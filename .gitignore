@@ -1,0 +1,14 @@
+target/
+.project
+.classpath
+.settings
+*.iml
+/.idea/
+bin
+.gradle
+*.DS_Store
+docker*
+*.sql
+classes/
+js/
+localconfig.conf
