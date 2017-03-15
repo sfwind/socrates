@@ -3,7 +3,6 @@ package com.iquanwai.job;
 import com.iquanwai.domain.MessageService;
 import com.iquanwai.domain.PracticeService;
 import com.iquanwai.domain.po.HomeworkVote;
-import com.iquanwai.util.ConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
