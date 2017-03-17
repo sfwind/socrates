@@ -2,7 +2,7 @@
 <configuration>
     <!-- 文件输出格式 -->
     <property name="PATTERN" value="%-12(%d{yyyy-MM-dd HH:mm:ss.SSS}) |-%-5level [%thread] %c [%L] -| %msg%n" />
-    <property name="FILE_PATH" value="/data/applogs/socrates" />
+    <property name="FILE_PATH" value="/data/applogs/socrates/socrates.log" />
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${PATTERN}</pattern>
