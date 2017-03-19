@@ -21,8 +21,8 @@ public class HeartBeatJob {
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
 
-    @Scheduled(cron="30 * * * * ?")
-    public void work(){
+    @Scheduled(cron = "30 * * * * ?")
+    public void work() {
         profileDao.load(Profile.class, 1);
         improvementPlanDao.load(ImprovementPlan.class, 1);
         logger.info("Heartbeat trigger");

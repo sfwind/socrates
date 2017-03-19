@@ -17,7 +17,7 @@ public class PracticeService {
     @Autowired
     private HomeworkVoteDao homeworkVoteDao;
 
-    public List<HomeworkVote> loadVoteYesterday(){
+    public List<HomeworkVote> loadVoteYesterday() {
         return homeworkVoteDao.loadVoteByDate(DateUtils.beforeDays(new Date(), 1));
     }
 

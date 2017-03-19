@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * Created by justin on 17/2/27.
- *  */
+ */
 @Service
 public class MessageService {
     @Autowired
@@ -28,10 +28,11 @@ public class MessageService {
     @Autowired
     private NotifyMessageDao notifyMessageDao;
 
+    private List<Integer> NOTICE_TYPE = Lists.newArrayList(1, 2);
+
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private static final String SYSTEM_MESSAGE ="AUTO";
-    private static final String SYSTEM_MESSAGE_NAME ="系统消息";
+    private static final String SYSTEM_MESSAGE = "AUTO";
 
     public void sendMessage(String message, String toUser, String fromUser, String url) {
         NotifyMessage notifyMessage = new NotifyMessage();
@@ -51,23 +52,25 @@ public class MessageService {
         List<VoteMessage> voteMessageList = Lists.newArrayList();
 
         //自己给自己点赞不提醒
-        homeworkVotes.stream().filter(h1->!h1.getVoteOpenId().equals(h1.getVotedOpenid())).forEach(homeworkVote -> {
-            VoteMessage voteMessage = new VoteMessage(homeworkVote.getReferencedId(),
-                    homeworkVote.getType());
+        homeworkVotes.stream().filter(h1 -> !h1.getVoteOpenId().equals(h1.getVotedOpenid()))
+                .filter(h1 -> NOTICE_TYPE.contains(h1.getType()))
+                .forEach(homeworkVote -> {
+                    VoteMessage voteMessage = new VoteMessage(homeworkVote.getReferencedId(),
+                            homeworkVote.getType());
 
-            //如果已经有了记录,点赞数+1
-            if(voteMessageList.contains(voteMessage)){
-                voteMessageList.forEach(voteMessageInList -> {
-                    if(voteMessageInList.equals(voteMessage)){
-                        voteMessageInList.increment();
+                    //如果已经有了记录,点赞数+1
+                    if (voteMessageList.contains(voteMessage)) {
+                        voteMessageList.forEach(voteMessageInList -> {
+                            if (voteMessageInList.equals(voteMessage)) {
+                                voteMessageInList.increment();
+                            }
+                        });
+                    } else {
+                        //如果已经没有记录,添加记录
+                        voteMessageList.add(voteMessage);
                     }
+                    voteMessage.setLastVote(homeworkVote);
                 });
-            }else{
-                //如果已经没有记录,添加记录
-                voteMessageList.add(voteMessage);
-            }
-            voteMessage.setLastVote(homeworkVote);
-        });
 
         //发送消息
         voteMessageList.stream().forEach(voteMessage -> {
@@ -75,25 +78,25 @@ public class MessageService {
             String openid = homeworkVote.getVoteOpenId();
             Profile profile = profileDao.queryByOpenId(openid);
             //没查到点赞人,不发消息
-            if(profile==null){
+            if (profile == null) {
                 logger.error("{} is not existed", openid);
                 return;
             }
             String message = getLikeMessage(voteMessage, profile);
             String toUser = homeworkVote.getVotedOpenid();
-            if(toUser==null){
+            if (toUser == null) {
                 return;
             }
             String url = "";
-            if(voteMessage.getType()==1){
+            if (voteMessage.getType() == 1) {
                 ChallengeSubmit challengeSubmit = submitDao.load(ChallengeSubmit.class, homeworkVote.getReferencedId());
-                if(challengeSubmit==null){
+                if (challengeSubmit == null) {
                     return;
                 }
                 url = "/rise/static/practice/challenge?id=" + challengeSubmit.getChallengeId();
-            }else if(voteMessage.getType()==2){
+            } else if (voteMessage.getType() == 2) {
                 ApplicationSubmit applicationSubmit = submitDao.load(ApplicationSubmit.class, homeworkVote.getReferencedId());
-                if(applicationSubmit==null){
+                if (applicationSubmit == null) {
                     return;
                 }
                 url = "/rise/static/practice/application?id=" + applicationSubmit.getApplicationId();
@@ -104,17 +107,17 @@ public class MessageService {
 
     private String getLikeMessage(VoteMessage voteMessage, Profile profile) {
         String message = "";
-        if(voteMessage.getCount()==1){
-            if(voteMessage.getType()==1){
-                message = profile.getNickname()+"赞了我的专题训练";
-            }else if(voteMessage.getType()==2){
-                message = profile.getNickname()+"赞了我的应用训练";
+        if (voteMessage.getCount() == 1) {
+            if (voteMessage.getType() == 1) {
+                message = profile.getNickname() + "赞了我的专题训练";
+            } else if (voteMessage.getType() == 2) {
+                message = profile.getNickname() + "赞了我的应用训练";
             }
-        }else{
-            if(voteMessage.getType()==1){
-                message = profile.getNickname()+"等"+voteMessage.getCount()+"人赞了我的专题";
-            }else if(voteMessage.getType()==2){
-                message = profile.getNickname()+"等"+voteMessage.getCount()+"人赞了我的应用训练";
+        } else {
+            if (voteMessage.getType() == 1) {
+                message = profile.getNickname() + "等" + voteMessage.getCount() + "人赞了我的专题";
+            } else if (voteMessage.getType() == 2) {
+                message = profile.getNickname() + "等" + voteMessage.getCount() + "人赞了我的应用训练";
             }
         }
         return message;
@@ -122,7 +125,7 @@ public class MessageService {
 
     @Setter
     @Getter
-    class VoteMessage{
+    class VoteMessage {
         private int referenceId;
         private int type;
         private HomeworkVote lastVote;
@@ -151,7 +154,7 @@ public class MessageService {
             return result;
         }
 
-        public void increment(){
+        public void increment() {
             this.count++;
         }
     }

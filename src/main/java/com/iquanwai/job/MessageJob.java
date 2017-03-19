@@ -22,8 +22,8 @@ public class MessageJob {
     @Autowired
     private MessageService messageService;
 
-    @Scheduled(cron="0 0 0 * * ?")
-    public void work(){
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void work() {
         logger.info("MessageJob start");
         //发送点赞数统计
         likeMessage();
@@ -31,7 +31,7 @@ public class MessageJob {
     }
 
 
-    private void likeMessage(){
+    private void likeMessage() {
         List<HomeworkVote> homeworkVotes = practiceService.loadVoteYesterday();
 
         messageService.sendLikeMessage(homeworkVotes);

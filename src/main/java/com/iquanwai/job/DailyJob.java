@@ -20,8 +20,8 @@ public class DailyJob {
     @Autowired
     private PlanService planService;
 
-    @Scheduled(cron="0 0 6 * * ?")
-    public void work(){
+    @Scheduled(cron = "0 0 6 * * ?")
+    public void work() {
         logger.info("DailyJob start");
         dailyJob();
         logger.info("DailyJob end");
@@ -31,9 +31,9 @@ public class DailyJob {
         List<ImprovementPlan> improvementPlanList = planService.loadAllRunningPlan();
         improvementPlanList.stream().forEach(improvementPlan -> {
             //过期自动结束训练
-            if(improvementPlan.getCloseDate().before(new Date())){
+            if (improvementPlan.getCloseDate().before(new Date())) {
                 planService.completePlan(improvementPlan.getId(), ImprovementPlan.CLOSE);
-            }else{
+            } else {
                 Integer key = improvementPlan.getKeycnt();
                 if (new Date().before(improvementPlan.getCloseDate())) {
                     planService.updateKey(improvementPlan.getId(), key + 1);
