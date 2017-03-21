@@ -32,12 +32,12 @@ public class NotifyJob {
     public void work() {
         logger.info("NotifyJob start");
         //发送点赞数统计
-        likeMessage();
+        notifyUser();
         logger.info("NotifyJob end");
     }
 
 
-    private void likeMessage() {
+    private void notifyUser() {
         List<ImprovementPlan> underClosedPlans = planService.loadUnderClosePlan();
         underClosedPlans.stream().forEach(improvementPlan -> {
             TemplateMessage templateMessage = new TemplateMessage();
