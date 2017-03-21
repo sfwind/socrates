@@ -57,4 +57,19 @@ public class ConfigUtils {
 		return config.getString("db.fragment.password");
 	}
 
+	public static String getAPIKey() {
+		return config.getString("api.key");
+	}
+
+	public static String getAppid() {
+		return config.getString("appid");
+	}
+
+	public static String getSecret() {
+		return config.getString("secret");
+	}
+
+	public static String getUnderCloseMsg() {
+		return config.getString("will.close.task.msg");
+	}
 }

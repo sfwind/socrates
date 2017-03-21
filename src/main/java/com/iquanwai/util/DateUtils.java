@@ -40,6 +40,10 @@ public class DateUtils {
         return Math.abs((int)(thisTime - thatTime)/1000)/60/60/24;
     }
 
+    public static Date startOfDay(Date date) {
+        return new DateTime(date).withTimeAtStartOfDay().toDate();
+    }
+
     public static long currentTimestamp(){
         return System.currentTimeMillis()/1000;
     }
