@@ -3,6 +3,7 @@ package com.iquanwai.domain;
 import com.google.common.collect.Lists;
 import com.iquanwai.domain.dao.NotifyMessageDao;
 import com.iquanwai.domain.dao.ProfileDao;
+import com.iquanwai.domain.dao.SubjectArticleDao;
 import com.iquanwai.domain.dao.SubmitDao;
 import com.iquanwai.domain.po.*;
 import com.iquanwai.util.DateUtils;
@@ -27,8 +28,10 @@ public class MessageService {
     private SubmitDao submitDao;
     @Autowired
     private NotifyMessageDao notifyMessageDao;
+    @Autowired
+    private SubjectArticleDao subjectArticleDao;
 
-    private List<Integer> NOTICE_TYPE = Lists.newArrayList(1, 2);
+    private List<Integer> NOTICE_TYPE = Lists.newArrayList(1, 2, 3);
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -100,6 +103,12 @@ public class MessageService {
                     return;
                 }
                 url = "/rise/static/practice/application?id=" + applicationSubmit.getApplicationId();
+            } else if(voteMessage.getType()== 3){
+                SubjectArticle subjectArticle = subjectArticleDao.load(SubjectArticle.class, homeworkVote.getReferencedId());
+                if (subjectArticle == null) {
+                    return;
+                }
+                url = "/rise/static/message/subject/reply?submitId=" + subjectArticle.getId();
             }
             sendMessage(message, toUser, SYSTEM_MESSAGE, url);
         });
