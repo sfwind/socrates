@@ -52,7 +52,7 @@ public class NotifyJob {
             data.put("first",new TemplateMessage.Keyword("你的以下专题还有3天就到期了"));
             data.put("keyword1",new TemplateMessage.Keyword(problem.getProblem()));
             data.put("keyword2",new TemplateMessage.Keyword(DateUtils.parseDateToString(improvementPlan.getCloseDate())));
-            data.put("remark",new TemplateMessage.Keyword("至少做完所有理解训练，才能完成该专题，加油\n" +
+            data.put("remark",new TemplateMessage.Keyword("至少做完所有理解训练和巩固训练，才能完成该专题，加油\n" +
                     "查看RISE进度，点击下方按钮↓↓↓"));
 
             templateMessageService.sendMessage(templateMessage);

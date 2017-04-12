@@ -11,7 +11,7 @@ public class Problem {
     private String problem; // 工作生活中遇到的问题
     private String pic; //头图
     private Integer length; //问题训练天数
-    private Integer warmupCount; //理解训练次数
+    private Integer warmupCount; //巩固训练次数
     private Integer applicationCount; //应用训练次数
     private Integer challengeCount; //小目标次数
     private String description; //富文本描述
