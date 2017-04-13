@@ -4,7 +4,6 @@ import com.iquanwai.domain.po.Profile;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -82,6 +81,18 @@ public class ProfileDao extends DBUtil{
                     account.getWorkingLife(), account.getRealName(),
                     account.getCity(), account.getProvince(),
                     account.getOpenid());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+            return false;
+        }
+        return true;
+    }
+
+    public Boolean riseMemberExpired(String openId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update Profile set RiseMember = 0 where OpenId = ?";
+        try{
+            runner.update(sql, openId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
             return false;
