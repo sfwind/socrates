@@ -16,7 +16,7 @@ public class RiseMemberJob {
     @Autowired
     private CustomerService customerService;
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "*/1 * * * * ?")
     public void work() {
         logger.info("start rise member expired check");
         customerService.checkMemberExpired();
