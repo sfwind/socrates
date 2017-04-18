@@ -17,8 +17,8 @@ public class ImprovementPlan {
     private Date closeDate; //课程关闭时间（课程关闭日期）
     private Integer status; //执行状态（1-正在进行, 2-已结束, 3-已过期）
     private Integer point; //积分
-    private Integer warmupComplete; //热身训练完成数量
-    private Integer applicationComplete; //应用训练完成数量
+    private Integer warmupComplete; //巩固练习完成数量
+    private Integer applicationComplete; //应用练习完成数量
     private Integer total; //任务总数
     private Integer keycnt; //钥匙数量
     private Integer currentSeries; //已解锁的题组

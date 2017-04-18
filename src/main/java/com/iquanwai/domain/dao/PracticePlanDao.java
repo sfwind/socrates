@@ -16,7 +16,7 @@ public class PracticePlanDao extends PracticeDBUtil {
 
     public void unlockApplicationPractice(Integer planId){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "update PracticePlan set UnLocked=1 where PlanId=? and Type=11";
+        String sql = "update PracticePlan set UnLocked=1 where PlanId=? and (Type=11 or Type=12)";
         try {
             runner.update(sql, planId);
         }catch (SQLException e) {

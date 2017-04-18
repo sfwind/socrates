@@ -30,7 +30,7 @@ public class PlanService {
     @Autowired
     private ProblemDao problemDao;
 
-    //提前3天通知用户,专题即将关闭
+    //提前3天通知用户,小课即将关闭
     private static final int NOTIFY_CLOSE_DAYS = 3;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
@@ -46,9 +46,9 @@ public class PlanService {
         logger.info("{} is terminated", planId);
         //更新训练计划状态
         improvementPlanDao.updateStatus(planId, status);
-        //解锁所有应用训练
+        //解锁所有应用练习
         practicePlanDao.unlockApplicationPractice(planId);
-        //更新待完成的专题状态
+        //更新待完成的小课状态
         problemPlanDao.updateStatus(plan.getOpenid(), plan.getProblemId(), 2);
     }
 
