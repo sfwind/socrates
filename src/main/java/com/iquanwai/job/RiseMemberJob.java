@@ -16,7 +16,8 @@ public class RiseMemberJob {
     @Autowired
     private CustomerService customerService;
 
-    @Scheduled(cron = "* */1 * * * ?")
+    // TODO 修改为每天的0点
+    @Scheduled(cron = "0 */1 * * * ?")
     public void work() {
         logger.info("start rise member expired check");
         customerService.checkMemberExpired();
