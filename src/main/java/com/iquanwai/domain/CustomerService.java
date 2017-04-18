@@ -24,7 +24,7 @@ public class CustomerService {
     private RiseMemberDao riseMemberDao;
 
     public void checkMemberExpired(){
-        List<RiseMember> riseMembers = riseMemberDao.loadAll(RiseMember.class);
+        List<RiseMember> riseMembers = riseMemberDao.loadWillCloseMembers();
         for (RiseMember riseMember : riseMembers) {
             if (!riseMember.getExpireDate().after(new Date())) {
                 try {
