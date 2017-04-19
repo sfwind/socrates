@@ -120,13 +120,13 @@ public class MessageService {
             if (voteMessage.getType() == 1) {
                 message = profile.getNickname() + "赞了我的小目标";
             } else if (voteMessage.getType() == 2) {
-                message = profile.getNickname() + "赞了我的应用训练";
+                message = profile.getNickname() + "赞了我的应用练习";
             }
         } else {
             if (voteMessage.getType() == 1) {
                 message = profile.getNickname() + "等" + voteMessage.getCount() + "人赞了我的小目标";
             } else if (voteMessage.getType() == 2) {
-                message = profile.getNickname() + "等" + voteMessage.getCount() + "人赞了我的应用训练";
+                message = profile.getNickname() + "等" + voteMessage.getCount() + "人赞了我的应用练习";
             }
         }
         return message;
