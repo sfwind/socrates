@@ -1,8 +1,12 @@
 package com.iquanwai.domain;
 
+import com.iquanwai.domain.dao.OperationLogDao;
 import com.iquanwai.domain.dao.ProfileDao;
 import com.iquanwai.domain.dao.RiseMemberDao;
+import com.iquanwai.domain.dao.RiseUserLandingDao;
+import com.iquanwai.domain.dao.RiseUserLoginDao;
 import com.iquanwai.domain.po.RiseMember;
+import com.iquanwai.domain.po.RiseUserLanding;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +26,12 @@ public class CustomerService {
     private ProfileDao profileDao;
     @Autowired
     private RiseMemberDao riseMemberDao;
+    @Autowired
+    private OperationLogDao operationLogDao;
+    @Autowired
+    private RiseUserLandingDao riseUserLandingDao;
+    @Autowired
+    private RiseUserLoginDao riseUserLoginDao;
 
     public void checkMemberExpired(){
         List<RiseMember> riseMembers = riseMemberDao.loadWillCloseMembers();
@@ -36,5 +46,38 @@ public class CustomerService {
                 }
             }
         }
+    }
+
+    public void userLoginLog(Integer days){
+        List<String> openIds = operationLogDao.loadThatDayLoginUser(days);
+        Date thatDay = DateUtils.beforeDays(new Date(), days);
+
+        openIds.forEach(openId -> {
+            RiseUserLanding riseUserLanding = riseUserLandingDao.loadByOpenId(openId);
+            Date landingDate = null;
+            if(riseUserLanding==null){
+                landingDate = DateUtils.beforeDays(new Date(), days);
+                boolean insert = riseUserLandingDao.insert(openId, landingDate);
+                if(!insert){
+                    logger.error("插入用户:{} 注册表失败! 日期:{}", openId, landingDate);
+                }
+            } else {
+                landingDate = riseUserLanding.getLandingDate();
+            }
+
+            Integer diffDay = DateUtils.interval(thatDay, landingDate);
+            boolean insert = riseUserLoginDao.insert(openId, thatDay, diffDay);
+            if (!insert) {
+                logger.error("插入用户:{} 登录表失败! 日期:{}", openId, thatDay);
+            }
+        });
+
+    }
+
+    /**
+     * 记录昨天用户的情况
+     */
+    public void userLoginLog(){
+        this.userLoginLog(1);
     }
 }

@@ -40,6 +40,14 @@ public class DateUtils {
         return Math.abs((int)(thisTime - thatTime)/1000)/60/60/24;
     }
 
+    // 计算日期差值，向上取整
+    public static int intervalCeil(Date date1, Date date2) {
+        long thisTime = date1.getTime();
+        long thatTime = date2.getTime();
+
+        return Math.abs((int)(thisTime - thatTime)/1000)/60/60/24;
+    }
+
     public static Date startOfDay(Date date) {
         return new DateTime(date).withTimeAtStartOfDay().toDate();
     }
