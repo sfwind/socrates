@@ -17,7 +17,7 @@ public class RiseUserJob {
     @Autowired
     private CustomerService customerService;
 
-    @Scheduled(cron = "0 25 17 * * ?")
+    @Scheduled(cron = "0 40 17 * * ?")
     public void work() {
         logger.info("start rise user login job");
         customerService.userLoginLog(2);
