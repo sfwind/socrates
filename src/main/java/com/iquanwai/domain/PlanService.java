@@ -47,7 +47,7 @@ public class PlanService {
         //更新训练计划状态
         improvementPlanDao.updateStatus(planId, status);
         //解锁所有应用练习
-        practicePlanDao.unlockApplicationPractice(planId);
+//        practicePlanDao.unlockApplicationPractice(planId);
         //更新待完成的小课状态
         problemPlanDao.updateStatus(plan.getOpenid(), plan.getProblemId(), 2);
     }

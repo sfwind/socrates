@@ -34,10 +34,10 @@ public class DailyJob {
             if (improvementPlan.getCloseDate().before(new Date())) {
                 planService.completePlan(improvementPlan.getId(), ImprovementPlan.CLOSE);
             } else {
-                Integer key = improvementPlan.getKeycnt();
-                if (new Date().before(improvementPlan.getCloseDate())) {
-                    planService.updateKey(improvementPlan.getId(), key + 1);
-                }
+//                Integer key = improvementPlan.getKeycnt();
+//                if (new Date().before(improvementPlan.getCloseDate())) {
+//                    planService.updateKey(improvementPlan.getId(), key + 1);
+//                }
             }
         });
 
