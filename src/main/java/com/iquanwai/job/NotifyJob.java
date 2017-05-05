@@ -36,6 +36,11 @@ public class NotifyJob {
         logger.info("NotifyJob end");
     }
 
+    {
+        logger.info("appid------:{}",ConfigUtils.getAppid());
+    }
+
+
 
     private void notifyUser() {
         List<ImprovementPlan> underClosedPlans = planService.loadUnderClosePlan();
