@@ -37,9 +37,8 @@ public class NotifyJob {
     }
 
     {
+        // 测试上线zk是否成功
         logger.info("appid------:{}",ConfigUtils.getAppid());
-        logger.info("jdbcurl------:{}",ConfigUtils.getJdbcUrl());
-        logger.info("db.name-----:{}",ConfigUtils.getFragmentUsername());
     }
 
 
