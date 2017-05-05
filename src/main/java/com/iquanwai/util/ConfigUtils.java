@@ -1,5 +1,6 @@
 package com.iquanwai.util;
 
+import com.iquanwai.util.zk.ZKConfigUtils;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -11,6 +12,7 @@ public class ConfigUtils {
 	private static Config config;
 	private static Config localconfig;
 	private static Config fileconfig;
+	private static ZKConfigUtils zkConfigUtils;
 
 	private static Timer timer;
 	static{
@@ -22,54 +24,82 @@ public class ConfigUtils {
 				loadConfig();
 			}
 		}, 0, 1000*60);
+		zkConfigUtils = new ZKConfigUtils();
 	}
 
+
 	private static void loadConfig() {
-		localconfig = ConfigFactory.load("localconfig");
-		config = ConfigFactory.load("socrates");
+		config = ConfigFactory.load("localconfig");
 		fileconfig = ConfigFactory.parseFile(new File("/data/config/localconfig"));
-		config = localconfig.withFallback(config);
 		config = fileconfig.withFallback(config);
 	}
 
+	public static String getValue(String key){
+		if (config.hasPath(key)) {
+			return config.getString(key);
+		} else {
+			String value = zkConfigUtils.getValue(key);
+			if (value == null) {
+				value = zkConfigUtils.getArchValue(key);
+			}
+			return value;
+		}
+	}
+
+	public static Integer getIntValue(String key){
+		if (config.hasPath(key)) {
+			return config.getInt(key);
+		} else {
+			return zkConfigUtils.getIntValue(key);
+		}
+	}
+
+	public static Boolean getBooleanValue(String key){
+		if (config.hasPath(key)) {
+			return config.getBoolean(key);
+		} else {
+			return zkConfigUtils.getBooleanValue(key);
+		}
+	}
+
 	public static String getJdbcUrl() {
-		return config.getString("db.url");
+		return getValue("db.url");
 	}
 
 	public static String getUsername() {
-		return config.getString("db.name");
+		return getValue("db.name");
 	}
 
 	public static String getPassword() {
-		return config.getString("db.password");
+		return getValue("db.password");
 	}
 
 
 	public static String getFragmentJdbcUrl() {
-		return config.getString("db.fragment.url");
+		return getValue("db.fragment.url");
 	}
 
 	public static String getFragmentUsername() {
-		return config.getString("db.fragment.name");
+		return getValue("db.fragment.name");
 	}
 
 	public static String getFragmentPassword() {
-		return config.getString("db.fragment.password");
+		return getValue("db.fragment.password");
 	}
 
 	public static String getAPIKey() {
-		return config.getString("api.key");
+		return getValue("api.key");
 	}
 
 	public static String getAppid() {
-		return config.getString("appid");
+		return getValue("appid");
 	}
 
 	public static String getSecret() {
-		return config.getString("secret");
+		return getValue("secret");
 	}
 
 	public static String getUnderCloseMsg() {
-		return config.getString("will.close.task.msg");
+		return getValue("will.close.task.msg");
 	}
 }
