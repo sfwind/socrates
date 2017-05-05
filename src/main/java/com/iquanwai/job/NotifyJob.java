@@ -38,6 +38,8 @@ public class NotifyJob {
 
     {
         logger.info("appid------:{}",ConfigUtils.getAppid());
+        logger.info("jdbcurl------:{}",ConfigUtils.getJdbcUrl());
+        logger.info("db.name-----:{}",ConfigUtils.getFragmentUsername());
     }
 
 
