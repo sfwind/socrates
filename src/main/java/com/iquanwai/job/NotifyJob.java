@@ -36,6 +36,12 @@ public class NotifyJob {
         logger.info("NotifyJob end");
     }
 
+    {
+        // 测试上线zk是否成功
+        logger.info("appid------:{}",ConfigUtils.getAppid());
+    }
+
+
 
     private void notifyUser() {
         List<ImprovementPlan> underClosedPlans = planService.loadUnderClosePlan();
