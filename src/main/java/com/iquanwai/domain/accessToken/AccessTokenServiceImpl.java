@@ -1,7 +1,6 @@
 package com.iquanwai.domain.accessToken;
 
 
-import com.iquanwai.domain.dao.AccessTokenDao;
 import com.iquanwai.domain.dao.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,18 +15,17 @@ public class AccessTokenServiceImpl implements AccessTokenService {
     @Autowired
     private WeiXinAccessTokenRepo weiXinAccessTokenRepo;
     @Autowired
-    private AccessTokenDao accessTokenDao;
-    @Autowired
     private RedisUtil redisUtil;
 
     public String getAccessToken() {
         if(accessToken!=null){
             return accessToken;
         }
+
         String token = redisUtil.get("accessToken");
         if(token==null){
             logger.info("insert access token");
-            accessTokenDao.insertOrUpdate(_getAccessToken());
+            redisUtil.set("accessToken", _getAccessToken());
         }else {
             accessToken = token;
         }
