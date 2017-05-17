@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ public class NotifyJob {
     private TemplateMessageService templateMessageService;
     @Autowired
     private RedisUtil redisUtil;
-    @Scheduled(cron = "0 15 10 * * ?")
+    @Scheduled(cron = "0 20 10 * * ?")
     public void work() {
         logger.info("NotifyJob start");
         //发送点赞数统计
@@ -41,6 +42,10 @@ public class NotifyJob {
     {
         // 测试上线zk是否成功
         logger.info("appid------:{}",ConfigUtils.getAppid());
+    }
+
+    @PostConstruct()
+    public void init(){
         logger.info("act------:{}",redisUtil.get("accessToken"));
     }
 
