@@ -57,7 +57,7 @@ public class RestfulHelper {
                 }
                 return body;
             } catch (Exception e) {
-                logger.error("execute {}, error:{} ", requestUrl, e);
+                logger.error("execute " + requestUrl + " error", e);
             }
         }
         return "";
