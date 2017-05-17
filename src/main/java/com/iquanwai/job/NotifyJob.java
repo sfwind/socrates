@@ -2,6 +2,7 @@ package com.iquanwai.job;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.PlanService;
+import com.iquanwai.domain.dao.RedisUtil;
 import com.iquanwai.domain.message.TemplateMessage;
 import com.iquanwai.domain.message.TemplateMessageService;
 import com.iquanwai.domain.po.ImprovementPlan;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +29,8 @@ public class NotifyJob {
     private PlanService planService;
     @Autowired
     private TemplateMessageService templateMessageService;
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Scheduled(cron = "0 0 8 * * ?")
     public void work() {
@@ -36,9 +40,12 @@ public class NotifyJob {
         logger.info("NotifyJob end");
     }
 
-    {
+
+    @PostConstruct()
+    public void init(){
         // 测试上线zk是否成功
         logger.info("appid------:{}",ConfigUtils.getAppid());
+        logger.info("act------:{}",redisUtil.get("accessToken"));
     }
 
 
