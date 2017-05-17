@@ -2,6 +2,7 @@ package com.iquanwai.job;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.PlanService;
+import com.iquanwai.domain.dao.RedisUtil;
 import com.iquanwai.domain.message.TemplateMessage;
 import com.iquanwai.domain.message.TemplateMessageService;
 import com.iquanwai.domain.po.ImprovementPlan;
@@ -27,8 +28,9 @@ public class NotifyJob {
     private PlanService planService;
     @Autowired
     private TemplateMessageService templateMessageService;
-
-    @Scheduled(cron = "0 0 8 * * ?")
+    @Autowired
+    private RedisUtil redisUtil;
+    @Scheduled(cron = "0 15 10 * * ?")
     public void work() {
         logger.info("NotifyJob start");
         //发送点赞数统计
@@ -39,6 +41,7 @@ public class NotifyJob {
     {
         // 测试上线zk是否成功
         logger.info("appid------:{}",ConfigUtils.getAppid());
+        logger.info("act------:{}",redisUtil.get("accessToken"));
     }
 
 
