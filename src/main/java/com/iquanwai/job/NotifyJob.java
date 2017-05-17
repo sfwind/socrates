@@ -31,7 +31,8 @@ public class NotifyJob {
     private TemplateMessageService templateMessageService;
     @Autowired
     private RedisUtil redisUtil;
-    @Scheduled(cron = "0 20 10 * * ?")
+
+    @Scheduled(cron = "0 0 8 * * ?")
     public void work() {
         logger.info("NotifyJob start");
         //发送点赞数统计
