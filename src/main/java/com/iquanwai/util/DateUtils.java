@@ -30,7 +30,7 @@ public class DateUtils {
         long now = new Date().getTime();
         long thatTime = date.getTime();
 
-        return Math.abs((int) ((now - thatTime) / 1000) / 60 / 60 / 24);
+        return Math.abs((int) ((now - thatTime) / 1000 / 60 / 60 / 24));
     }
 
     public static int interval(Date date1, Date date2) {
