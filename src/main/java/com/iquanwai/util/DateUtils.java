@@ -30,14 +30,14 @@ public class DateUtils {
         long now = new Date().getTime();
         long thatTime = date.getTime();
 
-        return Math.abs((int)(now - thatTime)/1000)/60/60/24;
+        return Math.abs((int) ((now - thatTime) / 1000 / 60 / 60 / 24));
     }
 
     public static int interval(Date date1, Date date2) {
         long thisTime = date1.getTime();
         long thatTime = date2.getTime();
 
-        return Math.abs((int)(thisTime - thatTime)/1000)/60/60/24;
+        return Math.abs((int) ((thisTime - thatTime) / 1000 / 60 / 60 / 24));
     }
 
     // 计算日期差值，向上取整

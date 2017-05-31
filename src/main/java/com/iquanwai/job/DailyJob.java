@@ -2,6 +2,7 @@ package com.iquanwai.job;
 
 import com.iquanwai.domain.PlanService;
 import com.iquanwai.domain.po.ImprovementPlan;
+import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class DailyJob {
         List<ImprovementPlan> improvementPlanList = planService.loadAllRunningPlan();
         improvementPlanList.stream().forEach(improvementPlan -> {
             //过期自动结束训练
-            if (improvementPlan.getCloseDate().before(new Date())) {
+            if (DateUtils.afterDays(improvementPlan.getCloseDate(), 1).before(new Date())) {
                 planService.completePlan(improvementPlan.getId(), ImprovementPlan.CLOSE);
             } else {
 //                Integer key = improvementPlan.getKeycnt();
