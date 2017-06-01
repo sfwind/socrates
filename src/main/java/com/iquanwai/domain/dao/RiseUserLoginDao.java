@@ -1,12 +1,19 @@
 package com.iquanwai.domain.dao;
 
+import com.google.common.collect.Lists;
+import com.iquanwai.domain.po.ImprovementPlan;
+import com.iquanwai.domain.po.RiseUserLogin;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by nethunder on 2017/4/21.
@@ -26,5 +33,19 @@ public class RiseUserLoginDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return insert > 0;
+    }
+
+    // 获取最后登录日期是 previousDate 的学员
+    public List<RiseUserLogin> loadPreviousLoginDateUser(String previousLoginDate) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from (select Openid, max(LoginDate) as LoginDate " +
+                "from RiseUserLogin GROUP BY Openid) a where a.LoginDate = ?";
+        ResultSetHandler<List<RiseUserLogin>> h = new BeanListHandler<>(RiseUserLogin.class);
+        try {
+            return runner.query(sql, h, previousLoginDate);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 }
