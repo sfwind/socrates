@@ -29,27 +29,31 @@ public class NotifyPreviousLoginJob {
     @Autowired
     private TemplateMessageService templateMessageService;
 
-    @Scheduled(cron = "0 0 20 * * ?")
+    private static final String INDEX_URL = "/rise/static/plan/main";
+
+    @Scheduled(cron = "0 0 20 * * THU")
     public void work() {
         logger.info("开始执行三天未登录信息通知任务");
-        notifyPreviousLogin();
+        notifyInactiveUser();
         logger.info("三天未登录信息通知任务结束");
     }
 
-    private void notifyPreviousLogin() {
+    private void notifyInactiveUser() {
         List<ImprovementPlan> improvementPlanList = planService.loadPreviouslyLogin();
         improvementPlanList.stream().forEach(improvementPlan -> {
             TemplateMessage templateMessage = new TemplateMessage();
             templateMessage.setTouser(improvementPlan.getOpenid());
-            templateMessage.setTemplate_id(ConfigUtils.getPreviousLoginMsg());
+            templateMessage.setTemplate_id(ConfigUtils.getLearningNotifyMsg());
 
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
             templateMessage.setData(data);
+            templateMessage.setUrl(ConfigUtils.getAppDomain()+INDEX_URL);
 
-            data.put("first", new TemplateMessage.Keyword("第一个文案\n"));
+            data.put("first", new TemplateMessage.Keyword("Hi，RISER～你已经忽视RISE超过三天啦！你的小课正在召唤你！\n" +
+                    "天朗气清，刷一波RISE小课可好？\n"));
             data.put("keyword1", new TemplateMessage.Keyword(improvementPlan.getProblemName()));
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
-            data.put("remark", new TemplateMessage.Keyword("\n最后一个文案↓↓↓"));
+            data.put("remark", new TemplateMessage.Keyword("\n想念刷题的爽快感受？点击“详情”，立刻开始提升自己！"));
 
             templateMessageService.sendMessage(templateMessage);
 

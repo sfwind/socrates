@@ -35,11 +35,11 @@ public class RiseUserLoginDao extends DBUtil {
         return insert > 0;
     }
 
-    // 获取最后登录日期是 previousDate 的学员
-    public List<RiseUserLogin> loadPreviousLoginDateUser(String previousLoginDate) {
+    // 获取3天未登录的学员
+    public List<RiseUserLogin> loadUnLoginUser(String previousLoginDate) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from (select Openid, max(LoginDate) as LoginDate " +
-                "from RiseUserLogin GROUP BY Openid) a where a.LoginDate = ?";
+        String sql = "select Openid, max(LoginDate) as LoginDate " +
+                "from RiseUserLogin GROUP BY Openid having max(LoginDate) < ?";
         ResultSetHandler<List<RiseUserLogin>> h = new BeanListHandler<>(RiseUserLogin.class);
         try {
             return runner.query(sql, h, previousLoginDate);

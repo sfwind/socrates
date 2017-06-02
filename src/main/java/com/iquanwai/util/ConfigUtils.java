@@ -104,8 +104,12 @@ public class ConfigUtils {
         return getValue("will.close.task.msg");
     }
 
-    public static String getPreviousLoginMsg() {
-        return getValue("previous.login.msg");
+    public static String getLearningNotifyMsg() {
+        return getValue("learning.notify.msg");
     }
+
+	public static String getAppDomain() {
+		return getValue("app.domain");
+	}
 
 }

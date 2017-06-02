@@ -58,7 +58,7 @@ public class ImprovementPlanDao extends PracticeDBUtil {
 
     public ImprovementPlan loadLatestProblemByOpenId(String openId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from ImprovementPlan where Openid = ? ORDER BY AddTime DESC LIMIT 1";
+        String sql = "select * from ImprovementPlan where Openid = ? ORDER BY Id DESC";
         ResultSetHandler<ImprovementPlan> h = new BeanHandler<>(ImprovementPlan.class);
         try {
             ImprovementPlan improvementPlan = runner.query(sql, h, openId);
