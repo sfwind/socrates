@@ -7,8 +7,11 @@ import com.iquanwai.domain.dao.SubjectArticleDao;
 import com.iquanwai.domain.dao.SubmitDao;
 import com.iquanwai.domain.po.*;
 import com.iquanwai.util.DateUtils;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +89,10 @@ public class MessageService {
                 return;
             }
             String message = getLikeMessage(voteMessage, profile);
+            if (StringUtils.isEmpty(message)) {
+                logger.error("{} is not supported", voteMessage);
+                return;
+            }
             String toUser = homeworkVote.getVotedOpenid();
             if (toUser == null) {
                 return;
@@ -103,7 +110,7 @@ public class MessageService {
                     return;
                 }
                 url = "/rise/static/practice/application?id=" + applicationSubmit.getApplicationId();
-            } else if(voteMessage.getType()== 3){
+            } else if (voteMessage.getType() == 3) {
                 SubjectArticle subjectArticle = subjectArticleDao.load(SubjectArticle.class, homeworkVote.getReferencedId());
                 if (subjectArticle == null) {
                     return;
@@ -121,12 +128,16 @@ public class MessageService {
                 message = profile.getNickname() + "赞了我的小目标";
             } else if (voteMessage.getType() == 2) {
                 message = profile.getNickname() + "赞了我的应用练习";
+            } else if (voteMessage.getType() == 3) {
+                message = profile.getNickname() + "赞了我的小课分享";
             }
         } else {
             if (voteMessage.getType() == 1) {
                 message = profile.getNickname() + "等" + voteMessage.getCount() + "人赞了我的小目标";
             } else if (voteMessage.getType() == 2) {
                 message = profile.getNickname() + "等" + voteMessage.getCount() + "人赞了我的应用练习";
+            } else if (voteMessage.getType() == 3) {
+                message = profile.getNickname() + "等" + voteMessage.getCount() + "人赞了我的小课分享";
             }
         }
         return message;
@@ -134,6 +145,7 @@ public class MessageService {
 
     @Setter
     @Getter
+    @ToString
     class VoteMessage {
         private int referenceId;
         private int type;
