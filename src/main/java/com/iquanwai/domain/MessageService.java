@@ -3,11 +3,9 @@ package com.iquanwai.domain;
 import com.google.common.collect.Lists;
 import com.iquanwai.domain.dao.NotifyMessageDao;
 import com.iquanwai.domain.dao.ProfileDao;
-import com.iquanwai.domain.dao.SubjectArticleDao;
 import com.iquanwai.domain.dao.SubmitDao;
 import com.iquanwai.domain.po.*;
 import com.iquanwai.util.DateUtils;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -31,8 +29,6 @@ public class MessageService {
     private SubmitDao submitDao;
     @Autowired
     private NotifyMessageDao notifyMessageDao;
-    @Autowired
-    private SubjectArticleDao subjectArticleDao;
 
     private List<Integer> NOTICE_TYPE = Lists.newArrayList(1, 2, 3);
 
@@ -81,11 +77,11 @@ public class MessageService {
         //发送消息
         voteMessageList.stream().forEach(voteMessage -> {
             HomeworkVote homeworkVote = voteMessage.getLastVote();
-            String openid = homeworkVote.getVoteOpenId();
-            Profile profile = profileDao.queryByOpenId(openid);
+            Integer profileId = homeworkVote.getVoteProfileId();
+            Profile profile = profileDao.load(Profile.class, profileId);
             //没查到点赞人,不发消息
             if (profile == null) {
-                logger.error("{} is not existed", openid);
+                logger.error("{} is not existed", profileId);
                 return;
             }
             String message = getLikeMessage(voteMessage, profile);
@@ -93,10 +89,7 @@ public class MessageService {
                 logger.error("{} is not supported", voteMessage);
                 return;
             }
-            String toUser = homeworkVote.getVotedOpenid();
-            if (toUser == null) {
-                return;
-            }
+            String toUser = homeworkVote.getVotedProfileId().toString();
             String url = "";
             if (voteMessage.getType() == 1) {
                 ChallengeSubmit challengeSubmit = submitDao.load(ChallengeSubmit.class, homeworkVote.getReferencedId());
@@ -111,7 +104,7 @@ public class MessageService {
                 }
                 url = "/rise/static/practice/application?id=" + applicationSubmit.getApplicationId();
             } else if (voteMessage.getType() == 3) {
-                SubjectArticle subjectArticle = subjectArticleDao.load(SubjectArticle.class, homeworkVote.getReferencedId());
+                SubjectArticle subjectArticle = submitDao.load(SubjectArticle.class, homeworkVote.getReferencedId());
                 if (subjectArticle == null) {
                     return;
                 }
