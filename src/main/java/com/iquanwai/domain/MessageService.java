@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by justin on 17/2/27.
@@ -89,7 +90,7 @@ public class MessageService {
                 logger.error("{} is not supported", voteMessage);
                 return;
             }
-            String toUser = String.valueOf(homeworkVote.getVotedProfileId());
+            String toUser = Objects.toString(homeworkVote.getVotedProfileId());
             String url = "";
             if (voteMessage.getType() == 1) {
                 ChallengeSubmit challengeSubmit = submitDao.load(ChallengeSubmit.class, homeworkVote.getReferencedId());
