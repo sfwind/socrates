@@ -89,7 +89,7 @@ public class MessageService {
                 logger.error("{} is not supported", voteMessage);
                 return;
             }
-            String toUser = homeworkVote.getVotedProfileId().toString();
+            String toUser = String.valueOf(homeworkVote.getVotedProfileId());
             String url = "";
             if (voteMessage.getType() == 1) {
                 ChallengeSubmit challengeSubmit = submitDao.load(ChallengeSubmit.class, homeworkVote.getReferencedId());
