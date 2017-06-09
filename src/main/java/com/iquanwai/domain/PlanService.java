@@ -1,7 +1,10 @@
 package com.iquanwai.domain;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.domain.dao.*;
+import com.iquanwai.domain.dao.ImprovementPlanDao;
+import com.iquanwai.domain.dao.ProblemDao;
+import com.iquanwai.domain.dao.RiseMemberDao;
+import com.iquanwai.domain.dao.RiseUserLoginDao;
 import com.iquanwai.domain.po.ImprovementPlan;
 import com.iquanwai.domain.po.Problem;
 import com.iquanwai.domain.po.RiseMember;
@@ -26,8 +29,6 @@ public class PlanService {
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
     @Autowired
-    private ProblemPlanDao problemPlanDao;
-    @Autowired
     private RiseMemberDao riseMemberDao;
     @Autowired
     private ProblemDao problemDao;
@@ -48,12 +49,9 @@ public class PlanService {
 
     public void completePlan(Integer planId, Integer status) {
         //训练计划结束
-        ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, planId);
         logger.info("{} is terminated", planId);
         //更新训练计划状态
         improvementPlanDao.updateStatus(planId, status);
-        //更新待完成的小课状态
-        problemPlanDao.updateStatus(plan.getOpenid(), plan.getProblemId(), 2);
     }
 
 
