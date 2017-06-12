@@ -12,6 +12,7 @@ public class RiseMember {
     private Integer id;
     private String orderId;
     private String openId;
+    private Integer profileId;
     private Integer memberTypeId;
     private Date expireDate;
     private Boolean expired;

@@ -1,14 +1,11 @@
 package com.iquanwai.domain;
 
-import com.iquanwai.domain.dao.OperationLogDao;
-import com.iquanwai.domain.dao.ProfileDao;
-import com.iquanwai.domain.dao.RiseMemberDao;
-import com.iquanwai.domain.dao.RiseUserLandingDao;
-import com.iquanwai.domain.dao.RiseUserLoginDao;
+import com.iquanwai.domain.dao.*;
 import com.iquanwai.domain.po.RiseMember;
 import com.iquanwai.domain.po.RiseUserLanding;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +17,7 @@ import java.util.List;
  */
 @Service
 public class CustomerService {
-    private Logger logger = org.slf4j.LoggerFactory.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private ProfileDao profileDao;
@@ -39,7 +36,7 @@ public class CustomerService {
             if (!riseMember.getExpireDate().after(new Date())) {
                 try {
                     logger.info("user:{} expired ad {}", riseMember.getOpenId(), DateUtils.parseDateTimeToString(riseMember.getExpireDate()));
-                    profileDao.riseMemberExpired(riseMember.getOpenId());
+                    profileDao.riseMemberExpired(riseMember.getProfileId());
                     riseMemberDao.riseMemberExpired(riseMember);
                 } catch (Exception e){
                     logger.error("expired: {} error", riseMember.getOpenId());
