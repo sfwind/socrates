@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.iquanwai.domain.po.RiseMember;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Repository;

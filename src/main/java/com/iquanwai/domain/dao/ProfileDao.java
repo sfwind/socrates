@@ -15,11 +15,11 @@ public class ProfileDao extends DBUtil{
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public Boolean riseMemberExpired(String openId){
+    public Boolean riseMemberExpired(Integer id){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update Profile set RiseMember = 0 where OpenId = ?";
+        String sql = "Update Profile set RiseMember = 0 where Id = ?";
         try{
-            runner.update(sql, openId);
+            runner.update(sql, id);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
             return false;
