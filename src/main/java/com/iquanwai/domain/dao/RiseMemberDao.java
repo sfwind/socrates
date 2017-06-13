@@ -6,6 +6,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
@@ -16,7 +17,7 @@ import java.util.List;
  */
 @Repository
 public class RiseMemberDao extends DBUtil {
-    private Logger logger = org.slf4j.LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public boolean riseMemberExpired(RiseMember riseMember){
         QueryRunner runner = new QueryRunner(getDataSource());

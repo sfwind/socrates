@@ -6,6 +6,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
@@ -16,7 +17,7 @@ import java.util.Date;
  */
 @Repository
 public class RiseUserLandingDao extends DBUtil {
-    private Logger logger = org.slf4j.LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public RiseUserLanding loadByOpenId(String openid){
         QueryRunner runner = new QueryRunner(getDataSource());
