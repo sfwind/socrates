@@ -52,6 +52,10 @@ public class PlanService {
         logger.info("{} is terminated", planId);
         //更新训练计划状态
         improvementPlanDao.updateStatus(planId, status);
+        if (status == ImprovementPlan.CLOSE) {
+            // 更新关闭时间
+            improvementPlanDao.updateCloseTime(planId);
+        }
     }
 
 
