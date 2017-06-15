@@ -1,5 +1,6 @@
 import com.iquanwai.domain.accessToken.AccessTokenService;
 import com.iquanwai.domain.dao.HomeworkVoteDao;
+import com.iquanwai.domain.dao.ImprovementPlanDao;
 import com.iquanwai.domain.dao.RedisUtil;
 import com.iquanwai.domain.po.HomeworkVote;
 import org.junit.Test;
@@ -15,6 +16,8 @@ public class DaoTest extends TestBase {
     private RedisUtil redisUtil;
     @Autowired
     private AccessTokenService accessTokenService;
+    @Autowired
+    private ImprovementPlanDao improvementPlanDao;
 
     @Test
     public void test(){
@@ -26,4 +29,8 @@ public class DaoTest extends TestBase {
         System.out.println(accessTokenService.getAccessToken());
     }
 
+    @Test
+    public void testClosePlan(){
+        improvementPlanDao.updateCloseTime(6929);
+    }
 }

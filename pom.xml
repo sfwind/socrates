@@ -88,6 +88,12 @@
             <version>3.3.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.33</version>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>
