@@ -52,13 +52,13 @@ public class MessageService {
 
 
     public void sendLikeMessage(List<HomeworkVote> homeworkVotes) {
-        List<VoteMessage> voteMessageList = Lists.newArrayList();
+        List<VoteMessage<HomeworkVote>> voteMessageList = Lists.newArrayList();
 
         //自己给自己点赞不提醒
         homeworkVotes.stream().filter(h1 -> !h1.getVoteOpenId().equals(h1.getVotedOpenid()))
                 .filter(h1 -> NOTICE_TYPE.contains(h1.getType()))
                 .forEach(homeworkVote -> {
-                    VoteMessage voteMessage = new VoteMessage(homeworkVote.getReferencedId(),
+                    VoteMessage<HomeworkVote> voteMessage = new VoteMessage<>(homeworkVote.getReferencedId(),
                             homeworkVote.getType());
 
                     //如果已经有了记录,点赞数+1
@@ -118,20 +118,20 @@ public class MessageService {
     private String getLikeMessage(VoteMessage voteMessage, Profile profile) {
         String message = "";
         if (voteMessage.getCount() == 1) {
-            if (voteMessage.getType() == 1) {
-                message = profile.getNickname() + "赞了我的小目标";
-            } else if (voteMessage.getType() == 2) {
-                message = profile.getNickname() + "赞了我的应用练习";
+            if (voteMessage.getType() == 2) {
+                message = profile.getNickname() + "很喜欢你的应用练习作业，并给你点了赞";
             } else if (voteMessage.getType() == 3) {
-                message = profile.getNickname() + "赞了我的小课分享";
+                message = profile.getNickname() + "很喜欢你的小课分享作业，并给你点了赞";
+            } else if (voteMessage.getType() == 4) {
+                message = profile.getNickname() + "很认可你的回答，并给你点了赞";
             }
         } else {
-            if (voteMessage.getType() == 1) {
-                message = profile.getNickname() + "等" + voteMessage.getCount() + "人赞了我的小目标";
-            } else if (voteMessage.getType() == 2) {
-                message = profile.getNickname() + "等" + voteMessage.getCount() + "人赞了我的应用练习";
+            if (voteMessage.getType() == 2) {
+                message = profile.getNickname() + "等" + voteMessage.getCount() + "人很喜欢你的应用练习作业，并给你点了赞";
             } else if (voteMessage.getType() == 3) {
-                message = profile.getNickname() + "等" + voteMessage.getCount() + "人赞了我的小课分享";
+                message = profile.getNickname() + "等" + voteMessage.getCount() + "人很喜欢你的小课分享作业，并给你点了赞";
+            } else if (voteMessage.getType() == 4) {
+                message = profile.getNickname() + "等" + voteMessage.getCount() + "人很认可你的回答，并给你点了赞";
             }
         }
         return message;
@@ -140,10 +140,10 @@ public class MessageService {
     @Setter
     @Getter
     @ToString
-    class VoteMessage {
+    class VoteMessage<T> {
         private int referenceId;
         private int type;
-        private HomeworkVote lastVote;
+        private T lastVote;
         private int count = 1;
 
         public VoteMessage(int referenceId, int type) {
@@ -172,5 +172,49 @@ public class MessageService {
         public void increment() {
             this.count++;
         }
+    }
+
+    public void sendForumLikeMessage(List<AnswerApproval> answerApprovals) {
+        List<VoteMessage<AnswerApproval>> voteMessageList = Lists.newArrayList();
+
+        //自己给自己点赞不提醒
+        answerApprovals.stream().filter(h1 -> !h1.getProfileId().equals(h1.getAnswerProfileId()))
+                .forEach(answerApproval -> {
+                    VoteMessage<AnswerApproval> voteMessage = new VoteMessage<>(answerApproval.getAnswerId(), 4);
+
+                    //如果已经有了记录,点赞数+1
+                    if (voteMessageList.contains(voteMessage)) {
+                        voteMessageList.forEach(voteMessageInList -> {
+                            if (voteMessageInList.equals(voteMessage)) {
+                                voteMessageInList.increment();
+                            }
+                        });
+                    } else {
+                        //如果已经没有记录,添加记录
+                        voteMessageList.add(voteMessage);
+                    }
+                    voteMessage.setLastVote(answerApproval);
+                });
+
+        //发送消息
+        voteMessageList.forEach(voteMessage -> {
+            AnswerApproval answerApproval = voteMessage.getLastVote();
+            Integer profileId = answerApproval.getProfileId();
+            Profile profile = profileDao.load(Profile.class, profileId);
+            //没查到点赞人,不发消息
+            if (profile == null) {
+                logger.error("{} is not existed", profileId);
+                return;
+            }
+            String message = getLikeMessage(voteMessage, profile);
+            if (StringUtils.isEmpty(message)) {
+                logger.error("{} is not supported", voteMessage);
+                return;
+            }
+            String toUser = Objects.toString(answerApproval.getAnswerProfileId());
+            String url = "/rise/static/message/question/answer?questionId=" + answerApproval.getQuestionId()
+                    + "&answerId=" + answerApproval.getAnswerId();
+            sendMessage(message, toUser, SYSTEM_MESSAGE, url);
+        });
     }
 }

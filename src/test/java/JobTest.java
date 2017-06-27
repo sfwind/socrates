@@ -2,6 +2,7 @@ import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.dao.OperationLogDao;
 import com.iquanwai.domain.dao.RiseUserLandingDao;
 import com.iquanwai.domain.po.RiseUserLanding;
+import com.iquanwai.job.ForumNotifyJob;
 import com.iquanwai.job.NotifyJob;
 import com.iquanwai.job.RiseMemberJob;
 import com.iquanwai.job.RiseUserJob;
@@ -22,7 +23,7 @@ public class JobTest extends TestBase{
     @Autowired
     private RiseUserJob riseUserJob;
     @Autowired
-    private OperationLogDao operationLogDao;
+    private ForumNotifyJob forumNotifyJob;
     @Autowired
     private CustomerService customerService;
     @Autowired
@@ -35,7 +36,7 @@ public class JobTest extends TestBase{
 
     @Test
     public void expiredTest(){
-        riseMemberJob.work();;
+        forumNotifyJob.work();
     }
 
     @Test

@@ -79,4 +79,14 @@ public class DateUtils {
     public static Date beforeDays(Date date, int increment){
         return new DateTime(date).minusDays(increment).toDate();
     }
+
+    public static Date startOfHour(Date date) {
+        DateTime dateTime = new DateTime(date);
+        int hour = dateTime.hourOfDay().get();
+        return dateTime.withTime(hour, 0, 0, 0).toDate();
+    }
+
+    public static Date beforeHours(Date date, int increment){
+        return new DateTime(date).minusHours(increment).toDate();
+    }
 }
