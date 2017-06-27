@@ -21,7 +21,7 @@ import java.util.Map;
  * Created by xfduan on 2017/6/1.
  */
 @Component
-public class NotifyPreviousLoginJob {
+public class NotifyInactiveUserJob {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
