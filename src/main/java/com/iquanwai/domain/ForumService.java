@@ -17,7 +17,7 @@ public class ForumService {
     @Autowired
     private AnswerApprovalDao answerApprovalDao;
 
-    private static final int FOUR_HOUR = 2;
+    private static final int FOUR_HOUR = 4;
 
     public List<AnswerApproval> getAnswerApprovals(){
         Date end = DateUtils.startOfHour(new Date());

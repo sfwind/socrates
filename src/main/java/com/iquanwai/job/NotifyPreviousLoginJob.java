@@ -31,7 +31,7 @@ public class NotifyPreviousLoginJob {
 
     private static final String INDEX_URL = "/rise/static/plan/main";
 
-    @Scheduled(cron = "0 0 20 * * THU")
+    @Scheduled(cron = "0 0 21 * * THU")
     public void work() {
         logger.info("开始执行三天未登录信息通知任务");
         notifyInactiveUser();
