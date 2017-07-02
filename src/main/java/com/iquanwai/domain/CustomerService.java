@@ -1,6 +1,10 @@
 package com.iquanwai.domain;
 
-import com.iquanwai.domain.dao.*;
+import com.iquanwai.domain.dao.OperationLogDao;
+import com.iquanwai.domain.dao.ProfileDao;
+import com.iquanwai.domain.dao.RiseMemberDao;
+import com.iquanwai.domain.dao.RiseUserLandingDao;
+import com.iquanwai.domain.dao.RiseUserLoginDao;
 import com.iquanwai.domain.po.RiseMember;
 import com.iquanwai.domain.po.RiseUserLanding;
 import com.iquanwai.util.DateUtils;
@@ -11,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by nethunder on 2017/4/13.
@@ -46,9 +52,8 @@ public class CustomerService {
     }
 
     public void userLoginLog(Integer days){
-        List<String> openIds = operationLogDao.loadThatDayLoginUser(days);
+        List<String> openIds = operationLogDao.loadThatDayLoginUser(days).stream().filter(Objects::nonNull).collect(Collectors.toList());
         Date thatDay = DateUtils.beforeDays(new Date(), days);
-
         openIds.forEach(openId -> {
             RiseUserLanding riseUserLanding = riseUserLandingDao.loadByOpenId(openId);
             Date landingDate = null;
