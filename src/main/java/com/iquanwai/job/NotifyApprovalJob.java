@@ -23,7 +23,7 @@ import java.util.Map;
  * Created by justin on 17/3/21.
  */
 @Component
-public class NotifyJob {
+public class NotifyApprovalJob {
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private PlanService planService;
@@ -36,10 +36,10 @@ public class NotifyJob {
 
     @Scheduled(cron = "0 0 8 * * ?")
     public void work() {
-        logger.info("NotifyJob start");
+        logger.info("通知点赞开始");
         //发送点赞数统计
         notifyUser();
-        logger.info("NotifyJob end");
+        logger.info("通知点赞结束");
     }
 
 
