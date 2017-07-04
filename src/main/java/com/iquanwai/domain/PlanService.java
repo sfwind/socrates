@@ -1,14 +1,8 @@
 package com.iquanwai.domain;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.domain.dao.ImprovementPlanDao;
-import com.iquanwai.domain.dao.ProblemDao;
-import com.iquanwai.domain.dao.RiseMemberDao;
-import com.iquanwai.domain.dao.RiseUserLoginDao;
-import com.iquanwai.domain.po.ImprovementPlan;
-import com.iquanwai.domain.po.Problem;
-import com.iquanwai.domain.po.RiseMember;
-import com.iquanwai.domain.po.RiseUserLogin;
+import com.iquanwai.domain.dao.*;
+import com.iquanwai.domain.po.*;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +28,8 @@ public class PlanService {
     private ProblemDao problemDao;
     @Autowired
     private RiseUserLoginDao riseUserLoginDao;
+    @Autowired
+    private ProfileDao profileDao;
 
     //提前3天通知用户,小课即将关闭
     private static final int NOTIFY_CLOSE_DAYS = 3;
@@ -104,4 +100,17 @@ public class PlanService {
         return improvementPlanList;
     }
 
+    public List<ImprovementPlan> getLearningPlan(Integer problemId){
+        List<ImprovementPlan> improvementPlans = Lists.newArrayList();
+        improvementPlanDao.loadByProblemId(problemId).forEach(improvementPlan -> {
+            Integer profileId = improvementPlan.getProfileId();
+            Profile profile = profileDao.load(Profile.class, profileId);
+            //过滤没报名的用户
+            if(profile!=null && profile.getOpenRise()){
+                improvementPlans.add(improvementPlan);
+            }
+        });
+
+        return improvementPlans;
+    }
 }
