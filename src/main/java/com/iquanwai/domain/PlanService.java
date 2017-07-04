@@ -102,12 +102,17 @@ public class PlanService {
 
     public List<ImprovementPlan> getLearningPlan(Integer problemId){
         List<ImprovementPlan> improvementPlans = Lists.newArrayList();
+        List<String> openids = Lists.newArrayList();
         improvementPlanDao.loadByProblemId(problemId).forEach(improvementPlan -> {
             Integer profileId = improvementPlan.getProfileId();
             Profile profile = profileDao.load(Profile.class, profileId);
             //过滤没报名的用户
             if(profile!=null && profile.getRiseMember()){
-                improvementPlans.add(improvementPlan);
+                //用户去重
+                if(!openids.contains(profile.getOpenid())){
+                    improvementPlans.add(improvementPlan);
+                    openids.add(profile.getOpenid());
+                }
             }
         });
 
