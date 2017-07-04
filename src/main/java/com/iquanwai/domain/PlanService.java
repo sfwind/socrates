@@ -106,7 +106,7 @@ public class PlanService {
             Integer profileId = improvementPlan.getProfileId();
             Profile profile = profileDao.load(Profile.class, profileId);
             //过滤没报名的用户
-            if(profile!=null && profile.getOpenRise()){
+            if(profile!=null && profile.getRiseMember()){
                 improvementPlans.add(improvementPlan);
             }
         });
