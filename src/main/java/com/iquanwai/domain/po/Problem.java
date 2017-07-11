@@ -24,4 +24,5 @@ public class Problem {
     private Boolean done; // 非db字段 用户是否做过
     private Integer status; // 非db字段 用户选过小课（0-未选过,1-正在进行,2-已完成）
     private String activityUrl; //非db字段 吊打活动页面
+    private String password; //非db字段 吊打密码
 }

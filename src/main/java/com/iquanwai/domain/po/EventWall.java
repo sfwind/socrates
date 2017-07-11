@@ -11,6 +11,7 @@ import java.util.Date;
 public class EventWall {
     private Integer id;
     private String title; // 活动标题
+    private String subHead; // 活动子标题
     private String publisher; // 活动发起人
     private String pic; // 头图
     private String destUrl; // 千聊链接
