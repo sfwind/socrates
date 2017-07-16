@@ -2,6 +2,7 @@ package com.iquanwai.job;
 
 import com.iquanwai.domain.PlanService;
 import com.iquanwai.domain.po.ImprovementPlan;
+import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,16 +17,16 @@ import java.util.List;
  * Created by justin on 16/12/11.
  */
 @Component
-public class DailyJob {
+public class ClosePlanJob {
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private PlanService planService;
 
     @Scheduled(cron = "0 0 6 * * ?")
     public void work() {
-        logger.info("DailyJob start");
+        logger.info("ClosePlanJob start");
         dailyJob();
-        logger.info("DailyJob end");
+        logger.info("ClosePlanJob end");
     }
 
     private void dailyJob() {
@@ -33,12 +34,15 @@ public class DailyJob {
         improvementPlanList.stream().forEach(improvementPlan -> {
             //过期自动结束训练
             if (DateUtils.afterDays(improvementPlan.getCloseDate(), 1).before(new Date())) {
-                planService.completePlan(improvementPlan.getId(), ImprovementPlan.CLOSE);
-            } else {
-//                Integer key = improvementPlan.getKeycnt();
-//                if (new Date().before(improvementPlan.getCloseDate())) {
-//                    planService.updateKey(improvementPlan.getId(), key + 1);
-//                }
+                Integer status = ImprovementPlan.CLOSE;
+                Integer freeProblemId = ConfigUtils.getFreeProblem();
+                //限免试用
+                if(improvementPlan.getProblemId().equals(freeProblemId)) {
+                    if(!improvementPlan.getRiseMember()){
+                        status = ImprovementPlan.CLOSE_FREE;
+                    }
+                }
+                planService.completePlan(improvementPlan.getId(), status);
             }
         });
 

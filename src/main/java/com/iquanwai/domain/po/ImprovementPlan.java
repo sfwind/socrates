@@ -32,9 +32,11 @@ public class ImprovementPlan {
     private Boolean newMessage; //非db字段 是否有新消息
     private String problemName; // problemId 对应备注中文
     private Integer profileId; // 用户id
+    private Boolean riseMember; // 是否付费
 
 
     public final static int RUNNING = 1;
     public final static int COMPLETE = 2;
     public final static int CLOSE = 3;
+    public final static int CLOSE_FREE = 4;
 }

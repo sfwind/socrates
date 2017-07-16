@@ -116,4 +116,8 @@ public class ConfigUtils {
 		return getValue("app.domain");
 	}
 
+    public static Integer getFreeProblem(){
+        return getIntValue("free.problem.id");
+    }
+
 }
