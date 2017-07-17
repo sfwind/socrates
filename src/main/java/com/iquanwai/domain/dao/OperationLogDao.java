@@ -46,10 +46,13 @@ public class OperationLogDao extends DBUtil {
     public List<String> loadThatDayLoginUser(Integer days){
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select DISTINCT Openid from OperatingLog where OperateDate = DATE_SUB(CURDATE(),INTERVAL ? DAY) " +
+                "                and Openid is not null " +
                 "                and ((Function = '开始训练' AND Action = '加载训练') OR " +
                 "                     (Function = '挑战训练' AND (Action = 'PC加载挑战训练' OR Action = '挑战训练列表加载自己的')) OR " +
                 "                     (Function = '应用任务' AND (Action = '应用任务列表加载自己的应用任务' OR Action = '加载自己的应用任务')) OR " +
+                "                     (Module = '打点') OR" +
                 "                     (Action = 'PC端加载小课论坛')) ";
+
         try{
             ResultSetHandler<List<String>> handler = new ColumnListHandler<String>();
             return runner.query(sql, handler, days);
