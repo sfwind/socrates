@@ -88,8 +88,8 @@ public class ConfigUtils {
         return getValue("db.fragment.password");
     }
 
-    public static String getAPIKey() {
-        return getValue("api.key");
+    public static String getForumJdbcUrl() {
+        return getValue("db.forum.url");
     }
 
     public static String getAppid() {
