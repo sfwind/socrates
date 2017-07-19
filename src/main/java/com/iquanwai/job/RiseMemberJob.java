@@ -18,8 +18,8 @@ public class RiseMemberJob {
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void work() {
-        logger.info("start rise member expired check");
+        logger.info("会员过期任务开始");
         customerService.checkMemberExpired();
-        logger.info("end rise member expired check");
+        logger.info("会员过期任务结束");
     }
 }

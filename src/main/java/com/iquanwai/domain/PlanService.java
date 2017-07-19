@@ -3,6 +3,7 @@ package com.iquanwai.domain;
 import com.google.common.collect.Lists;
 import com.iquanwai.domain.dao.*;
 import com.iquanwai.domain.po.*;
+import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,5 +118,23 @@ public class PlanService {
         });
 
         return improvementPlans;
+    }
+
+    /**
+     * 获取进行中的限免用户小课
+     */
+    public List<ImprovementPlan> loadFreeUserPlan() {
+        List<ImprovementPlan> improvementPlanList = improvementPlanDao.loadByProblemId(ConfigUtils.getFreeProblem());
+        return improvementPlanList.stream().filter(improvementPlan -> {
+            //限免用户risemember = 0
+            if (!improvementPlan.getRiseMember()) {
+                Date activeDate = DateUtils.startOfDay(improvementPlan.getUpdateTime());
+                if (!activeDate.equals(DateUtils.startOfDay(new Date()))) {
+                    return true;
+                }
+            }
+            return false;
+        }).collect(Collectors.toList());
+
     }
 }

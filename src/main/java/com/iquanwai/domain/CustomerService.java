@@ -5,6 +5,7 @@ import com.iquanwai.domain.dao.ProfileDao;
 import com.iquanwai.domain.dao.RiseMemberDao;
 import com.iquanwai.domain.dao.RiseUserLandingDao;
 import com.iquanwai.domain.dao.RiseUserLoginDao;
+import com.iquanwai.domain.po.Profile;
 import com.iquanwai.domain.po.RiseMember;
 import com.iquanwai.domain.po.RiseUserLanding;
 import com.iquanwai.util.DateUtils;
@@ -81,5 +82,9 @@ public class CustomerService {
      */
     public void userLoginLog(){
         this.userLoginLog(1);
+    }
+
+    public Profile getProfile(Integer id){
+        return profileDao.load(Profile.class, id);
     }
 }

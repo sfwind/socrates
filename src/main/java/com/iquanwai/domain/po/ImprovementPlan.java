@@ -33,6 +33,7 @@ public class ImprovementPlan {
     private String problemName; // problemId 对应备注中文
     private Integer profileId; // 用户id
     private Boolean riseMember; // 是否付费
+    private Date updateTime; //更新时间
 
 
     public final static int RUNNING = 1;

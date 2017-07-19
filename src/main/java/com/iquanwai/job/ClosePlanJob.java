@@ -24,9 +24,9 @@ public class ClosePlanJob {
 
     @Scheduled(cron = "0 0 6 * * ?")
     public void work() {
-        logger.info("ClosePlanJob start");
+        logger.info("关闭小课任务开始");
         dailyJob();
-        logger.info("ClosePlanJob end");
+        logger.info("关闭小课任务结束");
     }
 
     private void dailyJob() {

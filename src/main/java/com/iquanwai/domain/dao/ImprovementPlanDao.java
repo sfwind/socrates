@@ -79,4 +79,17 @@ public class ImprovementPlanDao extends PracticeDBUtil {
         return null;
     }
 
+    public List<ImprovementPlan> loadRunningPlanByProblemId(Integer problemId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from ImprovementPlan where ProblemId = ? and Status = 1 and Del = 0";
+        ResultSetHandler<List<ImprovementPlan>> h = new BeanListHandler<>(ImprovementPlan.class);
+        try {
+            List<ImprovementPlan> improvementPlans = runner.query(sql, h, problemId);
+            return improvementPlans;
+        } catch(Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
 }

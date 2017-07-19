@@ -24,10 +24,10 @@ public class MessageJob {
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void work() {
-        logger.info("MessageJob start");
+        logger.info("点赞消息任务开始");
         //发送点赞数统计
         likeMessage();
-        logger.info("MessageJob end");
+        logger.info("点赞消息任务结束");
     }
 
 
