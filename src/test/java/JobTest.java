@@ -2,6 +2,8 @@ import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.dao.RiseUserLandingDao;
 import com.iquanwai.domain.po.RiseUserLanding;
 import com.iquanwai.job.ForumNotifyJob;
+import com.iquanwai.job.NotifyApprovalJob;
+import com.iquanwai.job.NotifyDiaoDaJob;
 import com.iquanwai.job.RiseMemberJob;
 import com.iquanwai.job.RiseUserJob;
 import com.iquanwai.util.DateUtils;
@@ -14,6 +16,8 @@ import java.util.Date;
  * Created by justin on 17/3/21.
  */
 public class JobTest extends TestBase{
+    @Autowired
+    private NotifyDiaoDaJob notifyJob;
     @Autowired
     private RiseMemberJob riseMemberJob;
     @Autowired

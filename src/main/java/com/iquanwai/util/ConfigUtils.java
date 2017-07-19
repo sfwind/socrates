@@ -108,6 +108,10 @@ public class ConfigUtils {
         return getValue("learning.notify.msg");
     }
 
+    public static String getActivityStartMsg() {
+        return getValue("activity.start.msg");
+    }
+
 	public static String getAppDomain() {
 		return getValue("app.domain");
 	}
