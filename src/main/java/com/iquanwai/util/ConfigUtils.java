@@ -116,4 +116,19 @@ public class ConfigUtils {
 		return getValue("app.domain");
 	}
 
+    public static String getAPIKey() {
+        return getValue("api.key");
+    }
+
+    public static String getMch_id(){
+        return getValue("mch_id");
+    }
+
+    public static String getRabbitMQIp(){
+        return getValue("rabbitmq.ip");
+    }
+
+    public static int getRabbitMQPort(){
+        return getIntValue("rabbitmq.port");
+    }
 }
