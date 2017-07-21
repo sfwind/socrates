@@ -42,9 +42,9 @@ public class NotifyFreeUserJob {
     }
 
     private void notifyInactiveUser() {
-        List<ImprovementPlan> improvementPlans = planService.loadFreeUserPlan();
+        List<ImprovementPlan> improvementPlans = planService.loadFreeInactiveUserPlan();
         improvementPlans.stream().forEach(improvementPlan -> {
-            try{
+            try {
                 Profile profile = customerService.getProfile(improvementPlan.getProfileId());
                 TemplateMessage templateMessage = new TemplateMessage();
                 templateMessage.setTouser(improvementPlan.getOpenid());
@@ -52,18 +52,18 @@ public class NotifyFreeUserJob {
 
                 Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
                 templateMessage.setData(data);
-                templateMessage.setUrl(ConfigUtils.getAppDomain()+INDEX_URL);
+                templateMessage.setUrl(ConfigUtils.getAppDomain() + INDEX_URL);
 
                 int closeTime = DateUtils.interval(new Date(), improvementPlan.getCloseDate()) + 1;
-                data.put("first", new TemplateMessage.Keyword(profile.getNickname()+"童鞋，晚上好！\n" +
-                        "        趁今天还没结束，快点击下方“学习小课”，来一节能力提升练习吧！\n"));
+                data.put("first", new TemplateMessage.Keyword(profile.getNickname() + "童鞋，晚上好！\n" +
+                        "趁今天还没结束，快点击下方“上课啦”，来一节能力提升练习吧！\n"));
                 data.put("keyword1", new TemplateMessage.Keyword("找到本质问题，减少无效努力"));
-                data.put("keyword2", new TemplateMessage.Keyword("距到期还有"+closeTime+"天"));
+                data.put("keyword2", new TemplateMessage.Keyword("距到期还有" + closeTime + "天"));
                 data.put("remark", new TemplateMessage.Keyword("\n想念刷题的爽快感受？点击“详情”，立刻开始提升自己！"));
 
                 templateMessageService.sendMessage(templateMessage);
-            } catch (Exception e){
-                logger.error("发送"+improvementPlan.getOpenid()+"失败", e);
+            } catch (Exception e) {
+                logger.error("发送" + improvementPlan.getOpenid() + "失败", e);
             }
 
         });

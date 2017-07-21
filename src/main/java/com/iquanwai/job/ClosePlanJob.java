@@ -25,11 +25,11 @@ public class ClosePlanJob {
     @Scheduled(cron = "0 0 6 * * ?")
     public void work() {
         logger.info("关闭小课任务开始");
-        dailyJob();
+        closePlan();
         logger.info("关闭小课任务结束");
     }
 
-    private void dailyJob() {
+    private void closePlan() {
         List<ImprovementPlan> improvementPlanList = planService.loadAllRunningPlan();
         improvementPlanList.stream().forEach(improvementPlan -> {
             //过期自动结束训练
@@ -37,8 +37,8 @@ public class ClosePlanJob {
                 Integer status = ImprovementPlan.CLOSE;
                 Integer freeProblemId = ConfigUtils.getFreeProblem();
                 //限免试用
-                if(improvementPlan.getProblemId().equals(freeProblemId)) {
-                    if(!improvementPlan.getRiseMember()){
+                if (improvementPlan.getProblemId().equals(freeProblemId)) {
+                    if (!improvementPlan.getRiseMember()) {
                         status = ImprovementPlan.CLOSE_FREE;
                     }
                 }

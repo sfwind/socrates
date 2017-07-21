@@ -31,6 +31,8 @@ public class PlanService {
     private RiseUserLoginDao riseUserLoginDao;
     @Autowired
     private ProfileDao profileDao;
+    @Autowired
+    private PracticePlanDao practicePlanDao;
 
     //提前3天通知用户,小课即将关闭
     private static final int NOTIFY_CLOSE_DAYS = 3;
@@ -89,7 +91,7 @@ public class PlanService {
         List<String> riseMemberOpenids = riseMemberList.stream().map(RiseMember::getOpenId).collect(Collectors.toList());
 
         //只提醒会员用户
-        if(riseUserLoginList != null) {
+        if (riseUserLoginList != null) {
             improvementPlanList = riseUserLoginList.stream().filter(riseUserLogin ->
                     riseMemberOpenids.contains(riseUserLogin.getOpenid()))
                     .map(riseUserLogin -> {
@@ -101,16 +103,16 @@ public class PlanService {
         return improvementPlanList;
     }
 
-    public List<ImprovementPlan> getLearningPlan(Integer problemId){
+    public List<ImprovementPlan> getLearningPlan(Integer problemId) {
         List<ImprovementPlan> improvementPlans = Lists.newArrayList();
         List<String> openids = Lists.newArrayList();
         improvementPlanDao.loadByProblemId(problemId).forEach(improvementPlan -> {
             Integer profileId = improvementPlan.getProfileId();
             Profile profile = profileDao.load(Profile.class, profileId);
             //过滤没报名的用户
-            if(profile!=null && profile.getRiseMember()){
+            if (profile != null && profile.getRiseMember()) {
                 //用户去重
-                if(!openids.contains(profile.getOpenid())){
+                if (!openids.contains(profile.getOpenid())) {
                     improvementPlans.add(improvementPlan);
                     openids.add(profile.getOpenid());
                 }
@@ -123,17 +125,37 @@ public class PlanService {
     /**
      * 获取进行中的限免用户小课
      */
-    public List<ImprovementPlan> loadFreeUserPlan() {
-        List<ImprovementPlan> improvementPlanList = improvementPlanDao.loadByProblemId(ConfigUtils.getFreeProblem());
+    public List<ImprovementPlan> loadFreeInactiveUserPlan() {
+        List<ImprovementPlan> improvementPlanList = improvementPlanDao.loadRunningPlanByProblemId(
+                ConfigUtils.getFreeProblem());
         return improvementPlanList.stream().filter(improvementPlan -> {
-            //限免用户risemember = 0
-            if (!improvementPlan.getRiseMember()) {
-                Date activeDate = DateUtils.startOfDay(improvementPlan.getUpdateTime());
-                if (!activeDate.equals(DateUtils.startOfDay(new Date()))) {
-                    return true;
+            //非限免用户不通知
+            if (improvementPlan.getRiseMember()) {
+                return false;
+            }
+            // 第一天学习不通知
+            Date startDate = DateUtils.startOfDay(new Date());
+            if (startDate.equals(improvementPlan.getStartDate())) {
+                return false;
+            }
+            // 3天后即将关闭不提醒,有额外提醒消息
+            Date closeDate = DateUtils.afterDays(DateUtils.startOfDay(new Date()), 3);
+            if (closeDate.equals(improvementPlan.getCloseDate())) {
+                return false;
+            }
+
+            int planId = improvementPlan.getId();
+            List<PracticePlan> practicePlanList = practicePlanDao.loadPracticePlan(planId);
+
+            for (PracticePlan practicePlan : practicePlanList) {
+                // 判断今天是否完成过练习 已做过练习的不提醒
+                if (practicePlan.getStatus() == 1) {
+                    if (DateUtils.isToday(practicePlan.getUpdateTime())) {
+                        return false;
+                    }
                 }
             }
-            return false;
+            return true;
         }).collect(Collectors.toList());
 
     }
