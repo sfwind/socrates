@@ -55,7 +55,7 @@ public class NotifyDiaoDaJob {
                 templateMessage.setUrl(problem.getActivityUrl());
 
                 data.put("first", new TemplateMessage.Keyword("你学习的小课“"+problem.getProblem()
-                        +"”半小时后有作业吊打哦，快来看看大家怎么完善别人的作业吧！\n\n"+problem.getPassword()));
+                        +"”半小时后有作业吊打哦！快来听听教练的精彩分析吧！\n\n"+problem.getPassword()));
                 data.put("keyword1", new TemplateMessage.Keyword("作业吊打"));
                 data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())+" 20:30"));
 
