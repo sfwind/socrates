@@ -34,7 +34,7 @@ public class NotifyFreeUserJob {
 
     private static final String INDEX_URL = "/rise/static/plan/main";
 
-    @Scheduled(cron = "0 0 21 * * ?")
+    @Scheduled(cron = "0 30 21 * * ?")
     public void work() {
         logger.info("提醒限免用户任务开始");
         notifyInactiveUser();
