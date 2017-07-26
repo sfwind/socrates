@@ -88,8 +88,8 @@ public class ConfigUtils {
         return getValue("db.fragment.password");
     }
 
-    public static String getAPIKey() {
-        return getValue("api.key");
+    public static String getForumJdbcUrl() {
+        return getValue("db.forum.url");
     }
 
     public static String getAppid() {
@@ -120,4 +120,19 @@ public class ConfigUtils {
         return getIntValue("free.problem.id");
     }
 
+    public static String getAPIKey() {
+        return getValue("api.key");
+    }
+
+    public static String getMch_id(){
+        return getValue("mch_id");
+    }
+
+    public static String getRabbitMQIp(){
+        return getValue("rabbitmq.ip");
+    }
+
+    public static int getRabbitMQPort(){
+        return getIntValue("rabbitmq.port");
+    }
 }

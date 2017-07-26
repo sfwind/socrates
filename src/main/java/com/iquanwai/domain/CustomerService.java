@@ -8,12 +8,16 @@ import com.iquanwai.domain.dao.RiseUserLoginDao;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.domain.po.RiseMember;
 import com.iquanwai.domain.po.RiseUserLanding;
+import com.iquanwai.mq.MQService;
+import com.iquanwai.mq.RabbitMQPublisher;
+import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -36,15 +40,32 @@ public class CustomerService {
     private RiseUserLandingDao riseUserLandingDao;
     @Autowired
     private RiseUserLoginDao riseUserLoginDao;
+    @Autowired
+    private MQService mqService;
+
+    private RabbitMQPublisher rabbitMQPublisher;
+
+    public static final String TOPIC = "login_user_reload";
+
+    @PostConstruct
+    public void init(){
+        rabbitMQPublisher = new RabbitMQPublisher();
+        rabbitMQPublisher.init(TOPIC, ConfigUtils.getRabbitMQIp(),
+                ConfigUtils.getRabbitMQPort());
+        rabbitMQPublisher.setSendCallback(mqService::saveMQSendOperation);
+    }
 
     public void checkMemberExpired(){
         List<RiseMember> riseMembers = riseMemberDao.loadWillCloseMembers();
         for (RiseMember riseMember : riseMembers) {
             if (!riseMember.getExpireDate().after(new Date())) {
                 try {
-                    logger.info("user:{} expired ad {}", riseMember.getOpenId(), DateUtils.parseDateTimeToString(riseMember.getExpireDate()));
+                    logger.info("user:{} expired ad {}", riseMember.getOpenId(),
+                            DateUtils.parseDateTimeToString(riseMember.getExpireDate()));
                     profileDao.riseMemberExpired(riseMember.getProfileId());
                     riseMemberDao.riseMemberExpired(riseMember);
+                    //发送用户信息修改消息
+                    rabbitMQPublisher.publish(riseMember.getOpenId());
                 } catch (Exception e){
                     logger.error("expired: {} error", riseMember.getOpenId());
                 }
@@ -53,7 +74,8 @@ public class CustomerService {
     }
 
     public void userLoginLog(Integer days){
-        List<String> openIds = operationLogDao.loadThatDayLoginUser(days).stream().filter(Objects::nonNull).collect(Collectors.toList());
+        List<String> openIds = operationLogDao.loadThatDayLoginUser(days).stream().
+                filter(Objects::nonNull).collect(Collectors.toList());
         Date thatDay = DateUtils.beforeDays(new Date(), days);
         openIds.forEach(openId -> {
             RiseUserLanding riseUserLanding = riseUserLandingDao.loadByOpenId(openId);

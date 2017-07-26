@@ -69,30 +69,6 @@ public class CommonUtils {
         return false;
     }
 
-    public static String jsSign(final Map<String, String> map) {
-        if (map == null) {
-            return "";
-        }
-        List<String> list = new ArrayList(map.keySet());
-        Collections.sort(list);
-
-        List<String> kvList = Lists.transform(list, input -> input+"="+map.get(input));
-
-        String digest = StringUtils.join(kvList.iterator(), "&");
-        return MessageDigestHelper.getSHA1String(digest);
-    }
-
-    public static String randomString(int length) {
-        String base = "abcdefghijklmnopqrstuvwxyz0123456789";
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            int number = random.nextInt(base.length());
-            sb.append(base.charAt(number));
-        }
-        return sb.toString();
-    }
-
     public static String sign(final Map<String, String> params){
         List<String> list = new ArrayList(params.keySet());
         Collections.sort(list);
@@ -106,25 +82,14 @@ public class CommonUtils {
         return MessageDigestHelper.getMD5String(digest);
     }
 
-    public static String signH5Pay(final Map<String,String> params){
-        List<String> list = new ArrayList(params.keySet());
-        Collections.sort(list);
-
-        List<String> kvList = Lists.transform(list, input -> input+"="+params.get(input));
-
-        String digest = StringUtils.join(kvList.iterator(), "&");
-
-        return MessageDigestHelper.getMD5String(digest);
-
-    }
-
-    //保留两位小数
-    public static Double substract(Double a, Double b){
-        if(a==null||b==null){
-            return null;
+    public static String randomString(int length) {
+        String base = "abcdefghijklmnopqrstuvwxyz0123456789";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int number = random.nextInt(base.length());
+            sb.append(base.charAt(number));
         }
-
-        return new BigDecimal(a).subtract(new BigDecimal(b)).
-                setScale(2, BigDecimal.ROUND_HALF_DOWN).doubleValue();
+        return sb.toString();
     }
 }
