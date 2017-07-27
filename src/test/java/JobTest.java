@@ -1,11 +1,7 @@
 import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.dao.RiseUserLandingDao;
 import com.iquanwai.domain.po.RiseUserLanding;
-import com.iquanwai.job.ForumNotifyJob;
-import com.iquanwai.job.NotifyApprovalJob;
-import com.iquanwai.job.NotifyDiaoDaJob;
-import com.iquanwai.job.RiseMemberJob;
-import com.iquanwai.job.RiseUserJob;
+import com.iquanwai.job.*;
 import com.iquanwai.util.DateUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +13,7 @@ import java.util.Date;
  */
 public class JobTest extends TestBase{
     @Autowired
-    private NotifyDiaoDaJob notifyJob;
+    private NotifyFreeUserJob notifyFreeUserJob;
     @Autowired
     private RiseMemberJob riseMemberJob;
     @Autowired
@@ -28,6 +24,13 @@ public class JobTest extends TestBase{
     private CustomerService customerService;
     @Autowired
     private RiseUserLandingDao riseUserLandingDao;
+    @Autowired
+    private ClosePlanJob closePlanJob;
+
+    @Test
+    public void test(){
+        notifyFreeUserJob.work();
+    }
 
     @Test
     public void expiredTest(){

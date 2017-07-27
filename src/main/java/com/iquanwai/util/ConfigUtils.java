@@ -116,6 +116,10 @@ public class ConfigUtils {
 		return getValue("app.domain");
 	}
 
+    public static Integer getFreeProblem(){
+        return getIntValue("free.problem.id");
+    }
+
     public static String getAPIKey() {
         return getValue("api.key");
     }

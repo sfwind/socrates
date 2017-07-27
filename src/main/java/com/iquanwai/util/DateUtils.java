@@ -52,6 +52,13 @@ public class DateUtils {
         return new DateTime(date).withTimeAtStartOfDay().toDate();
     }
 
+    public static boolean isToday(Date date) {
+        Date inputDate = new DateTime(date).withTimeAtStartOfDay().toDate();
+        Date today = new DateTime(new Date()).withTimeAtStartOfDay().toDate();
+
+        return inputDate.equals(today);
+    }
+
     public static long currentTimestamp(){
         return System.currentTimeMillis()/1000;
     }
