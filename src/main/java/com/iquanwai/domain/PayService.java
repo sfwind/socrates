@@ -1,14 +1,12 @@
 package com.iquanwai.domain;
 
 import com.google.common.collect.Maps;
-import com.iquanwai.domain.dao.CouponDao;
-import com.iquanwai.domain.dao.QuanwaiOrderDao;
+import com.iquanwai.domain.dao.*;
 import com.iquanwai.domain.message.RestfulHelper;
 import com.iquanwai.domain.po.Coupon;
 import com.iquanwai.domain.po.PayClose;
 import com.iquanwai.domain.po.PayCloseReply;
 import com.iquanwai.domain.po.QuanwaiOrder;
-import com.iquanwai.mq.RabbitMQPublisher;
 import com.iquanwai.util.CommonUtils;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
@@ -18,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.net.ConnectException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +31,12 @@ public class PayService {
     private QuanwaiOrderDao quanwaiOrderDao;
     @Autowired
     private CouponDao couponDao;
-
-    private RabbitMQPublisher rabbitMQPublisher;
-
-    private static final String TOPIC ="close_quanwai_order";
+    @Autowired
+    private RiseCourseOrderDao riseCourseOrderDao;
+    @Autowired
+    private RiseOrderDao riseOrderDao;
+    @Autowired
+    private CourseOrderDao courseOrderDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -47,13 +45,6 @@ public class PayService {
     private static final String ERROR_CODE = "FAIL";
 
     private static final String SUCCESS_CODE = "SUCCESS";
-
-    @PostConstruct
-    public void init(){
-        rabbitMQPublisher = new RabbitMQPublisher();
-        rabbitMQPublisher.init(PayService.TOPIC, ConfigUtils.getRabbitMQIp(),
-                ConfigUtils.getRabbitMQPort());
-    }
 
     public void closeOrder() {
         //点开付费的保留5分钟
@@ -83,11 +74,23 @@ public class PayService {
             if (courseOrder.getDiscount() != 0.0) {
                 couponDao.updateCouponByOrderId(Coupon.UNUSED, orderId);
             }
-            //发mq消息
-            try {
-                rabbitMQPublisher.publish(orderId);
-            } catch (ConnectException e) {
-                logger.error("mq connection failed", e);
+
+            QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
+            if(quanwaiOrder==null){
+                logger.error("订单 {} 不存在", orderId);
+                return;
+            }
+            if (QuanwaiOrder.SYSTEMATISM.equals(quanwaiOrder.getGoodsType())) {
+                courseOrderDao.closeOrder(orderId);
+                quanwaiOrderDao.closeOrder(orderId);
+            }
+            if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
+                riseOrderDao.closeOrder(orderId);
+                quanwaiOrderDao.closeOrder(orderId);
+            }
+            if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
+                riseCourseOrderDao.closeOrder(orderId);
+                quanwaiOrderDao.closeOrder(orderId);;
             }
         }
     }
