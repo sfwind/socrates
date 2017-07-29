@@ -2,6 +2,8 @@ package com.iquanwai.domain.dao;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.util.ConfigUtils;
+import com.iquanwai.util.DBProperties;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
+import java.beans.PropertyVetoException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -25,17 +28,27 @@ import java.util.List;
 public class DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private DataSource ds;
+    private ComboPooledDataSource ds;
 
     @Bean
     @PostConstruct
     public DataSource getDataSource(){
         if(ds==null) {
-            ds = DataSourceBuilder.create()
-                    .url(ConfigUtils.getJdbcUrl())
-                    .username(ConfigUtils.getUsername())
-                    .password(ConfigUtils.getPassword())
-                    .build();
+            ds = new ComboPooledDataSource();
+            ds.setPassword(ConfigUtils.getPassword());
+            ds.setUser(ConfigUtils.getUsername());
+            ds.setJdbcUrl(ConfigUtils.getJdbcUrl());
+            try {
+                ds.setDriverClass("com.mysql.jdbc.Driver");
+            } catch (PropertyVetoException e) {
+                // ignore
+            }
+            ds.setCheckoutTimeout(DBProperties.CHECKOUT_TIMEOUT);
+            ds.setMaxStatements(DBProperties.MAX_STATEMENTS);
+            ds.setMaxPoolSize(DBProperties.MAX_POOL_SIZE);
+            ds.setMinPoolSize(DBProperties.MIN_POOL_SIZE);
+            ds.setMaxIdleTime(DBProperties.MAX_IDLE_TIME);
+            ds.setIdleConnectionTestPeriod(DBProperties.IDLE_CONNECTION_TEST_PERIOD);
         }
         return ds;
     }
