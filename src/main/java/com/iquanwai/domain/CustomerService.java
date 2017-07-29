@@ -1,16 +1,11 @@
 package com.iquanwai.domain;
 
-import com.iquanwai.domain.dao.OperationLogDao;
-import com.iquanwai.domain.dao.ProfileDao;
-import com.iquanwai.domain.dao.RiseMemberDao;
-import com.iquanwai.domain.dao.RiseUserLandingDao;
-import com.iquanwai.domain.dao.RiseUserLoginDao;
+import com.iquanwai.domain.dao.*;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.domain.po.RiseMember;
 import com.iquanwai.domain.po.RiseUserLanding;
 import com.iquanwai.mq.MQService;
 import com.iquanwai.mq.RabbitMQPublisher;
-import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,8 +45,7 @@ public class CustomerService {
     @PostConstruct
     public void init(){
         rabbitMQPublisher = new RabbitMQPublisher();
-        rabbitMQPublisher.init(TOPIC, ConfigUtils.getRabbitMQIp(),
-                ConfigUtils.getRabbitMQPort());
+        rabbitMQPublisher.init(TOPIC);
         rabbitMQPublisher.setSendCallback(mqService::saveMQSendOperation);
     }
 

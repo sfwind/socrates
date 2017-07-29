@@ -135,4 +135,12 @@ public class ConfigUtils {
     public static int getRabbitMQPort(){
         return getIntValue("rabbitmq.port");
     }
+
+    public static String getRabbitMQUser() {
+        return getValue("rabbitmq.user");
+    }
+
+    public static String getRabbitMQPasswd() {
+        return getValue("rabbitmq.password");
+    }
 }
