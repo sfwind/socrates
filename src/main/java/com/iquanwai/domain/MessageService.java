@@ -92,18 +92,13 @@ public class MessageService {
             }
             String toUser = Objects.toString(homeworkVote.getVotedProfileId());
             String url = "";
-            if (voteMessage.getType() == 1) {
-                ChallengeSubmit challengeSubmit = submitDao.load(ChallengeSubmit.class, homeworkVote.getReferencedId());
-                if (challengeSubmit == null) {
-                    return;
-                }
-                url = "/rise/static/practice/challenge?id=" + challengeSubmit.getChallengeId();
-            } else if (voteMessage.getType() == 2) {
+            if (voteMessage.getType() == 2) {
                 ApplicationSubmit applicationSubmit = submitDao.load(ApplicationSubmit.class, homeworkVote.getReferencedId());
                 if (applicationSubmit == null) {
                     return;
                 }
-                url = "/rise/static/practice/application?id=" + applicationSubmit.getApplicationId();
+                url = "/rise/static/practice/application?id=" + applicationSubmit.getApplicationId()
+                        + "&planId=" + applicationSubmit.getPlanId() + "&submitId=" + applicationSubmit.getId();
             } else if (voteMessage.getType() == 3) {
                 SubjectArticle subjectArticle = submitDao.load(SubjectArticle.class, homeworkVote.getReferencedId());
                 if (subjectArticle == null) {
