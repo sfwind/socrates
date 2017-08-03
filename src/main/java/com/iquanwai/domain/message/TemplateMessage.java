@@ -21,6 +21,10 @@ public class TemplateMessage {
         public Keyword(String value) {
             this.value = value;
         }
+        public Keyword(String value, String color) {
+            this.value = value;
+            this.color = color;
+        }
 
         private String value;
         private String color = "#04136d";

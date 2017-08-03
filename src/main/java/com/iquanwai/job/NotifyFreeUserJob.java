@@ -55,11 +55,11 @@ public class NotifyFreeUserJob {
                 templateMessage.setUrl(ConfigUtils.getAppDomain() + INDEX_URL);
 
                 int closeTime = DateUtils.interval(new Date(), improvementPlan.getCloseDate()) + 1;
-                data.put("first", new TemplateMessage.Keyword(profile.getNickname() + "童鞋，晚上好！\n" +
-                        "趁今天还没结束，快点击下方“上课啦”，来一节能力提升练习吧！\n"));
-                data.put("keyword1", new TemplateMessage.Keyword("找到本质问题，减少无效努力"));
-                data.put("keyword2", new TemplateMessage.Keyword("距到期还有" + closeTime + "天"));
-                data.put("remark", new TemplateMessage.Keyword("\n想念刷题的爽快感受？点击“详情”，立刻开始提升自己！"));
+                data.put("first", new TemplateMessage.Keyword(profile.getNickname() + "同学，晚上好！\n\n" +
+                        "快来完成今天的学习任务吧\n", "#666666"));
+                data.put("keyword1", new TemplateMessage.Keyword("找到本质问题，减少无效努力", "#333333"));
+                data.put("keyword2", new TemplateMessage.Keyword("距到期还有" + closeTime + "天", "#333333"));
+                data.put("remark", new TemplateMessage.Keyword("\n点此卡片开始学习！", "#32b4ed"));
 
                 templateMessageService.sendMessage(templateMessage);
             } catch (Exception e) {
