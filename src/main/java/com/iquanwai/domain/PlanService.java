@@ -33,6 +33,10 @@ public class PlanService {
     private ProfileDao profileDao;
     @Autowired
     private PracticePlanDao practicePlanDao;
+    @Autowired
+    private RedisUtil redisUtil;
+
+    private static final String LOGIN_REDIS_KEY = "login:";
 
     //提前3天通知用户,小课即将关闭
     private static final int NOTIFY_CLOSE_DAYS = 3;
@@ -110,7 +114,7 @@ public class PlanService {
             Integer profileId = improvementPlan.getProfileId();
             Profile profile = profileDao.load(Profile.class, profileId);
             //过滤没报名的用户
-            if (profile != null && profile.getRiseMember()) {
+            if (profile != null && (profile.getRiseMember() == 1 || profile.getRiseMember() == 2)) {
                 //用户去重
                 if (!openids.contains(profile.getOpenid())) {
                     improvementPlans.add(improvementPlan);
@@ -159,4 +163,28 @@ public class PlanService {
         }).collect(Collectors.toList());
 
     }
+
+    /**
+     * 昨日新关注人员，但是今日未登录
+     */
+    public List<Profile> loadNewUnLogin() {
+        Date beforeDate = DateUtils.beforeDays(new Date(), 1);
+        String todayDateString = DateUtils.parseDateToString(new Date());
+        List<Profile> profiles = profileDao.loadProfiles(beforeDate, new Date());
+
+        profiles = profiles.stream().filter(profile -> profile.getRiseMember() == 1 || profile.getRiseMember() == 2)
+                .collect(Collectors.toList());
+        List<Profile> unLoginProfiles = Lists.newArrayList();
+        for (Profile profile : profiles) {
+            Integer profileId = profile.getId();
+            String lastLoginTime = redisUtil.get(LOGIN_REDIS_KEY + profileId.toString());
+            if (lastLoginTime != null && lastLoginTime.length() >= 10
+                    && !lastLoginTime.substring(0, 10).equalsIgnoreCase(todayDateString)) {
+                // 今日未登录
+                unLoginProfiles.add(profile);
+            }
+        }
+        return unLoginProfiles;
+    }
+
 }
