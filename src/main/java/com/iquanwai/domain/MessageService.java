@@ -114,7 +114,7 @@ public class MessageService {
         String message = "";
         if (voteMessage.getCount() == 1) {
             if (voteMessage.getType() == 2) {
-                message = profile.getNickname() + "很喜欢你的应用练习作业，并给你点了赞";
+                message = profile.getNickname() + "很喜欢你的应用题作业，并给你点了赞";
             } else if (voteMessage.getType() == 3) {
                 message = profile.getNickname() + "很喜欢你的小课分享作业，并给你点了赞";
             } else if (voteMessage.getType() == 4) {
@@ -122,7 +122,7 @@ public class MessageService {
             }
         } else {
             if (voteMessage.getType() == 2) {
-                message = profile.getNickname() + "等" + voteMessage.getCount() + "人很喜欢你的应用练习作业，并给你点了赞";
+                message = profile.getNickname() + "等" + voteMessage.getCount() + "人很喜欢你的应用题作业，并给你点了赞";
             } else if (voteMessage.getType() == 3) {
                 message = profile.getNickname() + "等" + voteMessage.getCount() + "人很喜欢你的小课分享作业，并给你点了赞";
             } else if (voteMessage.getType() == 4) {

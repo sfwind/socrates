@@ -138,10 +138,10 @@ public class PlanService {
                 return false;
             }
             // 第一天学习不通知
-            Date startDate = DateUtils.startOfDay(new Date());
-            if (startDate.equals(improvementPlan.getStartDate())) {
-                return false;
-            }
+//            Date startDate = DateUtils.startOfDay(new Date());
+//            if (startDate.equals(improvementPlan.getStartDate())) {
+//                return false;
+//            }
             // 3天后即将关闭不提醒,有额外提醒消息
             Date closeDate = DateUtils.afterDays(DateUtils.startOfDay(new Date()), 3);
             if (closeDate.equals(improvementPlan.getCloseDate())) {
