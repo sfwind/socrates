@@ -42,7 +42,7 @@ public class NotifyNewUnlogin {
 
     private static final String INDEX_URL = "/rise/static/plan/main";
 
-    @Scheduled(cron = "0 0/5 17 * * ?")
+    @Scheduled(cron = "0 0/5 * * * ?")
     public void work() {
         logger.info("提醒一天未登录的新用户学习开始");
         notifyNewUnLogin();
