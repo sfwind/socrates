@@ -10,7 +10,6 @@ public class DateUtils {
     private static DateTimeFormatter format1 = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static DateTimeFormatter format2 = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
     private static DateTimeFormatter format3 = DateTimeFormat.forPattern("yyyyMMddHHmmss");
-    private static DateTimeFormatter format4 = DateTimeFormat.forPattern("yyyy-MM-dd 00:00:00");
     public static String parseDateToString(Date date) {
         return format1.print(new DateTime(date));
     }
@@ -21,10 +20,6 @@ public class DateUtils {
 
     public static String parseDateTimeToString(Date date) {
         return format2.print(new DateTime(date));
-    }
-
-    public static String parseDateWithZeroTime(Date date) {
-        return format4.print(new DateTime(date));
     }
 
     public static Date parseStringToDateTime(String strDate) {

@@ -24,7 +24,7 @@ public class Profile {
     private Integer isFull;
     private String riseId;
     private Boolean openRise;
-    private Boolean riseMember;
+    private Integer riseMember; // 0 - 非会员， 1 - 会员， 2 - 小课购买
 
     //默认头像
     public static final String DEFAULT_AVATAR = "http://www.iquanwai.com/images/default_avatar.png";

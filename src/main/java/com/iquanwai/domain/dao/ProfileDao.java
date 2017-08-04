@@ -40,7 +40,7 @@ public class ProfileDao extends DBUtil {
         String sql = "SELECT * FROM Profile WHERE AddTime >= ? AND AddTime <= ?";
         ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
         try {
-            return runner.query(sql, h, DateUtils.parseDateWithZeroTime(startDate), DateUtils.parseDateWithZeroTime(endDate));
+            return runner.query(sql, h, DateUtils.startOfDay(startDate), DateUtils.startOfDay(endDate));
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

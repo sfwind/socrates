@@ -114,7 +114,7 @@ public class PlanService {
             Integer profileId = improvementPlan.getProfileId();
             Profile profile = profileDao.load(Profile.class, profileId);
             //过滤没报名的用户
-            if (profile != null && profile.getRiseMember()) {
+            if (profile != null && (profile.getRiseMember() == 1 || profile.getRiseMember() == 2)) {
                 //用户去重
                 if (!openids.contains(profile.getOpenid())) {
                     improvementPlans.add(improvementPlan);
@@ -172,7 +172,8 @@ public class PlanService {
         String todayDateString = DateUtils.parseDateToString(new Date());
         List<Profile> profiles = profileDao.loadProfiles(beforeDate, new Date());
 
-        profiles = profiles.stream().filter(Profile::getRiseMember).collect(Collectors.toList());
+        profiles = profiles.stream().filter(profile -> profile.getRiseMember() == 1 || profile.getRiseMember() == 2)
+                .collect(Collectors.toList());
         List<Profile> unLoginProfiles = Lists.newArrayList();
         for (Profile profile : profiles) {
             Integer profileId = profile.getId();
