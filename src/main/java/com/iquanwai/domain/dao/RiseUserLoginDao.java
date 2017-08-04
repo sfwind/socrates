@@ -48,18 +48,4 @@ public class RiseUserLoginDao extends DBUtil {
         return Lists.newArrayList();
     }
 
-    // 获取最近登录日期为 x 的学员
-    public List<RiseUserLogin> loadLatestLoginDate(String latestLoginDate) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select Openid, max(LoginDate) as LoginDate " +
-                "from RiseUserLogin GROUP BY Openid having max(LoginDate) = ?";
-        ResultSetHandler<List<RiseUserLogin>> h = new BeanListHandler<>(RiseUserLogin.class);
-        try {
-            return runner.query(sql, h, latestLoginDate);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
-
 }
