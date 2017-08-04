@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import com.iquanwai.domain.PlanService;
 import com.iquanwai.domain.dao.ImprovementPlanDao;
 import com.iquanwai.domain.dao.ProblemDao;
-import com.iquanwai.domain.dao.ProfileDao;
 import com.iquanwai.domain.message.TemplateMessage;
 import com.iquanwai.domain.message.TemplateMessageService;
 import com.iquanwai.domain.po.ImprovementPlan;
@@ -36,13 +35,11 @@ public class NotifyNewUnlogin {
     @Autowired
     private ProblemDao problemDao;
     @Autowired
-    private ProfileDao profileDao;
-    @Autowired
     private TemplateMessageService templateMessageService;
 
     private static final String INDEX_URL = "/rise/static/plan/main";
 
-    @Scheduled(cron = "0 0/5 * * * ?")
+    @Scheduled(cron = "0 30 21 * * ?")
     public void work() {
         logger.info("提醒一天未登录的新用户学习开始");
         notifyNewUnLogin();
@@ -51,9 +48,6 @@ public class NotifyNewUnlogin {
 
     private void notifyNewUnLogin() {
         List<Profile> newUnLoginProfiles = planService.loadNewUnLogin();
-        newUnLoginProfiles.clear();
-        newUnLoginProfiles.add(profileDao.load(Profile.class, 30));
-        logger.info("清除之后，{}", newUnLoginProfiles.size());
         for (Profile profile : newUnLoginProfiles) {
             Integer profileId = profile.getId();
             List<ImprovementPlan> improvementPlans = improvementPlanDao.loadImprovementPlansByProfileId(profileId);

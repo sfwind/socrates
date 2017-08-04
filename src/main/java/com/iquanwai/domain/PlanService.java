@@ -172,21 +172,17 @@ public class PlanService {
         String todayDateString = DateUtils.parseDateToString(new Date());
         List<Profile> profiles = profileDao.loadProfiles(beforeDate, new Date());
 
-        logger.info("所有昨日ren数, {}", profiles.size());
         profiles = profiles.stream().filter(Profile::getRiseMember).collect(Collectors.toList());
         List<Profile> unLoginProfiles = Lists.newArrayList();
-        logger.info("所有昨日会员数, {}", profiles.size());
         for (Profile profile : profiles) {
             Integer profileId = profile.getId();
             String lastLoginTime = redisUtil.get(LOGIN_REDIS_KEY + profileId.toString());
-            logger.info("id: " + profileId + " - time: "+lastLoginTime);
             if (lastLoginTime != null && lastLoginTime.length() >= 10
                     && !lastLoginTime.substring(0, 10).equalsIgnoreCase(todayDateString)) {
                 // 今日未登录
                 unLoginProfiles.add(profile);
             }
         }
-        logger.info("匹配完 redis 之后人数，{}", unLoginProfiles.size());
         return unLoginProfiles;
     }
 
