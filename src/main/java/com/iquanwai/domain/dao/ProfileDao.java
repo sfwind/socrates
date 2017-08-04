@@ -2,6 +2,7 @@ package com.iquanwai.domain.dao;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.domain.po.Profile;
+import com.iquanwai.util.DateUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -34,12 +35,12 @@ public class ProfileDao extends DBUtil {
     }
 
     // 根据入库日期筛选 profile
-    public List<Profile> loadProfiles(Date addTime) {
+    public List<Profile> loadProfiles(Date startDate, Date endDate) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM Profile WHERE AddTime = ?";
+        String sql = "SELECT * FROM Profile WHERE AddTime >= ? AND AddTime <= ?";
         ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
         try {
-            return runner.query(sql, h, addTime);
+            return runner.query(sql, h, DateUtils.parseDateWithZeroTime(startDate), DateUtils.parseDateWithZeroTime(endDate));
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

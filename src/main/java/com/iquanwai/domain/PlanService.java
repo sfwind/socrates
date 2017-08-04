@@ -170,8 +170,8 @@ public class PlanService {
     public List<Profile> loadNewUnLogin() {
         Date beforeDate = DateUtils.beforeDays(new Date(), 1);
         String todayDateString = DateUtils.parseDateToString(new Date());
+        List<Profile> profiles = profileDao.loadProfiles(beforeDate, new Date());
 
-        List<Profile> profiles = profileDao.loadProfiles(beforeDate);
         logger.info("所有昨日ren数, {}", profiles.size());
         profiles = profiles.stream().filter(Profile::getRiseMember).collect(Collectors.toList());
         List<Profile> unLoginProfiles = Lists.newArrayList();
