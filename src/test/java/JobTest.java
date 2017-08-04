@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * Created by justin on 17/3/21.
  */
-public class JobTest extends TestBase{
+public class JobTest extends TestBase {
     @Autowired
     private NotifyFreeUserJob notifyFreeUserJob;
     @Autowired
@@ -27,29 +27,37 @@ public class JobTest extends TestBase{
     @Autowired
     private ClosePlanJob closePlanJob;
 
+    @Autowired
+    private NotifyNewUnlogin notifyNewUnlogin;
+
     @Test
-    public void test(){
+    public void testNotifyUnlogin() {
+        notifyNewUnlogin.work();
+    }
+
+    @Test
+    public void test() {
         notifyFreeUserJob.work();
     }
 
     @Test
-    public void expiredTest(){
+    public void expiredTest() {
         forumNotifyJob.work();
     }
 
     @Test
-    public void riseJobTest(){
+    public void riseJobTest() {
         riseUserJob.work();
     }
 
     @Test
-    public void customerTest(){
+    public void customerTest() {
         customerService.userLoginLog(2);
 
     }
 
     @Test
-    public void logDaoTest(){
+    public void logDaoTest() {
 //        List<String> strings = operationLogDao.loadThatDayLoginUser(2);
 //
 //        strings.forEach(System.out::println);
@@ -61,12 +69,5 @@ public class JobTest extends TestBase{
         Integer diff = DateUtils.interval(thatDate, landingDate);
         System.out.println(diff);
     }
-
-
-
-
-
-
-
 
 }

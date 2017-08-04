@@ -24,8 +24,8 @@ public class RiseUserLoginDao extends DBUtil {
     public boolean insert(String openId, Date loginDate, Integer diffDay) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO RiseUserLogin(Openid, LoginDate, DiffDay) VALUES (?, ?, ?) ";
-        long insert=0;
-        try{
+        long insert = 0;
+        try {
             ScalarHandler<Long> handler = new ScalarHandler<Long>();
             insert = runner.insert(sql, handler, openId, loginDate, diffDay);
         } catch (SQLException e) {
@@ -34,7 +34,7 @@ public class RiseUserLoginDao extends DBUtil {
         return insert > 0;
     }
 
-    // 获取3天未登录的学员
+    // 获取超过 x 天未登录的学员
     public List<RiseUserLogin> loadUnLoginUser(String previousLoginDate) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select Openid, max(LoginDate) as LoginDate " +
@@ -47,4 +47,19 @@ public class RiseUserLoginDao extends DBUtil {
         }
         return Lists.newArrayList();
     }
+
+    // 获取最近登录日期为 x 的学员
+    public List<RiseUserLogin> loadLatestLoginDate(String latestLoginDate) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select Openid, max(LoginDate) as LoginDate " +
+                "from RiseUserLogin GROUP BY Openid having max(LoginDate) = ?";
+        ResultSetHandler<List<RiseUserLogin>> h = new BeanListHandler<>(RiseUserLogin.class);
+        try {
+            return runner.query(sql, h, latestLoginDate);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
 }
