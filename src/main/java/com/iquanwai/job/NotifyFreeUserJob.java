@@ -56,10 +56,10 @@ public class NotifyFreeUserJob {
 
                 int closeTime = DateUtils.interval(new Date(), improvementPlan.getCloseDate()) + 1;
                 data.put("first", new TemplateMessage.Keyword(profile.getNickname() + "同学，晚上好！\n\n" +
-                        "快来完成今天的学习任务吧\n", "#666666"));
+                        "快来完成今天的学习任务吧\n", "#000000"));
                 data.put("keyword1", new TemplateMessage.Keyword("找到本质问题，减少无效努力", "#000000"));
                 data.put("keyword2", new TemplateMessage.Keyword("距到期还有" + closeTime + "天", "#000000"));
-                data.put("remark", new TemplateMessage.Keyword("\n点此卡片开始学习！", "#32b4ed"));
+                data.put("remark", new TemplateMessage.Keyword("\n点此卡片开始学习！", "#f57f16"));
 
                 templateMessageService.sendMessage(templateMessage);
             } catch (Exception e) {
