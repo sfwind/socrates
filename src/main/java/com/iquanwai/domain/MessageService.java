@@ -92,18 +92,13 @@ public class MessageService {
             }
             String toUser = Objects.toString(homeworkVote.getVotedProfileId());
             String url = "";
-            if (voteMessage.getType() == 1) {
-                ChallengeSubmit challengeSubmit = submitDao.load(ChallengeSubmit.class, homeworkVote.getReferencedId());
-                if (challengeSubmit == null) {
-                    return;
-                }
-                url = "/rise/static/practice/challenge?id=" + challengeSubmit.getChallengeId();
-            } else if (voteMessage.getType() == 2) {
+            if (voteMessage.getType() == 2) {
                 ApplicationSubmit applicationSubmit = submitDao.load(ApplicationSubmit.class, homeworkVote.getReferencedId());
                 if (applicationSubmit == null) {
                     return;
                 }
-                url = "/rise/static/practice/application?id=" + applicationSubmit.getApplicationId();
+                url = "/rise/static/practice/application?id=" + applicationSubmit.getApplicationId()
+                        + "&planId=" + applicationSubmit.getPlanId() + "&submitId=" + applicationSubmit.getId();
             } else if (voteMessage.getType() == 3) {
                 SubjectArticle subjectArticle = submitDao.load(SubjectArticle.class, homeworkVote.getReferencedId());
                 if (subjectArticle == null) {
@@ -119,7 +114,7 @@ public class MessageService {
         String message = "";
         if (voteMessage.getCount() == 1) {
             if (voteMessage.getType() == 2) {
-                message = profile.getNickname() + "很喜欢你的应用练习作业，并给你点了赞";
+                message = profile.getNickname() + "很喜欢你的应用题作业，并给你点了赞";
             } else if (voteMessage.getType() == 3) {
                 message = profile.getNickname() + "很喜欢你的小课分享作业，并给你点了赞";
             } else if (voteMessage.getType() == 4) {
@@ -127,7 +122,7 @@ public class MessageService {
             }
         } else {
             if (voteMessage.getType() == 2) {
-                message = profile.getNickname() + "等" + voteMessage.getCount() + "人很喜欢你的应用练习作业，并给你点了赞";
+                message = profile.getNickname() + "等" + voteMessage.getCount() + "人很喜欢你的应用题作业，并给你点了赞";
             } else if (voteMessage.getType() == 3) {
                 message = profile.getNickname() + "等" + voteMessage.getCount() + "人很喜欢你的小课分享作业，并给你点了赞";
             } else if (voteMessage.getType() == 4) {

@@ -27,7 +27,7 @@ public class ImprovementPlanDao extends PracticeDBUtil {
         try {
             List<ImprovementPlan> improvementPlans = runner.query(sql, h);
             return improvementPlans;
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
@@ -38,12 +38,12 @@ public class ImprovementPlanDao extends PracticeDBUtil {
         String sql = "UPDATE ImprovementPlan SET Status =? where Id=?";
         try {
             runner.update(sql, status, planId);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public void updateCloseTime(Integer planId){
+    public void updateCloseTime(Integer planId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "UPDATE ImprovementPlan SET CloseTime = CURRENT_TIMESTAMP where Id=? and CloseTime is null";
         try {
@@ -60,7 +60,7 @@ public class ImprovementPlanDao extends PracticeDBUtil {
         try {
             ImprovementPlan improvementPlan = runner.query(sql, h, openId);
             return improvementPlan;
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
@@ -73,7 +73,7 @@ public class ImprovementPlanDao extends PracticeDBUtil {
         try {
             List<ImprovementPlan> improvementPlans = runner.query(sql, h, problemId);
             return improvementPlans;
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
@@ -86,10 +86,22 @@ public class ImprovementPlanDao extends PracticeDBUtil {
         try {
             List<ImprovementPlan> improvementPlans = runner.query(sql, h, problemId);
             return improvementPlans;
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
+    }
+
+    public List<ImprovementPlan> loadImprovementPlansByProfileId(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM ImprovementPlan WHERE ProfileId = ? and Status = 1 and Del = 0";
+        ResultSetHandler<List<ImprovementPlan>> h = new BeanListHandler<ImprovementPlan>(ImprovementPlan.class);
+        try {
+            return runner.query(sql, h, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 
 }
