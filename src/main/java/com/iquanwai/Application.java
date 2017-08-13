@@ -7,6 +7,7 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -21,6 +22,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
+@EnableRabbit
 public class Application {
 
     @Bean(name = "connectionFactory")
@@ -30,7 +32,6 @@ public class Application {
         factory.setPort(ConfigUtils.getRabbitMQPort());
         factory.setUsername(ConfigUtils.getRabbitMQUser());
         factory.setPassword(ConfigUtils.getRabbitMQPasswd());
-        factory.start();
         return factory;
     }
 

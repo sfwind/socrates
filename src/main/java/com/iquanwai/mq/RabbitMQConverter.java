@@ -47,7 +47,6 @@ public class RabbitMQConverter implements MessageConverter {
     @Override
     public Object fromMessage(Message message) throws MessageConversionException {
         RabbitMQDto ob = JSON.parseObject(message.getBody(), RabbitMQDto.class);
-        System.out.println(JSON.toJSONString(ob));
         return ob;
     }
 }
