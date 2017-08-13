@@ -43,7 +43,7 @@ public class RabbitMQFactory {
             // 设置了开关，并且开关是false,则不接收mq消息
             return;
         }
-
+        logger.info("准备 开启队列监听：{}", topicName);
         Queue queue;
         if (queueName == null) {
             queue = amqpAdmin.declareQueue();
@@ -74,6 +74,7 @@ public class RabbitMQFactory {
             }
         });
         container.start();
+        logger.info("开启队列监听：{}", topicName);
     }
 
 
@@ -85,6 +86,7 @@ public class RabbitMQFactory {
      */
     public RabbitMQPublisher initFanoutPublisher(String topic) {
         Assert.notNull(topic, "交换机名字不能为null");
+        logger.info("初始化MQ提供者:{}", topic);
         FanoutExchange fanoutExchange = new FanoutExchange(topic, false, false);
         amqpAdmin.declareExchange(fanoutExchange);
 
