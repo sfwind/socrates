@@ -3,7 +3,7 @@ package com.iquanwai.mq;
 import lombok.Data;
 
 /**
- * Created by justin on 17/7/26.
+ * Created by nethunder on 2017/7/23.
  */
 @Data
 public class RabbitMQDto {
