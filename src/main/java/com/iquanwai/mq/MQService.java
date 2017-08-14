@@ -44,7 +44,6 @@ public class MQService {
         String ip = null;
         try {
             InetAddress localHost = InetAddress.getLocalHost();
-            System.out.println(localHost.getHostAddress());
             ip = localHost.getHostAddress();
         } catch (UnknownHostException e) {
             logger.error(e.getLocalizedMessage(), e);
