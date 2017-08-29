@@ -22,7 +22,7 @@ public class ClosePlanJob {
     @Autowired
     private PlanService planService;
 
-    @Scheduled(cron = "0 0 6 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     public void work() {
         logger.info("关闭小课任务开始");
         closePlan();
