@@ -37,6 +37,8 @@ public class PayService {
     private RiseOrderDao riseOrderDao;
     @Autowired
     private CourseOrderDao courseOrderDao;
+    @Autowired
+    private MonthlyCampOrderDao monthlyCampOrderDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -91,6 +93,10 @@ public class PayService {
             if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
                 riseCourseOrderDao.closeOrder(orderId);
                 quanwaiOrderDao.closeOrder(orderId);;
+            }
+            if(QuanwaiOrder.FRAGMENT_CAMP.equals(quanwaiOrder.getGoodsType())) {
+                monthlyCampOrderDao.closeOrder(orderId);
+                quanwaiOrderDao.closeOrder(orderId);
             }
         }
     }
