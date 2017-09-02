@@ -92,7 +92,7 @@ public class PayService {
             }
             if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
                 riseCourseOrderDao.closeOrder(orderId);
-                quanwaiOrderDao.closeOrder(orderId);;
+                quanwaiOrderDao.closeOrder(orderId);
             }
             if(QuanwaiOrder.FRAGMENT_CAMP.equals(quanwaiOrder.getGoodsType())) {
                 monthlyCampOrderDao.closeOrder(orderId);

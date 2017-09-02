@@ -22,37 +22,39 @@ public class MQService {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private String ipAddress;
 
-    public void saveMQSendOperation(MQSendLog mqSendLog){
+    public void saveMQSendOperation(MQSendLog mqSendLog) {
         // 插入mqSendOperation
-        new Thread(() -> {
-            String ip = null;
+        if (ipAddress == null) {
             try {
                 InetAddress localHost = InetAddress.getLocalHost();
-                ip = localHost.getHostAddress();
+                ipAddress = localHost.getHostAddress();
             } catch (UnknownHostException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
-            mqSendLog.setPublisherIp(ip);
-            mqSendLogDao.insert(mqSendLog);
-        }).start();
+        }
+
+        mqSendLog.setPublisherIp(ipAddress);
+        mqSendLogDao.insert(mqSendLog);
     }
 
 
     public void updateAfterDealOperation(RabbitMQDto dto) {
         String msgId = dto.getMsgId();
-        String ip = null;
-        try {
-            InetAddress localHost = InetAddress.getLocalHost();
-            ip = localHost.getHostAddress();
-        } catch (UnknownHostException e) {
-            logger.error(e.getLocalizedMessage(), e);
+        if (ipAddress == null) {
+            try {
+                InetAddress localHost = InetAddress.getLocalHost();
+                ipAddress = localHost.getHostAddress();
+            } catch (UnknownHostException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
         }
         MQDealLog mqDealLog = new MQDealLog();
         mqDealLog.setMsgId(msgId);
         mqDealLog.setTopic(dto.getTopic());
         mqDealLog.setQueue(dto.getQueue());
-        mqDealLog.setConsumerIp(ip);
+        mqDealLog.setConsumerIp(ipAddress);
         mqDealLogDao.insert(mqDealLog);
     }
 }
