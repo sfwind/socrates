@@ -235,7 +235,7 @@ public class PlanService {
         Map<Integer,ImprovementPlan> planMap = Maps.newHashMap();
         runningPlans.forEach(plan -> {
             if (planMap.containsKey(plan.getProfileId())) {
-                ImprovementPlan oldPlan = planMap.get(plan.getProblemId());
+                ImprovementPlan oldPlan = planMap.get(plan.getProfileId());
                 if (plan.getCloseDate().before(oldPlan.getCloseDate())) {
                     // 新的plan比老的plan更早关闭
                     planMap.put(plan.getProfileId(), plan);
