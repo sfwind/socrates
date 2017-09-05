@@ -144,12 +144,4 @@ public class ConfigUtils {
         return getValue("rabbitmq.password");
     }
 
-    public static String courseStartMsg() {
-        return getValue("course.start.msg");
-    }
-
-    public static String domainName() {
-        return getValue("app.domain");
-    }
-
 }

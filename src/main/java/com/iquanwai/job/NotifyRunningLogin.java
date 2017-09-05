@@ -35,7 +35,7 @@ public class NotifyRunningLogin {
     @Autowired
     private TemplateMessageService templateMessageService;
 
-    @Scheduled(cron = "0 15 11 ? * MON-FRI")
+    @Scheduled(cron = "0 18 11 ? * MON-FRI")
     public void notifyHasRunningPlansLogin() {
         logger.info("开始未登录提醒job");
         List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();
@@ -48,8 +48,8 @@ public class NotifyRunningLogin {
         templateMessage.setTouser(plan.getOpenid());
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
-        templateMessage.setTemplate_id(ConfigUtils.courseStartMsg());
-        templateMessage.setUrl(ConfigUtils.domainName() + INDEX_URL);
+        templateMessage.setTemplate_id(ConfigUtils.getLearningNotifyMsg());
+        templateMessage.setUrl(ConfigUtils.getAppDomain() + INDEX_URL);
         String closeDate = DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(plan.getCloseDate(), 1));
         Profile profile = customerService.getProfile(plan.getProfileId());
         String first = "\n" + profile.getNickname() + "同学，晚上好！快来学习今天的小课，拿下一个职场新技能！";
