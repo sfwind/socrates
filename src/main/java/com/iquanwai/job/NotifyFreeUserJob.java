@@ -12,8 +12,6 @@ import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
@@ -22,7 +20,7 @@ import java.util.Map;
 /**
  * Created by justin on 17/7/19.
  */
-@Component
+//@Component
 public class NotifyFreeUserJob {
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
@@ -34,7 +32,7 @@ public class NotifyFreeUserJob {
 
     private static final String INDEX_URL = "/rise/static/plan/main";
 
-    @Scheduled(cron = "0 30 21 * * ?")
+//    @Scheduled(cron = "0 30 21 * * ?")
     public void work() {
         logger.info("提醒限免用户任务开始");
         notifyInactiveUser();
