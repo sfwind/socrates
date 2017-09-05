@@ -35,7 +35,7 @@ public class NotifyRunningLogin {
     @Autowired
     private TemplateMessageService templateMessageService;
 
-    @Scheduled(cron = "0 20 16 ? * MON-FRI")
+    @Scheduled(cron = "0 22 16 ? * MON-FRI")
     public void notifyHasRunningPlansLogin() {
         logger.info("开始未登录提醒job");
         List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();
@@ -55,6 +55,7 @@ public class NotifyRunningLogin {
                 logger.info("用户:{} 关闭学习提醒", plan.getProfileId());
                 return;
             }
+            logger.info("用户:{} 发送未登录提醒", plan.getProfileId());
             TemplateMessage templateMessage = new TemplateMessage();
             templateMessage.setTouser(plan.getOpenid());
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
