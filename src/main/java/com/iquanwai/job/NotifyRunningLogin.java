@@ -35,7 +35,7 @@ public class NotifyRunningLogin {
     @Autowired
     private TemplateMessageService templateMessageService;
 
-    @Scheduled(cron = "0 0 12 ? * MON-FRI")
+    @Scheduled(cron = "0 05 14 ? * MON-FRI")
     public void notifyHasRunningPlansLogin() {
         logger.info("开始未登录提醒job");
         List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();
