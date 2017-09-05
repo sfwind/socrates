@@ -60,7 +60,6 @@ public class NotifyInactiveUserJob {
             } catch (Exception e){
                 logger.error("发送"+improvementPlan.getOpenid()+"失败", e);
             }
-
         });
     }
 

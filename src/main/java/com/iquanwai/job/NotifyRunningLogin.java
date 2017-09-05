@@ -35,7 +35,7 @@ public class NotifyRunningLogin {
     @Autowired
     private TemplateMessageService templateMessageService;
 
-    @Scheduled(cron = "0 21 15 ? * MON-FRI")
+    @Scheduled(cron = "0 59 15 ? * MON-FRI")
     public void notifyHasRunningPlansLogin() {
         logger.info("开始未登录提醒job");
         List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();
@@ -63,14 +63,14 @@ public class NotifyRunningLogin {
             templateMessage.setUrl(ConfigUtils.getAppDomain() + INDEX_URL);
             String closeDate = DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(plan.getCloseDate(), 1));
             String first = profile.getNickname() + "同学，晚上好！快来学习今天的小课，拿下一个职场新技能！\n";
-            data.put("first", new TemplateMessage.Keyword(first));
-            data.put("keyword1", new TemplateMessage.Keyword(plan.getProblemName()));
-            data.put("keyword2", new TemplateMessage.Keyword("今天——" + closeDate));
-            data.put("remark", new TemplateMessage.Keyword("\n可以自觉学习，不需要提醒？点击上课啦，进入“我的”去关闭\n" +
-                    "\n" +
-                    "点此卡片开始学习"));
+            data.put("first", new TemplateMessage.Keyword(first, "#000000"));
+            data.put("keyword1", new TemplateMessage.Keyword(plan.getProblemName(), "#000000"));
+            data.put("keyword2",
+                    new TemplateMessage.Keyword("今天——" + closeDate + "\n可以自觉学习，不需要提醒？点击上课啦，进入“我的”去关闭\n",
+                            "#000000"));
+            data.put("remark", new TemplateMessage.Keyword("\n点此卡片开始学习", "#f57f16"));
             templateMessageService.sendMessage(templateMessage);
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
