@@ -35,7 +35,7 @@ public class NotifyRunningLogin {
     @Autowired
     private TemplateMessageService templateMessageService;
 
-    @Scheduled(cron = "0 15 16 ? * MON-FRI")
+    @Scheduled(cron = "0 20 16 ? * MON-FRI")
     public void notifyHasRunningPlansLogin() {
         logger.info("开始未登录提醒job");
         List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();
@@ -66,7 +66,7 @@ public class NotifyRunningLogin {
             data.put("first", new TemplateMessage.Keyword(first, "#000000"));
             data.put("keyword1", new TemplateMessage.Keyword(plan.getProblemName(), "#000000"));
             data.put("keyword2",
-                    new TemplateMessage.Keyword("今天——" + closeDate + "\n可以自觉学习，不需要提醒？点击上课啦，进入“我的”去关闭\n",
+                    new TemplateMessage.Keyword("今天——" + closeDate + "\n\n可以自觉学习，不需要提醒？点击上课啦，进入“我的”去关闭",
                             "#000000"));
             data.put("remark", new TemplateMessage.Keyword("\n点此卡片开始学习", "#f57f16"));
             templateMessageService.sendMessage(templateMessage);
