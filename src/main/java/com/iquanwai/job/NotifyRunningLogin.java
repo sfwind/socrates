@@ -39,6 +39,7 @@ public class NotifyRunningLogin {
     public void notifyHasRunningPlansLogin() {
         logger.info("开始未登录提醒job");
         List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();
+        logger.info("待提醒人数：{}", runningUnlogin.size());
         runningUnlogin.forEach(this::sendNotifyMsg);
         logger.info("未登录提醒job结束");
     }
