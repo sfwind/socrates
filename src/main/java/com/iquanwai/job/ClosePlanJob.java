@@ -31,7 +31,7 @@ public class ClosePlanJob {
 
     private void closePlan() {
         List<ImprovementPlan> improvementPlanList = planService.loadAllRunningPlan();
-        improvementPlanList.stream().forEach(improvementPlan -> {
+        improvementPlanList.forEach(improvementPlan -> {
             //过期自动结束训练
             if (DateUtils.afterDays(improvementPlan.getCloseDate(), 1).before(new Date())) {
                 Integer status = ImprovementPlan.CLOSE;

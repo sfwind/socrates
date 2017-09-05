@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -62,12 +63,11 @@ public class NotifyRunningLogin {
             templateMessage.setData(data);
             templateMessage.setTemplate_id(ConfigUtils.getLearningNotifyMsg());
             templateMessage.setUrl(ConfigUtils.getAppDomain() + INDEX_URL);
-            String closeDate = DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(plan.getCloseDate(), 1));
             String first = profile.getNickname() + "同学，晚上好！快来学习今天的小课，拿下一个职场新技能！\n";
             data.put("first", new TemplateMessage.Keyword(first, "#000000"));
             data.put("keyword1", new TemplateMessage.Keyword(plan.getProblemName(), "#000000"));
             data.put("keyword2",
-                    new TemplateMessage.Keyword("今天——" + closeDate + "\n\n可以自觉学习，不需要提醒？点击上课啦，进入“我的”去关闭",
+                    new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()) + "\n\n可以自觉学习，不需要提醒？点击上课啦，进入“我的”去关闭",
                             "#000000"));
             data.put("remark", new TemplateMessage.Keyword("\n点此卡片开始学习", "#f57f16"));
             templateMessageService.sendMessage(templateMessage);
