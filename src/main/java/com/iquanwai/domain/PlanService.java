@@ -1,8 +1,20 @@
 package com.iquanwai.domain;
 
 import com.google.common.collect.Lists;
-import com.iquanwai.domain.dao.*;
-import com.iquanwai.domain.po.*;
+import com.google.common.collect.Maps;
+import com.iquanwai.domain.dao.ImprovementPlanDao;
+import com.iquanwai.domain.dao.PracticePlanDao;
+import com.iquanwai.domain.dao.ProblemDao;
+import com.iquanwai.domain.dao.ProfileDao;
+import com.iquanwai.domain.dao.RedisUtil;
+import com.iquanwai.domain.dao.RiseMemberDao;
+import com.iquanwai.domain.dao.RiseUserLoginDao;
+import com.iquanwai.domain.po.ImprovementPlan;
+import com.iquanwai.domain.po.PracticePlan;
+import com.iquanwai.domain.po.Problem;
+import com.iquanwai.domain.po.Profile;
+import com.iquanwai.domain.po.RiseMember;
+import com.iquanwai.domain.po.RiseUserLogin;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
@@ -50,6 +62,12 @@ public class PlanService {
         return improvementPlanDao.loadAllRunningPlan();
     }
 
+    /**
+     * 修改plan的状态
+     *
+     * @param planId id
+     * @param status 状态
+     */
     public void completePlan(Integer planId, Integer status) {
         //训练计划结束
         logger.info("{} is terminated", planId);
@@ -62,6 +80,11 @@ public class PlanService {
     }
 
 
+    /**
+     * 获取将要关闭的订单
+     *
+     * @return 订单
+     */
     public List<ImprovementPlan> loadUnderClosePlan() {
         List<ImprovementPlan> improvementPlans = loadAllRunningPlan();
         Date date = new Date();
@@ -72,6 +95,12 @@ public class PlanService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 查询Problem
+     *
+     * @param problemId id
+     * @return Problem
+     */
     public Problem getProblem(Integer problemId) {
         return problemDao.load(Problem.class, problemId);
     }
@@ -85,7 +114,7 @@ public class PlanService {
         // 一次性获取所有的 Problem 信息
         List<Problem> problemList = problemDao.loadAll(Problem.class);
         Map<Integer, String> problemMap = new HashMap<>();
-        problemList.stream().forEach(problem -> problemMap.put(problem.getId(), problem.getProblem()));
+        problemList.forEach(problem -> problemMap.put(problem.getId(), problem.getProblem()));
 
         // 获取三天前学员 OpenId 和最近一次的 LoginDate
         String previousLoginDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), NOLOGIN_DAYS));
@@ -185,6 +214,40 @@ public class PlanService {
             }
         }
         return unLoginProfiles;
+    }
+
+    public List<ImprovementPlan> loadRunningUnlogin() {
+        String todayDateString = DateUtils.parseDateToString(new Date());
+        List<ImprovementPlan> runningPlans = loadAllRunningPlan();
+        List<Problem> problemList = problemDao.loadAll(Problem.class);
+        Map<Integer, Problem> problemMap = Maps.newHashMap();
+        problemList.forEach(problem -> {
+            problemMap.put(problem.getId(), problem);
+        });
+        runningPlans = runningPlans.stream().filter(plan -> {
+            Integer profileId = plan.getProfileId();
+            String lastLoginTime = redisUtil.get(LOGIN_REDIS_KEY + profileId.toString());
+            // redis里没有 或者登录时间不是今天，都要提醒
+            return lastLoginTime == null ||
+                    (lastLoginTime.length() >= 10 &&
+                            !lastLoginTime.substring(0, 10).equalsIgnoreCase(todayDateString));
+        }).collect(Collectors.toList());
+        Map<Integer,ImprovementPlan> planMap = Maps.newHashMap();
+        runningPlans.forEach(plan -> {
+            if (planMap.containsKey(plan.getProfileId())) {
+                ImprovementPlan oldPlan = planMap.get(plan.getProfileId());
+                if (plan.getCloseDate().before(oldPlan.getCloseDate())) {
+                    // 新的plan比老的plan更早关闭
+                    planMap.put(plan.getProfileId(), plan);
+                }
+            } else {
+                planMap.put(plan.getProfileId(), plan);
+            }
+            Problem problem = problemMap.get(plan.getProblemId());
+            plan.setProblemName(problem != null ? problem.getProblem() : null);
+        });
+
+        return Lists.newArrayList(planMap.values());
     }
 
 }

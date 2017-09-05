@@ -24,6 +24,7 @@ public class Profile {
     private Integer isFull;
     private String riseId;
     private Boolean openRise;
+    private Boolean learningNotify; // 是否开启学习提醒
     private Integer riseMember; // 0 - 非会员， 1 - 会员， 2 - 小课购买
 
     //默认头像

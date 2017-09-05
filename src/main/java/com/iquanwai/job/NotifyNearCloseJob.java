@@ -32,7 +32,7 @@ public class NotifyNearCloseJob {
 //    @Autowired
 //    private RedisUtil redisUtil;
 
-    @Scheduled(cron = "0 0 8 * * ?")
+    @Scheduled(cron = "0 35 21 * * ?")
     public void work() {
         logger.info("通知即将关闭小课任务开始");
         //发送点赞数统计

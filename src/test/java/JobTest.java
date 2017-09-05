@@ -26,6 +26,8 @@ public class JobTest extends TestBase {
     private RiseUserLandingDao riseUserLandingDao;
     @Autowired
     private ClosePlanJob closePlanJob;
+    @Autowired
+    private NotifyRunningLogin notifyRunningLogin;
 
     @Autowired
     private NotifyNewUnlogin notifyNewUnlogin;
@@ -54,6 +56,10 @@ public class JobTest extends TestBase {
     public void customerTest() {
         customerService.userLoginLog(2);
 
+    }
+    @Test
+    public void testNotify(){
+        notifyRunningLogin.notifyHasRunningPlansLogin();;
     }
 
     @Test

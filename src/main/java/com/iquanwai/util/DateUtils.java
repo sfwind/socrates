@@ -10,6 +10,8 @@ public class DateUtils {
     private static DateTimeFormatter format1 = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static DateTimeFormatter format2 = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
     private static DateTimeFormatter format3 = DateTimeFormat.forPattern("yyyyMMddHHmmss");
+    private static DateTimeFormatter format4 = DateTimeFormat.forPattern("yyyy.MM.dd");
+
     public static String parseDateToString(Date date) {
         return format1.print(new DateTime(date));
     }
@@ -100,4 +102,9 @@ public class DateUtils {
     public static Date beforeHours(Date date, int increment){
         return new DateTime(date).minusHours(increment).toDate();
     }
+
+    public static String parseDateToStringByCommon(Date date) {
+        return format4.print(new DateTime(date));
+    }
+
 }

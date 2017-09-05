@@ -143,4 +143,5 @@ public class ConfigUtils {
     public static String getRabbitMQPasswd() {
         return getValue("rabbitmq.password");
     }
+
 }
