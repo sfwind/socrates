@@ -220,22 +220,34 @@ public class PlanService {
         String todayDateString = DateUtils.parseDateToString(new Date());
         List<ImprovementPlan> runningPlans = loadAllRunningPlan();
         List<Problem> problemList = problemDao.loadAll(Problem.class);
-        Map<Integer,Problem> problemMap = Maps.newHashMap();
+        Map<Integer, Problem> problemMap = Maps.newHashMap();
         problemList.forEach(problem -> {
             problemMap.put(problem.getId(), problem);
         });
-        return runningPlans.stream().filter(plan -> {
+        runningPlans = runningPlans.stream().filter(plan -> {
             Integer profileId = plan.getProfileId();
             String lastLoginTime = redisUtil.get(LOGIN_REDIS_KEY + profileId.toString());
             // redis里没有 或者登录时间不是今天，都要提醒
             return lastLoginTime == null ||
                     (lastLoginTime.length() >= 10 &&
                             !lastLoginTime.substring(0, 10).equalsIgnoreCase(todayDateString));
-        }).map(plan -> {
+        }).collect(Collectors.toList());
+        Map<Integer,ImprovementPlan> planMap = Maps.newHashMap();
+        runningPlans.forEach(plan -> {
+            if (planMap.containsKey(plan.getProfileId())) {
+                ImprovementPlan oldPlan = planMap.get(plan.getProblemId());
+                if (plan.getCloseDate().before(oldPlan.getCloseDate())) {
+                    // 新的plan比老的plan更早关闭
+                    planMap.put(plan.getProfileId(), plan);
+                }
+            } else {
+                planMap.put(plan.getProfileId(), plan);
+            }
             Problem problem = problemMap.get(plan.getProblemId());
             plan.setProblemName(problem != null ? problem.getProblem() : null);
-            return plan;
-        }).collect(Collectors.toList());
+        });
+
+        return Lists.newArrayList(planMap.values());
     }
 
 }

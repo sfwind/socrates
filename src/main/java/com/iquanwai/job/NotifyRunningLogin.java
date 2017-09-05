@@ -35,7 +35,7 @@ public class NotifyRunningLogin {
     @Autowired
     private TemplateMessageService templateMessageService;
 
-    @Scheduled(cron = "0 18 11 ? * MON-FRI")
+    @Scheduled(cron = "0 42 11 ? * MON-FRI")
     public void notifyHasRunningPlansLogin() {
         logger.info("开始未登录提醒job");
         List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();
@@ -44,21 +44,30 @@ public class NotifyRunningLogin {
     }
 
     private void sendNotifyMsg(ImprovementPlan plan) {
-        TemplateMessage templateMessage = new TemplateMessage();
-        templateMessage.setTouser(plan.getOpenid());
-        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-        templateMessage.setData(data);
-        templateMessage.setTemplate_id(ConfigUtils.getLearningNotifyMsg());
-        templateMessage.setUrl(ConfigUtils.getAppDomain() + INDEX_URL);
-        String closeDate = DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(plan.getCloseDate(), 1));
-        Profile profile = customerService.getProfile(plan.getProfileId());
-        String first = "\n" + profile.getNickname() + "同学，晚上好！快来学习今天的小课，拿下一个职场新技能！";
-        data.put("first", new TemplateMessage.Keyword(first));
-        data.put("keyword1", new TemplateMessage.Keyword(plan.getProblemName()));
-        data.put("keyword2", new TemplateMessage.Keyword("今天——" + closeDate));
-        data.put("remark", new TemplateMessage.Keyword("\n可以自觉学习，不需要提醒？点击上课啦，进入“我的”去关闭\n" +
-                "\n" +
-                "点此卡片开始学习"));
-        templateMessageService.sendMessage(templateMessage);
+        try {
+
+            Profile profile = customerService.getProfile(plan.getProfileId());
+            if (profile == null) {
+                logger.error("用户:{} 未找到", plan.getProfileId());
+                return;
+            }
+            TemplateMessage templateMessage = new TemplateMessage();
+            templateMessage.setTouser(plan.getOpenid());
+            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+            templateMessage.setData(data);
+            templateMessage.setTemplate_id(ConfigUtils.getLearningNotifyMsg());
+            templateMessage.setUrl(ConfigUtils.getAppDomain() + INDEX_URL);
+            String closeDate = DateUtils.parseDateToStringByCommon(DateUtils.beforeDays(plan.getCloseDate(), 1));
+            String first = "\n" + profile.getNickname() + "同学，晚上好！快来学习今天的小课，拿下一个职场新技能！";
+            data.put("first", new TemplateMessage.Keyword(first));
+            data.put("keyword1", new TemplateMessage.Keyword(plan.getProblemName()));
+            data.put("keyword2", new TemplateMessage.Keyword("今天——" + closeDate));
+            data.put("remark", new TemplateMessage.Keyword("\n可以自觉学习，不需要提醒？点击上课啦，进入“我的”去关闭\n" +
+                    "\n" +
+                    "点此卡片开始学习"));
+            templateMessageService.sendMessage(templateMessage);
+        } catch (Exception e){
+            logger.error(e.getLocalizedMessage(), e);
+        }
     }
 }
