@@ -35,7 +35,7 @@ public class NotifyRunningLogin {
     @Autowired
     private TemplateMessageService templateMessageService;
 
-    @Scheduled(cron = "0 53 11 ? * MON-FRI")
+    @Scheduled(cron = "0 0 12 ? * MON-FRI")
     public void notifyHasRunningPlansLogin() {
         logger.info("开始未登录提醒job");
         List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();
@@ -45,10 +45,13 @@ public class NotifyRunningLogin {
 
     private void sendNotifyMsg(ImprovementPlan plan) {
         try {
-
             Profile profile = customerService.getProfile(plan.getProfileId());
             if (profile == null) {
                 logger.error("用户:{} 未找到", plan.getProfileId());
+                return;
+            }
+            if (!profile.getLearningNotify()) {
+                logger.info("用户:{} 关闭学习提醒", plan.getProfileId());
                 return;
             }
             TemplateMessage templateMessage = new TemplateMessage();
