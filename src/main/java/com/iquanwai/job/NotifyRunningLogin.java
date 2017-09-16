@@ -3,8 +3,10 @@ package com.iquanwai.job;
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.PlanService;
+import com.iquanwai.domain.dao.CustomerMessageLogDao;
 import com.iquanwai.domain.message.TemplateMessage;
 import com.iquanwai.domain.message.TemplateMessageService;
+import com.iquanwai.domain.po.CustomerMessageLog;
 import com.iquanwai.domain.po.ImprovementPlan;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.util.ConfigUtils;
@@ -35,6 +37,8 @@ public class NotifyRunningLogin {
     private CustomerService customerService;
     @Autowired
     private TemplateMessageService templateMessageService;
+    @Autowired
+    private CustomerMessageLogDao customerMessageLogDao;
 
     @Scheduled(cron = "0 30 21 ? * MON-FRI")
     public void notifyHasRunningPlansLogin() {
@@ -71,6 +75,11 @@ public class NotifyRunningLogin {
                             "#000000"));
             data.put("remark", new TemplateMessage.Keyword("\n点此卡片开始学习", "#f57f16"));
             templateMessageService.sendMessage(templateMessage);
+            CustomerMessageLog log = new CustomerMessageLog();
+            log.setComment("进行中小课未登录提醒");
+            log.setOpenid(profile.getOpenid());
+            log.setPublishTime(new Date());
+            customerMessageLogDao.insert(log);
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }
