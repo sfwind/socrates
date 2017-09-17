@@ -41,7 +41,7 @@ public class NotifyRunningLogin {
     private CustomerMessageLogDao customerMessageLogDao;
 
     //    @Scheduled(cron = "0 30 21 ? * MON-FRI")
-    @Scheduled(cron = "0 0 18 ? * MON-FRI")
+    @Scheduled(cron = "0 35 18 ? * *")
     public void notifyHasRunningPlansLogin() {
         logger.info("开始未登录提醒job");
         List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();
