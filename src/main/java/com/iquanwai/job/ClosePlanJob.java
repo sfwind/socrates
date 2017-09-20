@@ -2,7 +2,6 @@ package com.iquanwai.job;
 
 import com.iquanwai.domain.PlanService;
 import com.iquanwai.domain.po.ImprovementPlan;
-import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +34,6 @@ public class ClosePlanJob {
             //过期自动结束训练
             if (DateUtils.afterDays(improvementPlan.getCloseDate(), 1).before(new Date())) {
                 Integer status = ImprovementPlan.CLOSE;
-                Integer freeProblemId = ConfigUtils.getFreeProblem();
-                //限免试用
-                if (improvementPlan.getProblemId().equals(freeProblemId)) {
-                    if (!improvementPlan.getRiseMember()) {
-                        status = ImprovementPlan.CLOSE_FREE;
-                    }
-                }
                 planService.completePlan(improvementPlan.getId(), status);
             }
         });
