@@ -53,20 +53,20 @@ public class CustomerService {
 
     public void checkMemberExpired(){
         List<RiseMember> riseMembers = riseMemberDao.loadWillCloseMembers();
-        for (RiseMember riseMember : riseMembers) {
-            if (!riseMember.getExpireDate().after(new Date())) {
-                try {
-                    logger.info("user:{} expired ad {}", riseMember.getOpenId(),
-                            DateUtils.parseDateTimeToString(riseMember.getExpireDate()));
-                    profileDao.riseMemberExpired(riseMember.getProfileId());
-                    riseMemberDao.riseMemberExpired(riseMember);
-                    //发送用户信息修改消息
-                    rabbitMQPublisher.publish(riseMember.getOpenId());
-                } catch (Exception e){
-                    logger.error("expired: {} error", riseMember.getOpenId());
-                }
+        //发送用户信息修改消息
+        riseMembers.stream().filter(riseMember -> !riseMember.getExpireDate().after(new Date()))
+                .forEach(riseMember -> {
+            try {
+                logger.info("user:{} expired ad {}", riseMember.getOpenId(),
+                        DateUtils.parseDateTimeToString(riseMember.getExpireDate()));
+                profileDao.riseMemberExpired(riseMember.getProfileId());
+                riseMemberDao.riseMemberExpired(riseMember);
+                //发送用户信息修改消息
+                rabbitMQPublisher.publish(riseMember.getOpenId());
+            } catch (Exception e) {
+                logger.error("expired: {} error", riseMember.getOpenId());
             }
-        }
+        });
     }
 
     public void userLoginLog(Integer days){

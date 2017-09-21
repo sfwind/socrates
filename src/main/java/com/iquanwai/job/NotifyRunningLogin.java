@@ -28,8 +28,7 @@ import java.util.Map;
 public class NotifyRunningLogin {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private static final String INDEX_URL = "/rise/static/plan/main";
-
+    private static final String INDEX_URL = "/rise/static/learn";
 
     @Autowired
     private PlanService planService;

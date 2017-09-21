@@ -28,7 +28,7 @@ public class NotifyNearCloseJob {
     @Autowired
     private TemplateMessageService templateMessageService;
 
-    private static final String INDEX_URL = "/rise/static/plan/main";
+    private static final String INDEX_URL = "/rise/static/learn";
 //    @Autowired
 //    private RedisUtil redisUtil;
 
