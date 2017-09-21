@@ -13,8 +13,6 @@ import java.util.Date;
  */
 public class JobTest extends TestBase {
     @Autowired
-    private NotifyFreeUserJob notifyFreeUserJob;
-    @Autowired
     private RiseMemberJob riseMemberJob;
     @Autowired
     private RiseUserJob riseUserJob;
@@ -28,19 +26,6 @@ public class JobTest extends TestBase {
     private ClosePlanJob closePlanJob;
     @Autowired
     private NotifyRunningLogin notifyRunningLogin;
-
-    @Autowired
-    private NotifyNewUnlogin notifyNewUnlogin;
-
-    @Test
-    public void testNotifyUnlogin() {
-        notifyNewUnlogin.work();
-    }
-
-    @Test
-    public void test() {
-        notifyFreeUserJob.work();
-    }
 
     @Test
     public void expiredTest() {
