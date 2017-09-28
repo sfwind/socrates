@@ -70,7 +70,7 @@ public class NotifyRunningLogin {
             data.put("first", new TemplateMessage.Keyword(first, "#000000"));
             data.put("keyword1", new TemplateMessage.Keyword(plan.getProblemName(), "#000000"));
             data.put("keyword2",
-                    new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()) + "\n\n可以自觉学习，不需要提醒？点击上课啦，进入“我的”去关闭",
+                    new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()) + "\n\n不需要提醒？可以点此卡片，进入“我的”去关闭",
                             "#000000"));
             data.put("remark", new TemplateMessage.Keyword("\n点此卡片开始学习", "#f57f16"));
             templateMessageService.sendMessage(templateMessage);
