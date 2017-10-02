@@ -45,41 +45,47 @@ public class CustomerService {
     private RabbitMQPublisher rabbitMQPublisher;
 
     public static final String TOPIC = "login_user_reload";
+    //训练营用户
+    public static final int MEMBER_TYPE_CAMP = 5;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         rabbitMQPublisher = rabbitMQFactory.initFanoutPublisher(TOPIC);
     }
 
-    public void checkMemberExpired(){
+    public void checkMemberExpired() {
         List<RiseMember> riseMembers = riseMemberDao.loadWillCloseMembers();
         //发送用户信息修改消息
         riseMembers.stream().filter(riseMember -> !riseMember.getExpireDate().after(new Date()))
                 .forEach(riseMember -> {
-            try {
-                logger.info("user:{} expired ad {}", riseMember.getOpenId(),
-                        DateUtils.parseDateTimeToString(riseMember.getExpireDate()));
-                profileDao.riseMemberExpired(riseMember.getProfileId());
-                riseMemberDao.riseMemberExpired(riseMember);
-                //发送用户信息修改消息
-                rabbitMQPublisher.publish(riseMember.getOpenId());
-            } catch (Exception e) {
-                logger.error("expired: {} error", riseMember.getOpenId());
-            }
-        });
+                    try {
+                        logger.info("user:{} expired ad {}", riseMember.getOpenId(),
+                                DateUtils.parseDateTimeToString(riseMember.getExpireDate()));
+                        //训练营用户的用户profile表保留risemember=3
+                        if (riseMember.getMemberTypeId() != MEMBER_TYPE_CAMP) {
+                            profileDao.riseMemberExpired(riseMember.getProfileId());
+                        }
+
+                        riseMemberDao.riseMemberExpired(riseMember);
+                        //发送用户信息修改消息
+                        rabbitMQPublisher.publish(riseMember.getOpenId());
+                    } catch (Exception e) {
+                        logger.error("expired: {} error", riseMember.getOpenId());
+                    }
+                });
     }
 
-    public void userLoginLog(Integer days){
+    public void userLoginLog(Integer days) {
         List<String> openIds = operationLogDao.loadThatDayLoginUser(days).stream().
                 filter(Objects::nonNull).collect(Collectors.toList());
         Date thatDay = DateUtils.beforeDays(new Date(), days);
         openIds.forEach(openId -> {
             RiseUserLanding riseUserLanding = riseUserLandingDao.loadByOpenId(openId);
             Date landingDate = null;
-            if(riseUserLanding==null){
+            if (riseUserLanding == null) {
                 landingDate = DateUtils.beforeDays(new Date(), days);
                 boolean insert = riseUserLandingDao.insert(openId, landingDate);
-                if(!insert){
+                if (!insert) {
                     logger.error("插入用户:{} 注册表失败! 日期:{}", openId, landingDate);
                 }
             } else {
@@ -98,11 +104,11 @@ public class CustomerService {
     /**
      * 记录昨天用户的情况
      */
-    public void userLoginLog(){
+    public void userLoginLog() {
         this.userLoginLog(1);
     }
 
-    public Profile getProfile(Integer id){
+    public Profile getProfile(Integer id) {
         return profileDao.load(Profile.class, id);
     }
 }
