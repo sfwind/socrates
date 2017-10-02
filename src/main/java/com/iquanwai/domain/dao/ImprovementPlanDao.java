@@ -22,7 +22,7 @@ public class ImprovementPlanDao extends PracticeDBUtil {
 
     public List<ImprovementPlan> loadAllRunningPlan() {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM ImprovementPlan WHERE Status in (1,2)";
+        String sql = "SELECT * FROM ImprovementPlan WHERE Status in (1,2) and Del=0";
         ResultSetHandler<List<ImprovementPlan>> h = new BeanListHandler<>(ImprovementPlan.class);
         try {
             List<ImprovementPlan> improvementPlans = runner.query(sql, h);
@@ -55,7 +55,7 @@ public class ImprovementPlanDao extends PracticeDBUtil {
 
     public ImprovementPlan loadLatestProblemByOpenId(String openId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from ImprovementPlan where Openid = ? ORDER BY Id DESC";
+        String sql = "select * from ImprovementPlan where Openid = ? and Del=0 ORDER BY Id DESC";
         ResultSetHandler<ImprovementPlan> h = new BeanHandler<>(ImprovementPlan.class);
         try {
             ImprovementPlan improvementPlan = runner.query(sql, h, openId);
@@ -77,31 +77,6 @@ public class ImprovementPlanDao extends PracticeDBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
-    }
-
-    public List<ImprovementPlan> loadRunningPlanByProblemId(Integer problemId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from ImprovementPlan where ProblemId = ? and Status = 1 and Del = 0";
-        ResultSetHandler<List<ImprovementPlan>> h = new BeanListHandler<>(ImprovementPlan.class);
-        try {
-            List<ImprovementPlan> improvementPlans = runner.query(sql, h, problemId);
-            return improvementPlans;
-        } catch (Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
-    public List<ImprovementPlan> loadImprovementPlansByProfileId(Integer profileId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM ImprovementPlan WHERE ProfileId = ? and Status = 1 and Del = 0";
-        ResultSetHandler<List<ImprovementPlan>> h = new BeanListHandler<ImprovementPlan>(ImprovementPlan.class);
-        try {
-            return runner.query(sql, h, profileId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
     }
 
 }
