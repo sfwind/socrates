@@ -2,20 +2,8 @@ package com.iquanwai.domain;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.iquanwai.domain.dao.ImprovementPlanDao;
-import com.iquanwai.domain.dao.PracticePlanDao;
-import com.iquanwai.domain.dao.ProblemDao;
-import com.iquanwai.domain.dao.ProfileDao;
-import com.iquanwai.domain.dao.RedisUtil;
-import com.iquanwai.domain.dao.RiseMemberDao;
-import com.iquanwai.domain.dao.RiseUserLoginDao;
-import com.iquanwai.domain.po.ImprovementPlan;
-import com.iquanwai.domain.po.PracticePlan;
-import com.iquanwai.domain.po.Problem;
-import com.iquanwai.domain.po.Profile;
-import com.iquanwai.domain.po.RiseMember;
-import com.iquanwai.domain.po.RiseUserLogin;
-import com.iquanwai.util.ConfigUtils;
+import com.iquanwai.domain.dao.*;
+import com.iquanwai.domain.po.*;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +31,6 @@ public class PlanService {
     private RiseUserLoginDao riseUserLoginDao;
     @Autowired
     private ProfileDao profileDao;
-    @Autowired
-    private PracticePlanDao practicePlanDao;
     @Autowired
     private RedisUtil redisUtil;
 
@@ -143,7 +129,7 @@ public class PlanService {
             Integer profileId = improvementPlan.getProfileId();
             Profile profile = profileDao.load(Profile.class, profileId);
             //过滤没报名的用户
-            if (profile != null && (profile.getRiseMember() == 1 || profile.getRiseMember() == 2)) {
+            if (profile != null && (profile.getRiseMember() != 0 )) {
                 //用户去重
                 if (!openids.contains(profile.getOpenid())) {
                     improvementPlans.add(improvementPlan);
@@ -155,75 +141,12 @@ public class PlanService {
         return improvementPlans;
     }
 
-    /**
-     * 获取进行中的限免用户小课
-     */
-    public List<ImprovementPlan> loadFreeInactiveUserPlan() {
-        List<ImprovementPlan> improvementPlanList = improvementPlanDao.loadRunningPlanByProblemId(
-                ConfigUtils.getFreeProblem());
-        return improvementPlanList.stream().filter(improvementPlan -> {
-            //非限免用户不通知
-            if (improvementPlan.getRiseMember()) {
-                return false;
-            }
-            // 第一天学习不通知
-//            Date startDate = DateUtils.startOfDay(new Date());
-//            if (startDate.equals(improvementPlan.getStartDate())) {
-//                return false;
-//            }
-            // 3天后即将关闭不提醒,有额外提醒消息
-            Date closeDate = DateUtils.afterDays(DateUtils.startOfDay(new Date()), 3);
-            if (closeDate.equals(improvementPlan.getCloseDate())) {
-                return false;
-            }
-
-            int planId = improvementPlan.getId();
-            List<PracticePlan> practicePlanList = practicePlanDao.loadPracticePlan(planId);
-
-            for (PracticePlan practicePlan : practicePlanList) {
-                // 判断今天是否完成过练习 已做过练习的不提醒
-                if (practicePlan.getStatus() == 1) {
-                    if (DateUtils.isToday(practicePlan.getUpdateTime())) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }).collect(Collectors.toList());
-
-    }
-
-    /**
-     * 昨日新关注人员，但是今日未登录
-     */
-    public List<Profile> loadNewUnLogin() {
-        Date beforeDate = DateUtils.beforeDays(new Date(), 1);
-        String todayDateString = DateUtils.parseDateToString(new Date());
-        List<Profile> profiles = profileDao.loadProfiles(beforeDate, new Date());
-
-        profiles = profiles.stream().filter(profile -> profile.getRiseMember() == 1 || profile.getRiseMember() == 2)
-                .collect(Collectors.toList());
-        List<Profile> unLoginProfiles = Lists.newArrayList();
-        for (Profile profile : profiles) {
-            Integer profileId = profile.getId();
-            String lastLoginTime = redisUtil.get(LOGIN_REDIS_KEY + profileId.toString());
-            if (lastLoginTime != null && lastLoginTime.length() >= 10
-                    && !lastLoginTime.substring(0, 10).equalsIgnoreCase(todayDateString)) {
-                // 今日未登录
-                unLoginProfiles.add(profile);
-            }
-        }
-        return unLoginProfiles;
-    }
-
     public List<ImprovementPlan> loadRunningUnlogin() {
         String todayDateString = DateUtils.parseDateToString(new Date());
         List<ImprovementPlan> runningPlans = loadAllRunningPlan();
         List<Problem> problemList = problemDao.loadAll(Problem.class);
         Map<Integer, Problem> problemMap = Maps.newHashMap();
-        problemList.forEach(problem -> {
-            problemMap.put(problem.getId(), problem);
-        });
+        problemList.forEach(problem -> problemMap.put(problem.getId(), problem));
         runningPlans = runningPlans.stream().filter(plan -> {
             Integer profileId = plan.getProfileId();
             String lastLoginTime = redisUtil.get(LOGIN_REDIS_KEY + profileId.toString());
