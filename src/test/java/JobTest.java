@@ -1,3 +1,4 @@
+import com.iquanwai.domain.BusinessSchoolService;
 import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.dao.RiseUserLandingDao;
 import com.iquanwai.domain.po.RiseUserLanding;
@@ -26,6 +27,8 @@ public class JobTest extends TestBase {
     private ClosePlanJob closePlanJob;
     @Autowired
     private NotifyRunningLogin notifyRunningLogin;
+    @Autowired
+    private BusinessSchoolService businessSchoolService;
 
     @Test
     public void expiredTest() {
@@ -59,6 +62,11 @@ public class JobTest extends TestBase {
         System.out.println(DateUtils.parseDateToString(thatDate));
         Integer diff = DateUtils.interval(thatDate, landingDate);
         System.out.println(diff);
+    }
+
+    @Test
+    public void searchTest(){
+//        businessSchoolService.searchApplications(DateUtils.parseStringToDate("2017-09-22"));
     }
 
 }

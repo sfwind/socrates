@@ -144,4 +144,9 @@ public class ConfigUtils {
         return getValue("rabbitmq.password");
     }
 
+    public static Integer getBsApplicationActivity(){
+        return getIntValue("business.school.application.activity");
+    }
+
+
 }
