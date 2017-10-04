@@ -67,7 +67,18 @@ public class BusinessSchoolService {
                 RiseMember riseMember = riseMemberDao.loadValidRiseMember(profile.getId());
                 application.setOriginMemberType(riseMember != null ? riseMember.getMemberTypeId() : null);
                 // 判断status
-                Integer status = otherBatch.stream().anyMatch(item -> item.getStatus() != BusinessSchoolApplication.APPLYING) ? BusinessSchoolApplication.AUTO_CLOSE : BusinessSchoolApplication.APPLYING;
+                boolean findOld = otherBatch.stream().anyMatch(item -> item.getStatus() != BusinessSchoolApplication.APPLYING);
+                Integer status;
+                if (!findOld) {
+                    // 之前没有处理过,一个月之内,并且当前不是精英版
+                    if (riseMember != null && (riseMember.getMemberTypeId() == RiseMember.ELITE || riseMember.getMemberTypeId() == RiseMember.HALF_ELITE)) {
+                        status = BusinessSchoolApplication.AUTO_CLOSE;
+                    } else {
+                        status = BusinessSchoolApplication.APPLYING;
+                    }
+                } else {
+                    status = BusinessSchoolApplication.AUTO_CLOSE;
+                }
                 application.setStatus(status);
                 // 常规数据初始化
                 application.setSubmitId(survey.getId());
