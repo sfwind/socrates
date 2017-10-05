@@ -66,7 +66,12 @@ public class JobTest extends TestBase {
 
     @Test
     public void searchTest(){
-//        businessSchoolService.searchApplications(DateUtils.parseStringToDate("2017-09-22"));
+        businessSchoolService.searchApplications(DateUtils.parseStringToDate("2017-09-21"));
+    }
+
+    @Test
+    public void noticeTest(){
+        businessSchoolService.noticeApplication(new Date());
     }
 
 }

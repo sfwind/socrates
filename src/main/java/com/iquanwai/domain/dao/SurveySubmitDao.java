@@ -73,7 +73,7 @@ public class SurveySubmitDao extends DBUtil {
 
     public List<SurveySubmit> loadSubmitGroup(Integer activity, Date date) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from quanwai.SurveySubmit where Activity = ? AND Status = 1 AND Del = 0 AND DATE(SubmitTime) = ?";
+        String sql = "select * from SurveySubmit where Activity = ? AND Status = 1 AND Del = 0 AND DATE(SubmitTime) = ?";
         try {
             return runner.query(sql, new BeanListHandler<SurveySubmit>(SurveySubmit.class), activity, DateUtils.parseDateToString(date));
         } catch (SQLException e) {

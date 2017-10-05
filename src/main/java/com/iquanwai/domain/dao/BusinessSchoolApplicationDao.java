@@ -45,11 +45,11 @@ public class BusinessSchoolApplicationDao extends DBUtil {
     }
 
 
-    public List<BusinessSchoolApplication> getUserApplications(Integer profileId, Date date) {
+    public List<BusinessSchoolApplication> getUserApplications(Integer profileId, Date date, Integer checkTime) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Select * from BusinessSchoolApplication where ProfileId = ? and AddTime >= ?";
+        String sql = "Select * from BusinessSchoolApplication where ProfileId = ? and AddTime >= ? AND Del = 0";
         try {
-            return runner.query(sql, new BeanListHandler<BusinessSchoolApplication>(BusinessSchoolApplication.class), profileId, DateUtils.beforeDays(date, 30));
+            return runner.query(sql, new BeanListHandler<BusinessSchoolApplication>(BusinessSchoolApplication.class), profileId, DateUtils.beforeDays(date, checkTime));
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -67,5 +67,27 @@ public class BusinessSchoolApplicationDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
+    }
+
+    public List<BusinessSchoolApplication> loadCheckApplicationsForNotice(Date date) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from BusinessSchoolApplication where DATE(CheckTime) = ? AND Status in (1,2) AND Deal = 0 AND Del = 0";
+        try {
+            return runner.query(sql, new BeanListHandler<BusinessSchoolApplication>(BusinessSchoolApplication.class), DateUtils.parseDateToString(date));
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public Integer autoCloseApplication(Integer id) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE BusinessSchoolApplication SET Status = 4,CheckTime = CURRENT_TIMESTAMP,Deal = 1 WHERE Id = ?";
+        try {
+            return runner.update(sql, id);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
     }
 }
