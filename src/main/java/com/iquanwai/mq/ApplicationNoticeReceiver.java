@@ -17,7 +17,7 @@ import java.util.Date;
 public class ApplicationNoticeReceiver {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private String TOPIC = "business_school_application";
+    private String TOPIC = "business_school_application_notice";
     private String QUEUE = "check_notice";
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
