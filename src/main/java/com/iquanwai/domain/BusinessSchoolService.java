@@ -186,7 +186,7 @@ public class BusinessSchoolService {
 
         // 发送没有优惠券的模版
         TemplateMessage noCouponMsg = new TemplateMessage();
-        noCouponMsg.setTemplate_id(ConfigUtils.getUnderCloseMsg());
+        noCouponMsg.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
         noCouponMsg.setUrl(PAY_URL);
         Map<String, TemplateMessage.Keyword> noCouponData = Maps.newHashMap();
         noCouponMsg.setData(data);
