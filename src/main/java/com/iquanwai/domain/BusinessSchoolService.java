@@ -123,32 +123,34 @@ public class BusinessSchoolService {
         Map<Integer, List<BusinessSchoolApplication>> waitNoticeMap = applications.stream().collect(Collectors.groupingBy(BusinessSchoolApplication::getStatus));
         // 通知 通过的
         List<BusinessSchoolApplication> approveGroup = waitNoticeMap.getOrDefault(BusinessSchoolApplication.APPROVE, Lists.newArrayList());
-        this.noticeApplicationForApprove(approveGroup, date);
+        this.noticeApplicationForApprove(approveGroup);
         // 通知 拒信
         List<BusinessSchoolApplication> rejectGroup = waitNoticeMap.getOrDefault(BusinessSchoolApplication.REJECT, Lists.newArrayList());
-        this.noticeApplicationForReject(rejectGroup, date);
+        this.noticeApplicationForReject(rejectGroup);
     }
 
-    public void noticeApplicationForReject(List<BusinessSchoolApplication> applications, Date date) {
+    public void noticeApplicationForReject(List<BusinessSchoolApplication> applications) {
+        logger.info("审核拒绝:{}条", applications.size());
         // 发送有优惠券的
         TemplateMessage templateMessage = new TemplateMessage();
         templateMessage.setTemplate_id(ConfigUtils.getActivityStartMsg());
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
         templateMessage.setUrl(PAY_URL);
-        data.put("keyword1", new TemplateMessage.Keyword("通过"));
-        data.put("keyword3", new TemplateMessage.Keyword("点击下方“详情”"));
+        data.put("keyword1", new TemplateMessage.Keyword("【圈外商学院】"));
+        data.put("keyword2", new TemplateMessage.Keyword("未通过"));
 
-        data.put("remark", new TemplateMessage.Keyword("\n在未来的日子里，希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！"));
+        data.put("remark", new TemplateMessage.Keyword("本期商学院的申请者都异常优秀，我们无法为每位申请者提供学习机会，但是很高兴你有一颗追求卓越的心！点击下方“详情”，了解预科班--圈外训练营。"));
         // 同样的对象不需要定义两次
         CustomerMessageLog log = new CustomerMessageLog();
-        log.setComment("商学院审核通过");
+        log.setComment("发送拒信");
         log.setPublishTime(new Date());
-        data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！\n本期商学院的申请者都异常优秀，能够占有一席是很值得自豪的。\n点击本通知书下方的“详情”即可办理入学。\n"));
-        applications.forEach(app -> this.sendMsg(templateMessage, data, log, app));
+        data.put("first", new TemplateMessage.Keyword("在认真审核过你的入学申请后，我们很遗憾地通知你不能加入我们的【圈外同学商学院】。" +
+                "\n在此之前，我们推荐你先加入我们的【训练营】进行学习。训练营能够帮你快速集中地提高专项能力，为你下次申请商学院提高录取通率。\n点击下方“详情”即可了解训练营。\n"));
+        applications.forEach(app -> this.sendMsg(templateMessage, data, log, app, "keyword3"));
     }
 
-    public void noticeApplicationForApprove(List<BusinessSchoolApplication> applications, Date date) {
+    public void noticeApplicationForApprove(List<BusinessSchoolApplication> applications) {
         Integer count = applications != null ? applications.size() : 0;
         logger.info("审核通过:{} 条", count);
         if (count == 0) {
@@ -177,7 +179,7 @@ public class BusinessSchoolService {
             data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！" +
                     "\n根据你的申请，圈外入学委员会决定为你提供" + amount.intValue() + "元的奖学金。奖学金已放入你的商学院个人帐户，付款操作时可使用奖学金抵扣。" +
                     "\n点击本通知书下方的“详情”即可办理入学。\n));"));
-            applicationGroup.forEach(app -> this.sendMsg(templateMessage, data, log, app));
+            applicationGroup.forEach(app -> this.sendMsg(templateMessage, data, log, app, "keyword2"));
         });
 
 
@@ -196,14 +198,14 @@ public class BusinessSchoolService {
         noCouponLog.setPublishTime(new Date());
         // 发送没有优惠券的
         if (noCouponGroup != null) {
-            noCouponGroup.forEach(app -> this.sendMsg(noCouponMsg, noCouponData, noCouponLog, app));
+            noCouponGroup.forEach(app -> this.sendMsg(noCouponMsg, noCouponData, noCouponLog, app, "keyword2"));
         }
     }
 
 
-    public void sendMsg(TemplateMessage templateMessage, Map<String, TemplateMessage.Keyword> data, CustomerMessageLog log, BusinessSchoolApplication application) {
+    public void sendMsg(TemplateMessage templateMessage, Map<String, TemplateMessage.Keyword> data, CustomerMessageLog log, BusinessSchoolApplication application, String checkKey) {
         templateMessage.setTouser(application.getOpenid());
-        data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime())));
+        data.put(checkKey, new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime())));
         templateMessageService.sendMessage(templateMessage);
         log.setOpenid(application.getOpenid());
         customerMessageLogDao.insert(log);
