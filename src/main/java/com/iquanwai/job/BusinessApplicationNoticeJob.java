@@ -25,4 +25,6 @@ public class BusinessApplicationNoticeJob {
         businessSchoolService.noticeApplication(new Date());
         logger.info("商学院申请通知任务开始");
     }
+
+
 }

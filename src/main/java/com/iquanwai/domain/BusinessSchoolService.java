@@ -84,6 +84,7 @@ public class BusinessSchoolService {
                 if (!findOld) {
                     // 之前没有处理过,一个月之内,并且当前不是精英版
                     if (riseMember != null && (riseMember.getMemberTypeId() == RiseMember.ELITE || riseMember.getMemberTypeId() == RiseMember.HALF_ELITE)) {
+                        logger.info("精英版自动关闭:{}", profile.getId());
                         status = BusinessSchoolApplication.AUTO_CLOSE;
                     } else {
                         status = BusinessSchoolApplication.APPLYING;
@@ -91,10 +92,12 @@ public class BusinessSchoolService {
                     if (CollectionUtils.isNotEmpty(otherBatch)) {
                         // 之前没处理过，并且有老的申请，将老的申请关掉
                         otherBatch.forEach(item -> {
+                            logger.info("关掉老的申请:{}", profile.getId());
                             businessSchoolApplicationDao.autoCloseApplication(item.getId());
                         });
                     }
                 } else {
+                    logger.info("已经处理过:{}", profile.getId());
                     status = BusinessSchoolApplication.AUTO_CLOSE;
                 }
                 application.setStatus(status);
