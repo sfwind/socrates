@@ -60,6 +60,7 @@ public class BusinessSchoolService {
             // 过滤已经入库的申请
             return businessSchoolApplicationDao.loadBySubmitId(item.getId()) == null;
         }).collect(Collectors.toList());
+        logger.info("查找:{} ，共{}条", DateUtils.parseDateToString(date), surveySubmits.size());
         /*
           处理步骤：
           1.判断 status
