@@ -133,7 +133,7 @@ public class BusinessSchoolService {
         logger.info("审核拒绝:{}条", applications.size());
         // 发送有优惠券的
         TemplateMessage templateMessage = new TemplateMessage();
-        templateMessage.setTemplate_id(ConfigUtils.getActivityStartMsg());
+        templateMessage.setTemplate_id(ConfigUtils.getRejectApplyMsgId());
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
         templateMessage.setUrl(PAY_URL);
@@ -165,7 +165,7 @@ public class BusinessSchoolService {
         logger.info("无优惠券,{}条", noCouponGroup == null ? 0 : noCouponGroup.size());
         // 发送有优惠券的
         TemplateMessage templateMessage = new TemplateMessage();
-        templateMessage.setTemplate_id(ConfigUtils.getActivityStartMsg());
+        templateMessage.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
         templateMessage.setUrl(PAY_URL);
