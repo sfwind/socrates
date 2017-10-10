@@ -151,10 +151,16 @@ public class BusinessSchoolService {
     public void noticeApplicationForApprove(List<BusinessSchoolApplication> applications, Date date) {
         Integer count = applications != null ? applications.size() : 0;
         logger.info("审核通过:{} 条", count);
+        if (count == 0) {
+            return;
+        }
         Map<Double, List<BusinessSchoolApplication>> coupons = applications.stream().collect(Collectors.groupingBy(BusinessSchoolApplication::getCoupon));
         // 没有优惠券
         List<BusinessSchoolApplication> noCouponGroup = coupons.remove(0d);
-
+        coupons.forEach((amount, group) -> {
+            logger.info("{}元优惠券,{}条", amount, group.size());
+        });
+        logger.info("无优惠券,{}条", noCouponGroup == null ? 0 : noCouponGroup.size());
         // 发送有优惠券的
         TemplateMessage templateMessage = new TemplateMessage();
         templateMessage.setTemplate_id(ConfigUtils.getActivityStartMsg());
@@ -189,7 +195,9 @@ public class BusinessSchoolService {
         noCouponLog.setComment("商学院审核通过");
         noCouponLog.setPublishTime(new Date());
         // 发送没有优惠券的
-        noCouponGroup.forEach(app -> this.sendMsg(noCouponMsg, noCouponData, noCouponLog, app));
+        if (noCouponGroup != null) {
+            noCouponGroup.forEach(app -> this.sendMsg(noCouponMsg, noCouponData, noCouponLog, app));
+        }
     }
 
 
