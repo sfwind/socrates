@@ -211,6 +211,8 @@ public class BusinessSchoolService {
         templateMessageService.sendMessage(templateMessage);
         log.setOpenid(application.getOpenid());
         customerMessageLogDao.insert(log);
+        // 更新提醒状态
+        businessSchoolApplicationDao.updateNoticeAction(application.getId());
     }
 
 

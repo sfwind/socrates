@@ -90,4 +90,16 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         }
         return -1;
     }
+
+
+    public Integer updateNoticeAction(Integer id) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE BusinessSchoolApplication SET Deal = 1,DealTime = CURRENT_TIMESTAMP WHERE Id = ?";
+        try {
+            return runner.update(sql, id);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
 }
