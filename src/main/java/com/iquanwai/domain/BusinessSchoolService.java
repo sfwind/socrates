@@ -207,6 +207,7 @@ public class BusinessSchoolService {
     public void sendMsg(TemplateMessage templateMessage, Map<String, TemplateMessage.Keyword> data, CustomerMessageLog log, BusinessSchoolApplication application, String checkKey) {
         templateMessage.setTouser(application.getOpenid());
         data.put(checkKey, new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime())));
+        logger.info("发送模版消息id ：{}", templateMessage.getTemplate_id());
         templateMessageService.sendMessage(templateMessage);
         log.setOpenid(application.getOpenid());
         customerMessageLogDao.insert(log);

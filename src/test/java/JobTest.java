@@ -71,7 +71,7 @@ public class JobTest extends TestBase {
 
     @Test
     public void noticeTest(){
-        businessSchoolService.noticeApplication(DateUtils.beforeDays(new Date(), 1));
+        businessSchoolService.noticeApplication(new Date());
     }
 
 }
