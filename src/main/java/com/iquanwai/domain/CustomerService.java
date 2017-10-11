@@ -153,7 +153,7 @@ public class CustomerService {
             }
             data.put("first", new TemplateMessage.Keyword(first.toString(), "#000000"));
             data.put("keyword1", new TemplateMessage.Keyword(convertMemberTypeStr(riseMember.getMemberTypeId()), "#000000"));
-            data.put("keyword1", new TemplateMessage.Keyword(riseMember.getExpired() + "\n\n到期前加入商学院，可以免申请入学哦！到期后可以复习，但不能选新课啦！", "#000000"));
+            data.put("keyword2", new TemplateMessage.Keyword(riseMember.getExpired() + "\n\n到期前加入商学院，可以免申请入学哦！到期后可以复习，但不能选新课啦！", "#000000"));
             data.put("remark", new TemplateMessage.Keyword("\n点击卡片，立即加入商学院，加速你的职业发展吧！", "#f57f16"));
             templateMessageService.sendMessage(templateMessage);
         }
