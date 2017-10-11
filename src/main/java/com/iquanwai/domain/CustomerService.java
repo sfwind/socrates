@@ -173,7 +173,7 @@ public class CustomerService {
                 smsDto.setPhone(profile.getMobileNo());
             }
             String content = "Hi " + profile.getNickname() + "，您的" + convertMemberTypeStr(riseMember.getMemberTypeId()) + distanceDay
-                    + "天后到期哦！有疑问请联系圈外小黑（微信ID：quanwaizhushou2） 回复TD退订";
+                    + "天后到期哦！有疑问请联系圈外小黑（微信ID：quanwaizhushou2）回复TD退订";
             smsDto.setContent(content);
             smsDto.setType(SMSDto.PROMOTION);
             shortMessageService.sendShorMessage(smsDto);
