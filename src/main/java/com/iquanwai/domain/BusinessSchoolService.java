@@ -189,7 +189,7 @@ public class BusinessSchoolService {
         noCouponMsg.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
         noCouponMsg.setUrl(PAY_URL);
         Map<String, TemplateMessage.Keyword> noCouponData = Maps.newHashMap();
-        noCouponMsg.setData(data);
+        noCouponMsg.setData(noCouponData);
         noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！\n本期商学院的申请者都异常优秀，能够占有一席是很值得自豪的。\n点击本通知书下方的“详情”即可办理入学。\n"));
         noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
         noCouponData.put("keyword3", new TemplateMessage.Keyword("点击下方“详情”"));
