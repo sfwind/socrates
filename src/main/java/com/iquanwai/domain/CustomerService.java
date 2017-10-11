@@ -1,6 +1,5 @@
 package com.iquanwai.domain;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.dao.*;
 import com.iquanwai.domain.message.SMSDto;
@@ -138,8 +137,7 @@ public class CustomerService {
 
         TemplateMessage templateMessage = new TemplateMessage();
         for (RiseMember riseMember : riseMembers) {
-            Integer profileId = riseMember.getProfileId();
-            Profile profile = profileMap.get(profileId);
+            Profile profile = profileMap.get(riseMember.getProfileId());
             templateMessage.setTouser(profile.getOpenid());
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
             templateMessage.setData(data);
@@ -147,13 +145,13 @@ public class CustomerService {
             templateMessage.setUrl(ConfigUtils.getAppDomain() + RISE_PAY_URL);
             StringBuilder first = new StringBuilder();
             if (distanceDay != 0) {
-                first.append("Hi " + profile.getNickname() + "小哥哥例行维护信息时，发现您的会员" + distanceDay + "天后到期哦：");
+                first.append("Hi " + profile.getNickname() + "，小哥哥例行维护信息时，发现您的会员" + distanceDay + "天后到期哦：");
             } else {
-                first.append("Hi " + profile.getNickname() + "小哥哥例行维护信息时，发现您的会员今天到期哦：");
+                first.append("Hi " + profile.getNickname() + "，小哥哥例行维护信息时，发现您的会员今天到期哦：");
             }
             data.put("first", new TemplateMessage.Keyword(first.toString(), "#000000"));
-            data.put("keyword1", new TemplateMessage.Keyword(convertMemberTypeStr(riseMember.getMemberTypeId()), "#000000"));
-            data.put("keyword2", new TemplateMessage.Keyword(riseMember.getExpired() + "\n\n到期前加入商学院，可以免申请入学哦！到期后可以复习，但不能选新课啦！", "#000000"));
+            data.put("name", new TemplateMessage.Keyword(convertMemberTypeStr(riseMember.getMemberTypeId()), "#000000"));
+            data.put("expDate", new TemplateMessage.Keyword(riseMember.getExpireDate() + "\n\n到期前加入商学院，可以免申请入学哦！到期后可以复习，但不能选新课啦", "#000000"));
             data.put("remark", new TemplateMessage.Keyword("\n点击卡片，立即加入商学院，加速你的职业发展吧！", "#f57f16"));
             templateMessageService.sendMessage(templateMessage);
         }
@@ -166,12 +164,7 @@ public class CustomerService {
 
         // Hi xxxx，您的半年版会员/一年版会员/商学院会员N天后/今天到期哦！有疑问请联系圈外小黑（微信ID：quanwaizhushou2）
         for (RiseMember riseMember : riseMembers) {
-            Profile profile = profileMap.get(riseMember.getId());
-
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("profileId", riseMember.getProfileId());
-            jsonObject.put("content", "Hi " + profile.getNickname() + "，您的" + convertMemberTypeStr(riseMember.getMemberTypeId()) + distanceDay
-                    + "天后到期哦！有疑问请联系圈外小黑（微信ID：quanwaizhushou2）");
+            Profile profile = profileMap.get(riseMember.getProfileId());
 
             SMSDto smsDto = new SMSDto();
             smsDto.setProfileId(profile.getId());
