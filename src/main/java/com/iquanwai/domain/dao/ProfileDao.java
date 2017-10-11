@@ -47,4 +47,15 @@ public class ProfileDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    public List<Profile> loadByProfileIds(List<Integer> profileIds) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM Profile WHERE Id IN (" + produceQuestionMark(profileIds.size()) + ")";
+        ResultSetHandler<List<Profile>> h = new BeanListHandler<>(Profile.class);
+        try {
+            return runner.query(sql, h, profileIds.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage());
+        }
+        return Lists.newArrayList();
+    }
 }

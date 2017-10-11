@@ -28,7 +28,6 @@ public class ConfigUtils {
         zkConfigUtils = new ZKConfigUtils();
     }
 
-
     private static void loadConfig() {
         config = ConfigFactory.load("localconfig");
         fileconfig = ConfigFactory.parseFile(new File("/data/config/localconfig"));
@@ -142,6 +141,17 @@ public class ConfigUtils {
 
     public static String getRabbitMQPasswd() {
         return getValue("rabbitmq.password");
+    }
+
+    /**
+     * 会员到期提醒
+     */
+    public static String getRiseMemberExpireMsg() {
+        return getValue("risemember.expire.msg");
+    }
+
+    public static String sendShortMessageUrl() {
+        return getValue("send.sms.url");
     }
 
 }

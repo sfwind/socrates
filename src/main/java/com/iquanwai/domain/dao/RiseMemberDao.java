@@ -19,41 +19,53 @@ import java.util.List;
 public class RiseMemberDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public boolean riseMemberExpired(RiseMember riseMember){
+    public boolean riseMemberExpired(RiseMember riseMember) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "Update RiseMember set Expired = 1 where Id = ?";
 
-        try{
-            runner.update(sql,riseMember.getId());
+        try {
+            runner.update(sql, riseMember.getId());
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
             return false;
         }
         return true;
     }
 
-    public List<RiseMember> loadWillCloseMembers(){
+    public List<RiseMember> loadWillCloseMembers() {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from RiseMember where Expired = 0 and ExpireDate <= CURRENT_TIMESTAMP";
         ResultSetHandler<List<RiseMember>> handler = new BeanListHandler<>(RiseMember.class);
-        try{
-           return runner.query(sql, handler);
+        try {
+            return runner.query(sql, handler);
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
 
-    public List<RiseMember> validRiseMember(){
+    public List<RiseMember> validRiseMember() {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from RiseMember where Expired = 0";
 
-        try{
+        try {
             ResultSetHandler<List<RiseMember>> handler = new BeanListHandler<>(RiseMember.class);
             return runner.query(sql, handler);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
         return null;
+    }
+
+    public List<RiseMember> loadRiseMembersByExpireDate(String expireDate) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseMember WHERE ExpireDate = ? AND Expired = 0 AND Del = 0";
+        ResultSetHandler<List<RiseMember>> h = new BeanListHandler<>(RiseMember.class);
+        try {
+            return runner.query(sql, h, expireDate);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 }
