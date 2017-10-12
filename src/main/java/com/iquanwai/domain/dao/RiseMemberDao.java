@@ -34,7 +34,7 @@ public class RiseMemberDao extends DBUtil {
 
     public List<RiseMember> loadWillCloseMembers() {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from RiseMember where Expired = 0 and ExpireDate <= CURRENT_TIMESTAMP";
+        String sql = "select * from RiseMember where Expired = 0 and ExpireDate <= CURRENT_TIMESTAMP AND Del = 0";
         ResultSetHandler<List<RiseMember>> handler = new BeanListHandler<>(RiseMember.class);
         try {
             return runner.query(sql, handler);
@@ -46,7 +46,7 @@ public class RiseMemberDao extends DBUtil {
 
     public List<RiseMember> validRiseMember() {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from RiseMember where Expired = 0";
+        String sql = "select * from RiseMember where Expired = 0 AND Del = 0";
 
         try {
             ResultSetHandler<List<RiseMember>> handler = new BeanListHandler<>(RiseMember.class);
