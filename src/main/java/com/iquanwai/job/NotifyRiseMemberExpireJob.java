@@ -44,12 +44,12 @@ public class NotifyRiseMemberExpireJob {
 
         Date threeExpireDate = DateUtils.afterDays(new Date(), THREE_EXPIRE_DATE);
         List<RiseMember> threeRiseMembers = customerService.loadRiseMembersByExpireDate(threeExpireDate);
-        logger.info("3天人数：{}", sevenRiseMembers.size());
+        logger.info("3天人数：{}", threeRiseMembers.size());
         customerService.sendWillExpireMessage(threeRiseMembers, THREE_EXPIRE_DATE);
 
         Date oneExpireDate = DateUtils.afterDays(new Date(), ONE_EXPIRE_DATE);
         List<RiseMember> oneRiseMembers = customerService.loadRiseMembersByExpireDate(oneExpireDate);
-        logger.info("1天人数：{}", sevenRiseMembers.size());
+        logger.info("1天人数：{}", oneRiseMembers.size());
         customerService.sendWillExpireMessage(oneRiseMembers, ONE_EXPIRE_DATE);
 
         // 会员过期前3天发送短信消息提醒
