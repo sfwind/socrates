@@ -143,13 +143,13 @@ public class CustomerService {
             templateMessage.setData(data);
             templateMessage.setTemplate_id(ConfigUtils.getRiseMemberExpireMsg());
             templateMessage.setUrl(ConfigUtils.getAppDomain() + RISE_PAY_URL);
-            StringBuilder first = new StringBuilder();
-            if (distanceDay != 0) {
-                first.append("Hi " + profile.getNickname() + "，小哥哥例行维护信息时，发现您的会员" + distanceDay + "天后到期哦：");
+            String first;
+            if (distanceDay != 1) {
+                first = "Hi " + profile.getNickname() + "，小哥哥例行维护信息时，发现您的会员" + distanceDay + "天后到期哦：";
             } else {
-                first.append("Hi " + profile.getNickname() + "，小哥哥例行维护信息时，发现您的会员今天到期哦：");
+                first = "Hi " + profile.getNickname() + "，小哥哥例行维护信息时，发现您的会员今天到期哦：";
             }
-            data.put("first", new TemplateMessage.Keyword(first.toString(), "#000000"));
+            data.put("first", new TemplateMessage.Keyword(first, "#000000"));
             data.put("name", new TemplateMessage.Keyword(convertMemberTypeStr(riseMember.getMemberTypeId()), "#000000"));
             data.put("expDate", new TemplateMessage.Keyword(riseMember.getExpireDate() + "\n\n到期前加入商学院，可以免申请入学哦！到期后可以复习，但不能选新课啦", "#000000"));
             data.put("remark", new TemplateMessage.Keyword("\n点击卡片，立即加入商学院，加速你的职业发展吧！", "#f57f16"));
@@ -172,8 +172,14 @@ public class CustomerService {
             if (!StringUtils.isEmpty(mobileNo)) {
                 smsDto.setPhone(profile.getMobileNo());
             }
-            String content = "Hi " + profile.getNickname() + "，您的" + convertMemberTypeStr(riseMember.getMemberTypeId()) + distanceDay
-                    + "天后到期哦！有疑问请联系圈外小黑（微信ID：quanwaizhushou2）回复TD退订";
+            String content;
+            if (distanceDay != 1) {
+                content = "Hi " + profile.getNickname() + "，您的" + convertMemberTypeStr(riseMember.getMemberTypeId()) + distanceDay
+                        + "天后到期哦！有疑问请联系圈外小黑（微信ID：quanwaizhushou2）回复TD退订";
+            } else {
+                content = "Hi " + profile.getNickname() + "，您的" + convertMemberTypeStr(riseMember.getMemberTypeId()) +
+                        "今天到期哦！有疑问请联系圈外小黑（微信ID：quanwaizhushou2）回复TD退订";
+            }
             smsDto.setContent(content);
             smsDto.setType(SMSDto.PROMOTION);
             shortMessageService.sendShorMessage(smsDto);
