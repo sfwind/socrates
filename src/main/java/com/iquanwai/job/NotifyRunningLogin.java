@@ -72,9 +72,9 @@ public class NotifyRunningLogin {
             logger.info("用户:{} 发送未登录提醒", plan.getProfileId());
 
             String openId = profile.getOpenid();
-            String content = profile.getNickname() + "同学，晚上好！\n\n" +
-                    "快来继续学习你的小课<a href='" + ConfigUtils.getAppDomain() + INDEX_URL + "'>《" + plan.getProblemName() + "》</a>，拿下一个职场新技能！\n\n";
-                    // "如不需要学习提醒，点击<a href='" + ConfigUtils.getAppDomain() + PERSONAL_URL + "'>这里</a>关闭";
+            String content = profile.getNickname() + "同学，晚上好！\n\n"
+                    + "快来继续学习你的小课<a href='" + ConfigUtils.getAppDomain() + INDEX_URL + "'>《" + plan.getProblemName() + "》</a>，拿下一个职场新技能！\n\n"
+                    + "如不需要学习提醒，点击<a href='" + ConfigUtils.getAppDomain() + PERSONAL_URL + "'>这里</a>关闭";
             customerMessageService.sendCustomerMessage(openId, content, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
 
             // TemplateMessage templateMessage = new TemplateMessage();
