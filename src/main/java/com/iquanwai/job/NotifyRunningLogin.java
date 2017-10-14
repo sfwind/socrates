@@ -2,10 +2,7 @@ package com.iquanwai.job;
 
 import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.PlanService;
-import com.iquanwai.domain.dao.CustomerMessageLogDao;
-import com.iquanwai.domain.dao.ImprovementPlanDao;
 import com.iquanwai.domain.message.CustomerMessageService;
-import com.iquanwai.domain.message.TemplateMessageService;
 import com.iquanwai.domain.po.ImprovementPlan;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.util.ConfigUtils;
@@ -15,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Created by nethunder on 2017/9/5.
@@ -31,32 +30,16 @@ public class NotifyRunningLogin {
     @Autowired
     private CustomerService customerService;
     @Autowired
-    private TemplateMessageService templateMessageService;
-    @Autowired
     private CustomerMessageService customerMessageService;
-    @Autowired
-    private CustomerMessageLogDao customerMessageLogDao;
-    @Autowired
-    private ImprovementPlanDao improvementPlanDao;
 
-    // @Scheduled(cron = "0 30 21 ? * MON-FRI")
-    // public void notifyHasRunningPlansLogin() {
-    //     logger.info("开始未登录提醒job");
-    //     List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();
-    //     logger.info("待提醒人数：{}", runningUnlogin.size());
-    //     runningUnlogin.forEach(this::sendNotifyMsg);
-    //     logger.info("未登录提醒job结束");
-    // }
-
-    @Scheduled(cron = "*/20 * * * * ?")
-    public void work() {
-        logger.info("test start");
-        ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, 22317);
-        plan.setProblemName("认识自己");
-        sendNotifyMsg(plan);
-        logger.info("test end");
+    @Scheduled(cron = "0 30 21 ? * MON-FRI")
+    public void notifyHasRunningPlansLogin() {
+        logger.info("开始未登录提醒job");
+        List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();
+        logger.info("待提醒人数：{}", runningUnlogin.size());
+        runningUnlogin.forEach(this::sendNotifyMsg);
+        logger.info("未登录提醒job结束");
     }
-
 
     private void sendNotifyMsg(ImprovementPlan plan) {
         try {
