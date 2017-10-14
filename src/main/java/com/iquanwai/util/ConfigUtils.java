@@ -148,4 +148,18 @@ public class ConfigUtils {
         return getValue("send.sms.url");
     }
 
+    /**
+     * 申请成功通知
+     */
+    public static String getApplySuccessMsg() {
+        return getValue("application.approve.msg");
+    }
+
+    /**
+     * 账户变动提醒
+     */
+    public static String getAccountChangeMsg() {
+        return getValue("account.change.message");
+    }
+
 }

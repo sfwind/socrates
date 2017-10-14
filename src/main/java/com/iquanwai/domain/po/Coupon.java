@@ -28,4 +28,6 @@ public class Coupon {
     public static final int UNUSED = 0;
     //正在使用
     public static final int USING = 2;
+
+
 }
