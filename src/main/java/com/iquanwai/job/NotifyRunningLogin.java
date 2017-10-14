@@ -53,7 +53,9 @@ public class NotifyRunningLogin {
     @Scheduled(cron = "*/20 * * * * ?")
     public void testwork() {
         logger.info("test");
-        sendNotifyMsg(improvementPlanDao.load(ImprovementPlan.class, 22317));
+        ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, 22317);
+        logger.info(plan.getProblemName());
+        sendNotifyMsg(plan);
         logger.info("test end");
     }
 
@@ -74,6 +76,7 @@ public class NotifyRunningLogin {
             String content = "同学，晚上好！快来学习今天的小课，拿下一个职场新技能！\n" +
                     "课程名称：" + plan.getProblemName() + "\n" +
                     "不需要提醒？可以<a href='" + ConfigUtils.getAppDomain() + INDEX_URL + "'>点此</a>，进入“我的”去关闭";
+            logger.info("open: {}, content : {}", openId, content);
             customerMessageService.sendCustomerMessage(openId, content, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
 
             // TemplateMessage templateMessage = new TemplateMessage();
