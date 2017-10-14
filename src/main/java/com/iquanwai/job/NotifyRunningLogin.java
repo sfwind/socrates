@@ -11,6 +11,7 @@ import com.iquanwai.domain.po.ImprovementPlan;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.Constants;
+import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,7 @@ public class NotifyRunningLogin {
     public void testwork() {
         logger.info("test");
         ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, 22317);
+        plan.setProblemName("认识自己");
         logger.info(plan.getProblemName());
         sendNotifyMsg(plan);
         logger.info("test end");
@@ -73,8 +75,9 @@ public class NotifyRunningLogin {
             logger.info("用户:{} 发送未登录提醒", plan.getProfileId());
 
             String openId = profile.getOpenid();
-            String content = "同学，晚上好！快来学习今天的小课，拿下一个职场新技能！\n" +
+            String content = "同学，晚上好！快来学习今天的小课，拿下一个职场新技能！\n\n" +
                     "课程名称：" + plan.getProblemName() + "\n" +
+                    "时间：" + DateUtils.parseDateToString(new Date()) + "\n\n" +
                     "不需要提醒？可以<a href='" + ConfigUtils.getAppDomain() + INDEX_URL + "'>点此</a>，进入“我的”去关闭";
             logger.info("open: {}, content : {}", openId, content);
             customerMessageService.sendCustomerMessage(openId, content, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
