@@ -6,7 +6,6 @@ import com.iquanwai.domain.dao.CustomerMessageLogDao;
 import com.iquanwai.domain.dao.ImprovementPlanDao;
 import com.iquanwai.domain.message.CustomerMessageService;
 import com.iquanwai.domain.message.TemplateMessageService;
-import com.iquanwai.domain.po.CustomerMessageLog;
 import com.iquanwai.domain.po.ImprovementPlan;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.util.ConfigUtils;
@@ -19,6 +18,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by nethunder on 2017/9/5.
@@ -42,23 +42,13 @@ public class NotifyRunningLogin {
     @Autowired
     private ImprovementPlanDao improvementPlanDao;
 
-    // @Scheduled(cron = "0 30 21 ? * MON-FRI")
-    // public void notifyHasRunningPlansLogin() {
-    //     logger.info("开始未登录提醒job");
-    //     List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();
-    //     logger.info("待提醒人数：{}", runningUnlogin.size());
-    //     runningUnlogin.forEach(this::sendNotifyMsg);
-    //     logger.info("未登录提醒job结束");
-    // }
-
-    @Scheduled(cron = "*/20 * * * * ?")
-    public void testwork() {
-        logger.info("test");
-        ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, 22317);
-        plan.setProblemName("认识自己");
-        logger.info(plan.getProblemName());
-        sendNotifyMsg(plan);
-        logger.info("test end");
+    @Scheduled(cron = "0 30 21 ? * MON-FRI")
+    public void notifyHasRunningPlansLogin() {
+        logger.info("开始未登录提醒job");
+        List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();
+        logger.info("待提醒人数：{}", runningUnlogin.size());
+        runningUnlogin.forEach(this::sendNotifyMsg);
+        logger.info("未登录提醒job结束");
     }
 
     private void sendNotifyMsg(ImprovementPlan plan) {
@@ -79,7 +69,6 @@ public class NotifyRunningLogin {
                     "课程名称：" + plan.getProblemName() + "\n" +
                     "时间：" + DateUtils.parseDateToString(new Date()) + "\n\n" +
                     "不需要提醒？可以<a href='" + ConfigUtils.getAppDomain() + INDEX_URL + "'>点此</a>，进入“我的”去关闭";
-            logger.info("open: {}, content : {}", openId, content);
             customerMessageService.sendCustomerMessage(openId, content, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
 
             // TemplateMessage templateMessage = new TemplateMessage();
@@ -96,11 +85,11 @@ public class NotifyRunningLogin {
             //                 "#000000"));
             // data.put("remark", new TemplateMessage.Keyword("\n点此卡片开始学习", "#f57f16"));
             // templateMessageService.sendMessage(templateMessage);
-            CustomerMessageLog log = new CustomerMessageLog();
-            log.setComment("进行中小课未登录提醒");
-            log.setOpenid(profile.getOpenid());
-            log.setPublishTime(new Date());
-            customerMessageLogDao.insert(log);
+            // CustomerMessageLog log = new CustomerMessageLog();
+            // log.setComment("进行中小课未登录提醒");
+            // log.setOpenid(profile.getOpenid());
+            // log.setPublishTime(new Date());
+            // customerMessageLogDao.insert(log);
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }
