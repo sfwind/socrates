@@ -33,8 +33,8 @@ public class NotifyRiseMemberApplyJob {
         Date sevenDate = DateUtils.beforeDays(new Date(), 7);
         customerService.sendRiseMemberApplyMessageByAddTime(sevenDate, 0);
 
-        Date threeDate = DateUtils.beforeDays(new Date(), 4);
-        customerService.sendRiseMemberApplyShortMessageByAddTime(threeDate, 3);
+        Date threeDate = DateUtils.beforeDays(new Date(), 7);
+        customerService.sendRiseMemberApplyShortMessageByAddTime(threeDate, 0);
     }
 
 }
