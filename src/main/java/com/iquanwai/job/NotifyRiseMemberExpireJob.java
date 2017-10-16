@@ -24,10 +24,6 @@ public class NotifyRiseMemberExpireJob {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private static final int SEVEN_EXPIRE_DATE = 7;
-    private static final int THREE_EXPIRE_DATE = 3;
-    private static final int ONE_EXPIRE_DATE = 1;
-
     @Scheduled(cron = "0/20 * * * * ?")
     public void work() {
         logger.info("会员即将过期的模板消息提醒任务开始");
@@ -37,23 +33,23 @@ public class NotifyRiseMemberExpireJob {
 
     private void riseMemberExpireCheck() {
         // 会员过期前7、3、1天发送模板消息提醒
-        Date sevenExpireDate = DateUtils.afterDays(new Date(), SEVEN_EXPIRE_DATE);
+        Date sevenExpireDate = DateUtils.afterDays(new Date(), 7);
         List<RiseMember> sevenRiseMembers = customerService.loadRiseMembersByExpireDate(sevenExpireDate);
         logger.info("7天人数：{}", sevenRiseMembers.size());
-        customerService.sendWillExpireMessage(sevenRiseMembers, SEVEN_EXPIRE_DATE);
+        customerService.sendWillExpireMessage(sevenRiseMembers, 7);
 
-        Date threeExpireDate = DateUtils.afterDays(new Date(), THREE_EXPIRE_DATE);
-        List<RiseMember> threeRiseMembers = customerService.loadRiseMembersByExpireDate(threeExpireDate);
-        logger.info("3天人数：{}", threeRiseMembers.size());
-        customerService.sendWillExpireMessage(threeRiseMembers, THREE_EXPIRE_DATE);
+        // Date threeExpireDate = DateUtils.afterDays(new Date(), 3);
+        // List<RiseMember> threeRiseMembers = customerService.loadRiseMembersByExpireDate(threeExpireDate);
+        // logger.info("3天人数：{}", threeRiseMembers.size());
+        // customerService.sendWillExpireMessage(threeRiseMembers, 3);
 
-        Date oneExpireDate = DateUtils.afterDays(new Date(), ONE_EXPIRE_DATE);
+        Date oneExpireDate = DateUtils.afterDays(new Date(), 1);
         List<RiseMember> oneRiseMembers = customerService.loadRiseMembersByExpireDate(oneExpireDate);
         logger.info("1天人数：{}", oneRiseMembers.size());
-        customerService.sendWillExpireMessage(oneRiseMembers, ONE_EXPIRE_DATE);
+        customerService.sendWillExpireMessage(oneRiseMembers, 1);
 
         // 会员过期前3天发送短信消息提醒
-        customerService.sendWillExpireShortMessage(threeRiseMembers, THREE_EXPIRE_DATE);
+        customerService.sendWillExpireShortMessage(threeRiseMembers, 3);
     }
 
 }
