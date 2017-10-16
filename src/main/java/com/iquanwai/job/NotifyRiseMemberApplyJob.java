@@ -30,11 +30,10 @@ public class NotifyRiseMemberApplyJob {
 
     private void sendRiseMemberApplyMessage() {
         // 优惠券是数据库中日期的 0 点，所以在查询的时候要减 1，但是描述时正常描述
-        Date sevenDate = DateUtils.beforeDays(new Date(), 7);
-        customerService.sendRiseMemberApplyMessageByAddTime(sevenDate, 0);
+        Date sixDate = DateUtils.beforeDays(new Date(), 6);
+        // customerService.sendRiseMemberApplyMessageByAddTime(sixDate, 1);
 
-        Date threeDate = DateUtils.beforeDays(new Date(), 7);
-        customerService.sendRiseMemberApplyShortMessageByAddTime(threeDate, 0);
+        customerService.sendRiseMemberApplyShortMessageByAddTime(sixDate);
     }
 
 }

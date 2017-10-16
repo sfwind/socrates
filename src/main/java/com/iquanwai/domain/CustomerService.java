@@ -166,7 +166,7 @@ public class CustomerService {
                     if (distanceDay == 0) {
                         data.put("keyword1", new TemplateMessage.Keyword("今天24点", "#000000"));
                     } else {
-                        String expiredDateStr = DateUtils.parseDateToString(coupon.getExpiredDate());
+                        String expiredDateStr = DateUtils.parseDateToString(DateUtils.afterDays(new Date(), 1));
                         data.put("keyword1", new TemplateMessage.Keyword(distanceDay + "天后（" + expiredDateStr + "）", "#000000"));
                     }
                     data.put("keyword2", new TemplateMessage.Keyword("商学院入学奖学金", "#000000"));
@@ -193,7 +193,7 @@ public class CustomerService {
     /**
      * 会员的短信
      */
-    public void sendRiseMemberApplyShortMessageByAddTime(Date addTime, Integer distanceDay) {
+    public void sendRiseMemberApplyShortMessageByAddTime(Date addTime) {
         String addTimeStr = DateUtils.parseDateToString(addTime);
         // 全部的数据
         List<CustomerStatus> customerStatuses = customerStatusDao.loadCustomerStatusByAddTime(addTimeStr, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
@@ -222,7 +222,7 @@ public class CustomerService {
                         smsDto.setPhone(profile.getMobileNo());
                         smsDto.setType(SMSDto.PROMOTION);
                         String content = "Hi " + profile.getNickname() +
-                                "，你申请的商学院入学奖学金即将到期，请至「圈外同学」微信号，办理入学并使用吧！如有疑问请联系圈外小黑(quanwaizhushou2) 回复TD退订";
+                                "，你申请的商学院入学奖学金即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小黑(微信号：quanwaizhushou2) 回复TD退订";
                         smsDto.setContent(content);
                     }
                     shortMessageService.sendShorMessage(smsDto);
