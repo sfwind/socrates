@@ -20,12 +20,12 @@ public class CustomerStatusDao extends DBUtil {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public List<CustomerStatus> loadCustomerStatusByAddTime(String addTime) {
+    public List<CustomerStatus> loadCustomerStatusByAddTime(String addTime, Integer statusId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM CustomerStatus WHERE date(AddTime) = ? AND Del = 0";
+        String sql = "SELECT * FROM CustomerStatus WHERE date(AddTime) = ? AND StatusId = ? AND Del = 0";
         ResultSetHandler<List<CustomerStatus>> h = new BeanListHandler<>(CustomerStatus.class);
         try {
-            return runner.query(sql, h, addTime);
+            return runner.query(sql, h, addTime, statusId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

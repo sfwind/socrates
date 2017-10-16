@@ -33,7 +33,7 @@ public class CouponDao extends DBUtil {
 
     public List<Coupon> loadCouponsByProfileId(Integer profileId, String category, String description) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM Coupon WHERE ProfileId = ? AND Used = 0 Category = ? AND Description = ?";
+        String sql = "SELECT * FROM Coupon WHERE ProfileId = ? AND Used = 0 AND Category = ? AND Description = ?";
         ResultSetHandler<List<Coupon>> h = new BeanListHandler<>(Coupon.class);
         try {
             return runner.query(sql, h, profileId, category, description);

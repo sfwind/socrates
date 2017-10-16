@@ -131,7 +131,8 @@ public class CustomerService {
     public void sendRiseMemberApplyMessageByAddTime(Date addTime, Integer distanceDay) {
         String addTimeStr = DateUtils.parseDateToString(addTime);
         // 全部的数据
-        List<CustomerStatus> customerStatuses = customerStatusDao.loadCustomerStatusByAddTime(addTimeStr);
+        List<CustomerStatus> customerStatuses = customerStatusDao.loadCustomerStatusByAddTime(addTimeStr, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
+        Map<Integer, CustomerStatus> customerStatusMap = customerStatuses.stream().collect(Collectors.toMap(CustomerStatus::getProfileId, customerStatus -> customerStatus));
         List<Integer> customerStatusProfileIds = customerStatuses.stream().map(CustomerStatus::getProfileId).collect(Collectors.toList());
 
         // 在 RiseMember 中存在的数据
@@ -140,13 +141,12 @@ public class CustomerService {
 
         for (Integer profileId : customerStatusProfileIds) {
             RiseMember riseMember = existRiseMemberMap.get(profileId);
-            if (riseMember == null
-                    || riseMember.getMemberTypeId().equals(RiseMember.HALF)
-                    || riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)
-                    || riseMember.getMemberTypeId().equals(RiseMember.ELITE)
-                    || riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE)) {
-                List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId, RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION);
+            if (riseMember == null || (!riseMember.getMemberTypeId().equals(RiseMember.HALF)
+                    && !riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)
+                    && !riseMember.getMemberTypeId().equals(RiseMember.ELITE)
+                    && !riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
 
+                List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId, RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION);
                 Profile profile = profileDao.load(Profile.class, profileId);
 
                 TemplateMessage templateMessage = new TemplateMessage();
@@ -156,43 +156,78 @@ public class CustomerService {
                 templateMessage.setUrl(ConfigUtils.getAppDomain() + RISE_PAY_PAGE);
 
                 if (coupons.size() > 0) {
+                    Coupon coupon = coupons.get(0);
                     // 设置消息 message id
                     templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
 
                     // 有优惠券模板消息内容
-                    String first = profile.getNickname() + "同学，晚上好！快来学习今天的小课，拿下一个职场新技能！\n";
+                    String first = "Hi " + profile.getNickname() + "你申请的商学院入学奖学金即将到期，请尽快办理入学并使用吧！\n";
                     data.put("first", new TemplateMessage.Keyword(first, "#000000"));
-                    data.put("keyword1", new TemplateMessage.Keyword(plan.getProblemName(), "#000000"));
-                    data.put("keyword2",
-                            new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()) + "\n\n不需要提醒？可以点此卡片，进入“我的”去关闭",
-                                    "#000000"));
-                    data.put("remark", new TemplateMessage.Keyword("\n点此卡片开始学习", "#f57f16"));
+                    if (distanceDay == 0) {
+                        data.put("keyword1", new TemplateMessage.Keyword("今天24点", "#000000"));
+                    } else {
+                        String expiredDateStr = DateUtils.parseDateToString(coupon.getExpiredDate());
+                        data.put("keyword1", new TemplateMessage.Keyword(distanceDay + "天后（" + expiredDateStr + "）", "#000000"));
+                    }
+                    data.put("keyword2", new TemplateMessage.Keyword("商学院入学奖学金", "#000000"));
+                    data.put("keyword3", new TemplateMessage.Keyword(coupon.getAmount().intValue() + "元", "#000000"));
+                    data.put("remark", new TemplateMessage.Keyword("\n点此卡片，立即使用", "#f57f16"));
+                } else {
+                    // 设置消息 message id
+                    templateMessage.setTemplate_id(ConfigUtils.getApplySuccessMsg());
 
+                    // 无优惠券模板消息内容
+                    CustomerStatus customerStatus = customerStatusMap.get(profileId);
+                    String first = "我们很荣幸地通知你被商学院录取，请尽快办理入学，及时开始学习并结识优秀的校友吧！\n";
+                    data.put("first", new TemplateMessage.Keyword(first, "#000000"));
+                    data.put("keyword1", new TemplateMessage.Keyword("已录取", "#000000"));
+                    data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(customerStatus.getAddTime()), "#000000"));
+                    data.put("remark", new TemplateMessage.Keyword("\n点击卡片，立即办理入学", "#f57f16"));
+                }
 
+                templateMessageService.sendMessage(templateMessage);
+            }
+        }
+    }
+
+    /**
+     * 会员的短信
+     */
+    public void sendRiseMemberApplyShortMessageByAddTime(Date addTime, Integer distanceDay) {
+        String addTimeStr = DateUtils.parseDateToString(addTime);
+        // 全部的数据
+        List<CustomerStatus> customerStatuses = customerStatusDao.loadCustomerStatusByAddTime(addTimeStr, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
+        List<Integer> customerStatusProfileIds = customerStatuses.stream().map(CustomerStatus::getProfileId).collect(Collectors.toList());
+
+        // 在 RiseMember 中存在的数据
+        List<RiseMember> customerRiseMembers = riseMemberDao.loadValidRiseMemberByProfileIds(customerStatusProfileIds);
+        Map<Integer, RiseMember> existRiseMemberMap = customerRiseMembers.stream().collect(Collectors.toMap(RiseMember::getProfileId, riseMember -> riseMember));
+
+        for (Integer profileId : customerStatusProfileIds) {
+            RiseMember riseMember = existRiseMemberMap.get(profileId);
+            if (riseMember == null
+                    || (!riseMember.getMemberTypeId().equals(RiseMember.HALF)
+                    && !riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)
+                    && !riseMember.getMemberTypeId().equals(RiseMember.ELITE)
+                    && !riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
+                List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId, RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION);
+
+                Profile profile = profileDao.load(Profile.class, profileId);
+
+                if (coupons.size() > 0) {
                     // 有优惠券短信内容
                     SMSDto smsDto = new SMSDto();
                     if (profile.getMobileNo() != null) {
                         smsDto.setProfileId(profileId);
                         smsDto.setPhone(profile.getMobileNo());
                         smsDto.setType(SMSDto.PROMOTION);
-                        smsDto.setContent("");
+                        String content = "Hi " + profile.getNickname() +
+                                "，你申请的商学院入学奖学金即将到期，请至【圈外同学】微信号，办理入学并使用吧！如有疑问请联系圈外小黑(quanwaizhushou2) 回复TD退订";
+                        smsDto.setContent(content);
                     }
                     shortMessageService.sendShorMessage(smsDto);
-                } else {
-                    // 设置消息 message id
-                    templateMessage.setTemplate_id(ConfigUtils.getApplySuccessMsg());
-
-                    // 无优惠券模板消息内容
-                    String first = profile.getNickname() + "同学，晚上好！快来学习今天的小课，拿下一个职场新技能！\n";
-                    data.put("first", new TemplateMessage.Keyword(first, "#000000"));
-                    data.put("keyword1", new TemplateMessage.Keyword(plan.getProblemName(), "#000000"));
-                    data.put("keyword2",
-                            new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()) + "\n\n不需要提醒？可以点此卡片，进入“我的”去关闭",
-                                    "#000000"));
-                    data.put("remark", new TemplateMessage.Keyword("\n点此卡片开始学习", "#f57f16"));
                 }
 
-                templateMessageService.sendMessage(templateMessage);
             }
         }
     }

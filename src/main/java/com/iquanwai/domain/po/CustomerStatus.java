@@ -17,4 +17,8 @@ public class CustomerStatus {
     private Date addTime;
     private Date updateTime;
 
+    public static final Integer OPEN_BIBLE = 1; //开bible
+    public static final Integer EDIT_TAG = 2; //选择tag
+    public static final Integer APPLY_BUSINESS_SCHOOL_SUCCESS = 3; // 申请通过
+
 }
