@@ -24,7 +24,7 @@ public class NotifyRiseMemberExpireJob {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Scheduled(cron = "0/20 * * * * ?")
+    @Scheduled(cron = "0 40 21 * * ?")
     public void work() {
         logger.info("会员即将过期的模板消息提醒任务开始");
         riseMemberExpireCheck();
