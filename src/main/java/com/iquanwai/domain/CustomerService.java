@@ -141,10 +141,7 @@ public class CustomerService {
 
         for (Integer profileId : customerStatusProfileIds) {
             RiseMember riseMember = existRiseMemberMap.get(profileId);
-            if (riseMember == null || (!riseMember.getMemberTypeId().equals(RiseMember.HALF)
-                    && !riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)
-                    && !riseMember.getMemberTypeId().equals(RiseMember.ELITE)
-                    && !riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
+            if (riseMember == null || (!riseMember.getMemberTypeId().equals(RiseMember.ELITE) && !riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
 
                 List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId, RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION);
                 Profile profile = profileDao.load(Profile.class, profileId);
@@ -205,14 +202,10 @@ public class CustomerService {
 
         for (Integer profileId : customerStatusProfileIds) {
             RiseMember riseMember = existRiseMemberMap.get(profileId);
-            if (riseMember == null
-                    || (!riseMember.getMemberTypeId().equals(RiseMember.HALF)
-                    && !riseMember.getMemberTypeId().equals(RiseMember.ANNUAL)
-                    && !riseMember.getMemberTypeId().equals(RiseMember.ELITE)
-                    && !riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
+            if (riseMember == null || (!riseMember.getMemberTypeId().equals(RiseMember.ELITE) && !riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
                 List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId, RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION);
 
-                Profile profile = profileDao.load(Profile.class, profileId);
+                Profile profile = getProfile(profileId);
 
                 if (coupons.size() > 0) {
                     // 有优惠券短信内容
