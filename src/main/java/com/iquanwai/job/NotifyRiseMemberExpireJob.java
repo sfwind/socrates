@@ -38,8 +38,6 @@ public class NotifyRiseMemberExpireJob {
         logger.info("7天人数：{}", sevenRiseMembers.size());
         customerService.sendWillExpireMessage(sevenRiseMembers, 7);
 
-        // Date threeExpireDate = DateUtils.afterDays(new Date(), 3);
-        // List<RiseMember> threeRiseMembers = customerService.loadRiseMembersByExpireDate(threeExpireDate);
         // logger.info("3天人数：{}", threeRiseMembers.size());
         // customerService.sendWillExpireMessage(threeRiseMembers, 3);
 
@@ -47,9 +45,11 @@ public class NotifyRiseMemberExpireJob {
         List<RiseMember> oneRiseMembers = customerService.loadRiseMembersByExpireDate(oneExpireDate);
         logger.info("1天人数：{}", oneRiseMembers.size());
         customerService.sendWillExpireMessage(oneRiseMembers, 1);
+        customerService.sendWillExpireShortMessage(oneRiseMembers, 1);
 
-        // 会员过期前3天发送短信消息提醒
-        customerService.sendWillExpireShortMessage(threeRiseMembers, 3);
+        // // 会员过期前3天发送短信消息提醒
+        // Date threeExpireDate = DateUtils.afterDays(new Date(), 3);
+        // List<RiseMember> threeRiseMembers = customerService.loadRiseMembersByExpireDate(threeExpireDate);
     }
 
 }
