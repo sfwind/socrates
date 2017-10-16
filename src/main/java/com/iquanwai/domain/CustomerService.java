@@ -227,7 +227,6 @@ public class CustomerService {
                     }
                     shortMessageService.sendShorMessage(smsDto);
                 }
-
             }
         }
     }
