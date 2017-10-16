@@ -222,7 +222,7 @@ public class CustomerService {
                         smsDto.setPhone(profile.getMobileNo());
                         smsDto.setType(SMSDto.PROMOTION);
                         String content = "Hi " + profile.getNickname() +
-                                "，你申请的商学院入学奖学金即将到期，请至【圈外同学】微信号，办理入学并使用吧！如有疑问请联系圈外小黑(quanwaizhushou2) 回复TD退订";
+                                "，你申请的商学院入学奖学金即将到期，请至「圈外同学」微信号，办理入学并使用吧！如有疑问请联系圈外小黑(quanwaizhushou2) 回复TD退订";
                         smsDto.setContent(content);
                     }
                     shortMessageService.sendShorMessage(smsDto);
