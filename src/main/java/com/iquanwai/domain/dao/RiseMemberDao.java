@@ -57,6 +57,18 @@ public class RiseMemberDao extends DBUtil {
         return null;
     }
 
+    public List<RiseMember> loadRiseMembersByExpireDate(String expireDate) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseMember WHERE ExpireDate = ? AND Expired = 0 AND Del = 0";
+        ResultSetHandler<List<RiseMember>> h = new BeanListHandler<>(RiseMember.class);
+        try {
+            return runner.query(sql, h, expireDate);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
     public List<RiseMember> loadValidRiseMemberByProfileIds(List<Integer> profileIds) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseMember WHERE ProfileId in (" + produceQuestionMark(profileIds.size()) + ") AND Expired = 0 AND Del = 0";
