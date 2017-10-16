@@ -19,36 +19,36 @@ import java.util.List;
 public class RiseMemberDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public boolean riseMemberExpired(RiseMember riseMember){
+    public boolean riseMemberExpired(RiseMember riseMember) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update RiseMember set Expired = 1 where Id = ?";
+        String sql = "Update RiseMember set Expired = 1 where Id = ? AND Del = 0";
 
-        try{
-            runner.update(sql,riseMember.getId());
+        try {
+            runner.update(sql, riseMember.getId());
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
             return false;
         }
         return true;
     }
 
-    public List<RiseMember> loadWillCloseMembers(){
+    public List<RiseMember> loadWillCloseMembers() {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from RiseMember where Expired = 0 and ExpireDate <= CURRENT_TIMESTAMP";
+        String sql = "select * from RiseMember where Expired = 0 and ExpireDate <= CURRENT_TIMESTAMP AND Del = 0";
         ResultSetHandler<List<RiseMember>> handler = new BeanListHandler<>(RiseMember.class);
-        try{
-           return runner.query(sql, handler);
+        try {
+            return runner.query(sql, handler);
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
 
-    public List<RiseMember> validRiseMember(){
+    public List<RiseMember> validRiseMember() {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from RiseMember where Expired = 0";
+        String sql = "select * from RiseMember where Expired = 0 AND Del = 0";
 
-        try{
+        try {
             ResultSetHandler<List<RiseMember>> handler = new BeanListHandler<>(RiseMember.class);
             return runner.query(sql, handler);
         } catch (SQLException e) {
@@ -56,4 +56,17 @@ public class RiseMemberDao extends DBUtil {
         }
         return null;
     }
+
+    public List<RiseMember> loadValidRiseMemberByProfileIds(List<Integer> profileIds) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseMember WHERE ProfileId in (" + produceQuestionMark(profileIds.size()) + ") AND Expired = 0 AND Del = 0";
+        ResultSetHandler<List<RiseMember>> h = new BeanListHandler<>(RiseMember.class);
+        try {
+            return runner.query(sql, h, profileIds.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
 }
