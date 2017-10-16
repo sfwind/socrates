@@ -250,7 +250,7 @@ public class CustomerService {
             templateMessage.setTemplate_id(ConfigUtils.getRiseMemberExpireMsg());
             templateMessage.setUrl(ConfigUtils.getAppDomain() + RISE_PAY_URL);
             String first;
-            if (distanceDay != 1) {
+            if (distanceDay != 0) {
                 first = "Hi " + profile.getNickname() + "，小哥哥例行维护信息时，发现您的会员" + distanceDay + "天后到期哦：";
             } else {
                 first = "Hi " + profile.getNickname() + "，小哥哥例行维护信息时，发现您的会员今天到期哦：";
@@ -279,12 +279,12 @@ public class CustomerService {
                 smsDto.setPhone(profile.getMobileNo());
             }
             String content;
-            if (distanceDay != 1) {
+            if (distanceDay != 0) {
                 content = "Hi " + profile.getNickname() + "，您的" + convertMemberTypeStr(riseMember.getMemberTypeId()) + distanceDay
-                        + "天后到期哦！有疑问请联系圈外小黑（微信ID：quanwaizhushou2）回复TD退订";
+                        + "天后到期哦！有疑问请联系圈外小黑（微信号：quanwaizhushou2）回复TD退订";
             } else {
                 content = "Hi " + profile.getNickname() + "，您的" + convertMemberTypeStr(riseMember.getMemberTypeId()) +
-                        "今天到期哦！有疑问请联系圈外小黑（微信ID：quanwaizhushou2）回复TD退订";
+                        "今天到期哦！有疑问请联系圈外小黑（微信号：quanwaizhushou2）回复TD退订";
             }
             smsDto.setContent(content);
             smsDto.setType(SMSDto.PROMOTION);
