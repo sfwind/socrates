@@ -21,7 +21,7 @@ public class RiseMemberDao extends DBUtil {
 
     public boolean riseMemberExpired(RiseMember riseMember) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update RiseMember set Expired = 1 where Id = ?";
+        String sql = "Update RiseMember set Expired = 1 where Id = ? AND Del = 0";
 
         try {
             runner.update(sql, riseMember.getId());
@@ -68,4 +68,17 @@ public class RiseMemberDao extends DBUtil {
         }
         return Lists.newArrayList();
     }
+
+    public List<RiseMember> loadValidRiseMemberByProfileIds(List<Integer> profileIds) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseMember WHERE ProfileId in (" + produceQuestionMark(profileIds.size()) + ") AND Expired = 0 AND Del = 0";
+        ResultSetHandler<List<RiseMember>> h = new BeanListHandler<>(RiseMember.class);
+        try {
+            return runner.query(sql, h, profileIds.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
 }

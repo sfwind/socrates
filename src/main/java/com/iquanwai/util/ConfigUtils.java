@@ -35,11 +35,11 @@ public class ConfigUtils {
     }
 
     public static String getValue(String key) {
-        if(config.hasPath(key)) {
+        if (config.hasPath(key)) {
             return config.getString(key);
         } else {
             String value = zkConfigUtils.getValue(key);
-            if(value == null) {
+            if (value == null) {
                 value = zkConfigUtils.getArchValue(key);
             }
             return value;
@@ -47,7 +47,7 @@ public class ConfigUtils {
     }
 
     public static Integer getIntValue(String key) {
-        if(config.hasPath(key)) {
+        if (config.hasPath(key)) {
             return config.getInt(key);
         } else {
             return zkConfigUtils.getIntValue(key);
@@ -55,7 +55,7 @@ public class ConfigUtils {
     }
 
     public static Boolean getBooleanValue(String key) {
-        if(config.hasPath(key)) {
+        if (config.hasPath(key)) {
             return config.getBoolean(key);
         } else {
             return zkConfigUtils.getBooleanValue(key);
@@ -111,11 +111,11 @@ public class ConfigUtils {
         return getValue("activity.start.msg");
     }
 
-	public static String getAppDomain() {
-		return getValue("app.domain");
-	}
+    public static String getAppDomain() {
+        return getValue("app.domain");
+    }
 
-    public static Integer getFreeProblem(){
+    public static Integer getFreeProblem() {
         return getIntValue("free.problem.id");
     }
 
@@ -123,15 +123,15 @@ public class ConfigUtils {
         return getValue("api.key");
     }
 
-    public static String getMch_id(){
+    public static String getMch_id() {
         return getValue("mch_id");
     }
 
-    public static String getRabbitMQIp(){
+    public static String getRabbitMQIp() {
         return getValue("rabbitmq.ip");
     }
 
-    public static int getRabbitMQPort(){
+    public static int getRabbitMQPort() {
         return getIntValue("rabbitmq.port");
     }
 
@@ -152,6 +152,20 @@ public class ConfigUtils {
 
     public static String sendShortMessageUrl() {
         return getValue("send.sms.url");
+    }
+
+    /**
+     * 申请成功通知
+     */
+    public static String getApplySuccessMsg() {
+        return getValue("application.approve.msg");
+    }
+
+    /**
+     * 账户变动提醒
+     */
+    public static String getAccountChangeMsg() {
+        return getValue("account.change.message");
     }
 
 }
