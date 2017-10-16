@@ -21,7 +21,7 @@ public class NotifyRiseMemberApplyJob {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Scheduled(cron = "*/20 * * * * ?")
+    @Scheduled(cron = "0 0 21 * * ?")
     public void work() {
         logger.info("商学院申请未报名用户提醒任务开始");
         sendRiseMemberApplyMessage();
@@ -29,7 +29,8 @@ public class NotifyRiseMemberApplyJob {
     }
 
     private void sendRiseMemberApplyMessage() {
-        // 优惠券是数据库中日期的 0 点，所以在查询的时候要减 1，但是描述时正常描述
+        // 优惠券的过期展示日期要比数据库中减少一天
+        // 会员申请通过之后，优惠券的有效日期是 7 天，提醒日期为第六天晚上
         Date sixDate = DateUtils.beforeDays(new Date(), 6);
         customerService.sendRiseMemberApplyMessageByAddTime(sixDate, 1);
 

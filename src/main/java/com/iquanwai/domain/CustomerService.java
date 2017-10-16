@@ -161,7 +161,7 @@ public class CustomerService {
                     templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
 
                     // 有优惠券模板消息内容
-                    String first = "Hi " + profile.getNickname() + "你申请的商学院入学奖学金即将到期，请尽快办理入学并使用吧！\n";
+                    String first = "Hi " + profile.getNickname() + "，你申请的商学院入学奖学金即将到期，请尽快办理入学并使用吧！\n";
                     data.put("first", new TemplateMessage.Keyword(first, "#000000"));
                     if (distanceDay == 0) {
                         data.put("keyword1", new TemplateMessage.Keyword("今天24点", "#000000"));
