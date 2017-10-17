@@ -168,4 +168,16 @@ public class ConfigUtils {
         return getValue("account.change.message");
     }
 
+    public static Integer getBsApplicationActivity() {
+        return getIntValue("business.school.application.activity");
+    }
+
+    public static String getRejectApplyMsgId() {
+        return getValue("application.reject.msg");
+    }
+
+    public static String getApproveApplyMsgId(){
+        return getValue("application.approve.msg");
+    }
+
 }

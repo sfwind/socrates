@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -24,8 +25,8 @@ public class MQService {
 
     private String ipAddress;
 
-    public void saveMQSendOperation(MQSendLog mqSendLog) {
-        // 插入mqSendOperation
+    @PostConstruct
+    public void init(){
         if (ipAddress == null) {
             try {
                 InetAddress localHost = InetAddress.getLocalHost();
@@ -34,7 +35,10 @@ public class MQService {
                 logger.error(e.getLocalizedMessage(), e);
             }
         }
+    }
 
+    public void saveMQSendOperation(MQSendLog mqSendLog) {
+        // 插入mqSendOperation
         mqSendLog.setPublisherIp(ipAddress);
         mqSendLogDao.insert(mqSendLog);
     }
@@ -42,14 +46,6 @@ public class MQService {
 
     public void updateAfterDealOperation(RabbitMQDto dto) {
         String msgId = dto.getMsgId();
-        if (ipAddress == null) {
-            try {
-                InetAddress localHost = InetAddress.getLocalHost();
-                ipAddress = localHost.getHostAddress();
-            } catch (UnknownHostException e) {
-                logger.error(e.getLocalizedMessage(), e);
-            }
-        }
         MQDealLog mqDealLog = new MQDealLog();
         mqDealLog.setMsgId(msgId);
         mqDealLog.setTopic(dto.getTopic());

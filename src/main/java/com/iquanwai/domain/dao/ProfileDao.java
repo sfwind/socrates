@@ -5,6 +5,7 @@ import com.iquanwai.domain.po.Profile;
 import com.iquanwai.util.DateUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,17 @@ public class ProfileDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
+    }
+
+    public Profile loadByOpenId(String openId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Select * from Profile where Openid = ?";
+        try {
+            return runner.query(sql, new BeanHandler<Profile>(Profile.class), openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 
     public List<Profile> loadByProfileIds(List<Integer> profileIds) {
