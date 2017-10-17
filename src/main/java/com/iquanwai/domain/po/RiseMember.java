@@ -16,6 +16,7 @@ public class RiseMember {
     private Integer memberTypeId;
     private Date expireDate;
     private Boolean expired;
+    private Integer del;
     private Date addTime;
 
     private String startTime; // 非DB字段，addTime

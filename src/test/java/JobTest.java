@@ -47,7 +47,7 @@ public class JobTest extends TestBase {
     }
     @Test
     public void testNotify(){
-        notifyRunningLogin.notifyHasRunningPlansLogin();;
+        // notifyRunningLogin.notifyHasRunningPlansLogin();;
     }
 
     @Test
