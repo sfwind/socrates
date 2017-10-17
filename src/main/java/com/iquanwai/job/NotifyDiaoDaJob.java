@@ -59,7 +59,7 @@ public class NotifyDiaoDaJob {
                 data.put("keyword1", new TemplateMessage.Keyword("作业吊打"));
                 data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())+" 20:30"));
 
-                templateMessageService.sendMessage(templateMessage);
+                templateMessageService.sendMessage(templateMessage, true);
             });
         });
     }

@@ -131,8 +131,16 @@ public class CustomerService {
         this.userLoginLog(1);
     }
 
-    public Profile getProfile(Integer id) {
-        return profileDao.load(Profile.class, id);
+    public Profile getProfile(Integer profileId) {
+        Profile profile = profileDao.load(Profile.class, profileId);
+        profile.setRiseMember(getRiseMember(profileId));
+        return profile;
+    }
+
+    public Profile getProfile(String openId) {
+        Profile profile = profileDao.loadByOpenId(openId);
+        profile.setRiseMember(getRiseMember(profile.getId()));
+        return profile;
     }
 
     public void sendRiseMemberApplyMessageByAddTime(Date addTime, Integer distanceDay) {
@@ -189,7 +197,7 @@ public class CustomerService {
                     data.put("remark", new TemplateMessage.Keyword("\n点击卡片，立即办理入学", "#f57f16"));
                 }
 
-                templateMessageService.sendMessage(templateMessage);
+                templateMessageService.sendMessage(templateMessage, true);
             }
         }
     }
@@ -259,7 +267,7 @@ public class CustomerService {
             data.put("name", new TemplateMessage.Keyword(convertMemberTypeStr(riseMember.getMemberTypeId()), "#000000"));
             data.put("expDate", new TemplateMessage.Keyword(DateUtils.parseDateToString(DateUtils.beforeDays(riseMember.getExpireDate(), 1)) + "\n\n到期前加入商学院，可以免申请入学哦！到期后可以复习，但不能选新课啦", "#000000"));
             data.put("remark", new TemplateMessage.Keyword("\n点击卡片，立即加入商学院，加速你的职业发展吧！", "#f57f16"));
-            templateMessageService.sendMessage(templateMessage);
+            templateMessageService.sendMessage(templateMessage, true);
         }
     }
 
@@ -289,6 +297,24 @@ public class CustomerService {
             smsDto.setContent(content);
             smsDto.setType(SMSDto.PROMOTION);
             shortMessageService.sendShorMessage(smsDto);
+        }
+    }
+
+    private Integer getRiseMember(Integer profileId) {
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+        if (riseMember == null) return 0;
+        Integer memberTypeId = riseMember.getMemberTypeId();
+        if (memberTypeId == null) return 0;
+        // 精英或者专业版用户
+        if (memberTypeId == RiseMember.HALF || memberTypeId == RiseMember.ANNUAL
+                || memberTypeId == RiseMember.ELITE || memberTypeId == RiseMember.HALF_ELITE) {
+            return 1;
+        } else if (memberTypeId == RiseMember.CAMP) {
+            return 3;
+        } else if (memberTypeId == RiseMember.COURSE) {
+            return 2;
+        } else {
+            return 0;
         }
     }
 

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.iquanwai.domain.po.RiseMember;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,18 @@ public class RiseMemberDao extends DBUtil {
             return false;
         }
         return true;
+    }
+
+    public RiseMember loadValidRiseMember(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseMember WHERE ProfileId = ? AND Expired = 0 AND Del = 0";
+        ResultSetHandler<RiseMember> h = new BeanHandler<RiseMember>(RiseMember.class);
+        try {
+            return runner.query(sql, h, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 
     public List<RiseMember> loadWillCloseMembers() {

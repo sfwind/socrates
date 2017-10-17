@@ -5,6 +5,7 @@ import com.iquanwai.domain.po.Profile;
 import com.iquanwai.util.DateUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,18 @@ public class ProfileDao extends DBUtil {
             return false;
         }
         return true;
+    }
+
+    public Profile loadByOpenId(String openId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM Profile WHERE OpenId = ?";
+        ResultSetHandler<Profile> h = new BeanHandler<>(Profile.class);
+        try {
+            return runner.query(sql, h, openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 
     // 根据入库日期筛选 profile
