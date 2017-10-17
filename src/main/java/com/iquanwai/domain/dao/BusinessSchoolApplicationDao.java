@@ -47,7 +47,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     public List<BusinessSchoolApplication> getUserApplications(Integer profileId, Date date, Integer checkTime) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Select * from BusinessSchoolApplication where ProfileId = ? and AddTime >= ? AND Del = 0";
+        String sql = "Select * from BusinessSchoolApplication where ProfileId = ? and CheckTime >= ? AND Del = 0";
         try {
             return runner.query(sql, new BeanListHandler<BusinessSchoolApplication>(BusinessSchoolApplication.class), profileId, DateUtils.beforeDays(date, checkTime));
         } catch (SQLException e) {
