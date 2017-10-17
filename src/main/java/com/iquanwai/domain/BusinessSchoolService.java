@@ -108,6 +108,7 @@ public class BusinessSchoolService {
                 application.setOpenid(profile.getOpenid());
                 application.setCheckTime(status != BusinessSchoolApplication.APPLYING ? new Date() : null);
                 application.setDeal(status != BusinessSchoolApplication.APPLYING);
+                application.setDealTime(status != BusinessSchoolApplication.APPLYING ? new Date() : null);
                 application.setSubmitTime(survey.getSubmitTime());
                 return application;
             }).collect(Collectors.toList());

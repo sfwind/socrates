@@ -58,11 +58,11 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     public Integer insert(BusinessSchoolApplication businessSchoolApplication) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO BusinessSchoolApplication(SubmitId, ProfileId, Openid, Status, CheckTime, IsDuplicate, Deal, OriginMemberType,SubmitTime) VALUES (?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO BusinessSchoolApplication(SubmitId, ProfileId, Openid, Status, CheckTime, IsDuplicate, Deal, OriginMemberType,SubmitTime,DealTime) VALUES (?,?,?,?,?,?,?,?,?,?)";
         try {
             return runner.insert(sql, new ScalarHandler<Long>(), businessSchoolApplication.getSubmitId(), businessSchoolApplication.getProfileId(), businessSchoolApplication.getOpenid(),
                     businessSchoolApplication.getStatus(), businessSchoolApplication.getCheckTime(), businessSchoolApplication.getIsDuplicate(),
-                    businessSchoolApplication.getDeal(), businessSchoolApplication.getOriginMemberType(), businessSchoolApplication.getSubmitTime()).intValue();
+                    businessSchoolApplication.getDeal(), businessSchoolApplication.getOriginMemberType(), businessSchoolApplication.getSubmitTime(), businessSchoolApplication.getDealTime()).intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -82,7 +82,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     public Integer autoCloseApplication(Integer id) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE BusinessSchoolApplication SET Status = 4,CheckTime = CURRENT_TIMESTAMP,Deal = 1 WHERE Id = ?";
+        String sql = "UPDATE BusinessSchoolApplication SET Status = 4,CheckTime = CURRENT_TIMESTAMP,Deal = 1, DealTime = CURRENT_TIMESTAMP WHERE Id = ?";
         try {
             return runner.update(sql, id);
         } catch (SQLException e) {
