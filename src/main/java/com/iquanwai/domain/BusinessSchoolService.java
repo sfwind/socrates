@@ -171,15 +171,14 @@ public class BusinessSchoolService {
         templateMessage.setData(data);
         templateMessage.setUrl(PAY_URL);
         data.put("keyword1", new TemplateMessage.Keyword("通过"));
-        data.put("remark", new TemplateMessage.Keyword("报名方式：点击下方“详情”\n\n在未来的日子里，希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！"));
+        data.put("remark", new TemplateMessage.Keyword("入学方式：点击本通知书，即可办理\n\n在未来的日子里，希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！"));
         // 同样的对象不需要定义两次
         CustomerMessageLog log = new CustomerMessageLog();
         log.setComment("商学院审核通过");
         log.setPublishTime(new Date());
         coupons.forEach((amount, applicationGroup) -> {
             data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！" +
-                    "\n根据你的申请，圈外入学委员会决定为你提供" + amount.intValue() + "元的奖学金。奖学金已放入你的商学院个人帐户，付款操作时可使用奖学金抵扣。" +
-                    "\n点击本通知书下方的“详情”即可办理入学。\n));"));
+                    "\n根据你的申请，圈外入学委员会决定为你提供" + amount.intValue() + "元的奖学金。奖学金已放入你的商学院个人帐户，付款操作时可使用奖学金抵扣。\n"));
             applicationGroup.forEach(app -> this.sendMsg(templateMessage, data, log, app, "keyword2"));
         });
 
