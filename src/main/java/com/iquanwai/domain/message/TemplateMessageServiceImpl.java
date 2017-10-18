@@ -128,6 +128,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         customerMessageLog.setContentHash(Integer.toString(templateMessage.getContent().hashCode()));
         customerMessageLog.setForwardlyPush(forwardlyPush ? 1 : 0);
         customerMessageLog.setValidPush(validPush ? 1 : 0);
+        customerMessageLog.setComment(templateMessage.getComment());
         customerMessageLogDao.insert(customerMessageLog);
     }
 

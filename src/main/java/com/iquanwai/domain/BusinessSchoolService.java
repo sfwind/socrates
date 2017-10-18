@@ -136,6 +136,7 @@ public class BusinessSchoolService {
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
         templateMessage.setUrl(PAY_URL);
+        templateMessage.setComment("发送拒信");
         data.put("keyword1", new TemplateMessage.Keyword("【圈外商学院】"));
         data.put("keyword2", new TemplateMessage.Keyword("未通过"));
         data.put("remark", new TemplateMessage.Keyword("本期商学院的申请者都异常优秀，我们无法为每位申请者提供学习机会，但是很高兴你有一颗追求卓越的心！点击下方“详情”，了解预科班--圈外训练营。"));
@@ -164,6 +165,7 @@ public class BusinessSchoolService {
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
         templateMessage.setUrl(PAY_URL);
+        templateMessage.setComment("商学院审核通过");
         data.put("keyword1", new TemplateMessage.Keyword("通过"));
         data.put("remark", new TemplateMessage.Keyword("入学方式：点击本通知书，即可办理\n\n在未来的日子里，希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！"));
         // 同样的对象不需要定义两次
@@ -178,6 +180,7 @@ public class BusinessSchoolService {
         TemplateMessage noCouponMsg = new TemplateMessage();
         noCouponMsg.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
         noCouponMsg.setUrl(PAY_URL);
+        noCouponMsg.setComment("商学院审核通过,无优惠券");
         Map<String, TemplateMessage.Keyword> noCouponData = Maps.newHashMap();
         noCouponMsg.setData(noCouponData);
         noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！\n本期商学院的申请者都异常优秀，能够占有一席是很值得自豪的。\n点击本通知书下方的“详情”即可办理入学。\n"));
