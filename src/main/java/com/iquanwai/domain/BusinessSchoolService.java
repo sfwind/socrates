@@ -31,6 +31,7 @@ public class BusinessSchoolService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     public Integer BS_APPLICATION;
     public static String PAY_URL = "https://www.iquanwai.com/pay/rise";
+    public static String PAY_CAMP_URL = "https://www.iquanwai.com/pay/camp";
 
     @PostConstruct
     public void init() {
@@ -135,7 +136,7 @@ public class BusinessSchoolService {
         templateMessage.setTemplate_id(ConfigUtils.getRejectApplyMsgId());
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
-        templateMessage.setUrl(PAY_URL);
+        templateMessage.setUrl(PAY_CAMP_URL);
         templateMessage.setComment("发送拒信");
         data.put("keyword1", new TemplateMessage.Keyword("【圈外商学院】"));
         data.put("keyword2", new TemplateMessage.Keyword("未通过"));
