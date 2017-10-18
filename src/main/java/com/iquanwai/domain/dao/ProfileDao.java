@@ -35,6 +35,18 @@ public class ProfileDao extends DBUtil {
         return true;
     }
 
+    public Profile loadByOpenId(String openId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM Profile WHERE OpenId = ?";
+        ResultSetHandler<Profile> h = new BeanHandler<>(Profile.class);
+        try {
+            return runner.query(sql, h, openId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
     // 根据入库日期筛选 profile
     public List<Profile> loadProfiles(Date startDate, Date endDate) {
         QueryRunner runner = new QueryRunner(getDataSource());
@@ -46,17 +58,6 @@ public class ProfileDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
-    }
-
-    public Profile loadByOpenId(String openId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Select * from Profile where Openid = ?";
-        try {
-            return runner.query(sql, new BeanHandler<Profile>(Profile.class), openId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
     }
 
     public List<Profile> loadByProfileIds(List<Integer> profileIds) {

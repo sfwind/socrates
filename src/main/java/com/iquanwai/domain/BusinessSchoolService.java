@@ -2,15 +2,10 @@ package com.iquanwai.domain;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.iquanwai.domain.dao.BusinessSchoolApplicationDao;
-import com.iquanwai.domain.dao.CustomerMessageLogDao;
-import com.iquanwai.domain.dao.ProfileDao;
-import com.iquanwai.domain.dao.RiseMemberDao;
-import com.iquanwai.domain.dao.SurveySubmitDao;
+import com.iquanwai.domain.dao.*;
 import com.iquanwai.domain.message.TemplateMessage;
 import com.iquanwai.domain.message.TemplateMessageService;
 import com.iquanwai.domain.po.BusinessSchoolApplication;
-import com.iquanwai.domain.po.CustomerMessageLog;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.domain.po.RiseMember;
 import com.iquanwai.domain.po.SurveySubmit;
@@ -143,15 +138,11 @@ public class BusinessSchoolService {
         templateMessage.setUrl(PAY_URL);
         data.put("keyword1", new TemplateMessage.Keyword("【圈外商学院】"));
         data.put("keyword2", new TemplateMessage.Keyword("未通过"));
-
         data.put("remark", new TemplateMessage.Keyword("本期商学院的申请者都异常优秀，我们无法为每位申请者提供学习机会，但是很高兴你有一颗追求卓越的心！点击下方“详情”，了解预科班--圈外训练营。"));
         // 同样的对象不需要定义两次
-        CustomerMessageLog log = new CustomerMessageLog();
-        log.setComment("发送拒信");
-        log.setPublishTime(new Date());
         data.put("first", new TemplateMessage.Keyword("在认真审核过你的入学申请后，我们很遗憾地通知你不能加入我们的【圈外同学商学院】。" +
                 "\n在此之前，我们推荐你先加入我们的【训练营】进行学习。训练营能够帮你快速集中地提高专项能力，为你下次申请商学院提高录取通率。\n点击下方“详情”即可了解训练营。\n"));
-        applications.forEach(app -> this.sendMsg(templateMessage, data, log, app, "keyword3"));
+        applications.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword3"));
     }
 
     public void noticeApplicationForApprove(List<BusinessSchoolApplication> applications) {
@@ -176,13 +167,10 @@ public class BusinessSchoolService {
         data.put("keyword1", new TemplateMessage.Keyword("通过"));
         data.put("remark", new TemplateMessage.Keyword("入学方式：点击本通知书，即可办理\n\n在未来的日子里，希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！"));
         // 同样的对象不需要定义两次
-        CustomerMessageLog log = new CustomerMessageLog();
-        log.setComment("商学院审核通过");
-        log.setPublishTime(new Date());
         coupons.forEach((amount, applicationGroup) -> {
             data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！" +
                     "\n根据你的申请，圈外入学委员会决定为你提供" + amount.intValue() + "元的奖学金。奖学金已放入你的商学院个人帐户，付款操作时可使用奖学金抵扣。\n"));
-            applicationGroup.forEach(app -> this.sendMsg(templateMessage, data, log, app, "keyword2"));
+            applicationGroup.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword2"));
         });
 
 
@@ -196,26 +184,20 @@ public class BusinessSchoolService {
         noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
         noCouponData.put("keyword3", new TemplateMessage.Keyword("点击下方“详情”"));
         noCouponData.put("remark", new TemplateMessage.Keyword("\n在未来的日子里，希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！"));
-        CustomerMessageLog noCouponLog = new CustomerMessageLog();
-        noCouponLog.setComment("商学院审核通过");
-        noCouponLog.setPublishTime(new Date());
         // 发送没有优惠券的
         if (noCouponGroup != null) {
-            noCouponGroup.forEach(app -> this.sendMsg(noCouponMsg, noCouponData, noCouponLog, app, "keyword2"));
+            noCouponGroup.forEach(app -> this.sendMsg(noCouponMsg, noCouponData, app, "keyword2"));
         }
     }
 
 
-    public void sendMsg(TemplateMessage templateMessage, Map<String, TemplateMessage.Keyword> data, CustomerMessageLog log, BusinessSchoolApplication application, String checkKey) {
+    private void sendMsg(TemplateMessage templateMessage, Map<String, TemplateMessage.Keyword> data, BusinessSchoolApplication application, String checkKey) {
         templateMessage.setTouser(application.getOpenid());
         data.put(checkKey, new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime())));
         logger.info("发送模版消息id ：{}", templateMessage.getTemplate_id());
         templateMessageService.sendMessage(templateMessage);
-        log.setOpenid(application.getOpenid());
-        customerMessageLogDao.insert(log);
         // 更新提醒状态
         businessSchoolApplicationDao.updateNoticeAction(application.getId());
     }
-
 
 }

@@ -29,8 +29,6 @@ public class NotifyNearCloseJob {
     private TemplateMessageService templateMessageService;
 
     private static final String INDEX_URL = "/rise/static/learn";
-//    @Autowired
-//    private RedisUtil redisUtil;
 
     @Scheduled(cron = "0 35 21 * * ?")
     public void work() {
@@ -40,33 +38,23 @@ public class NotifyNearCloseJob {
         logger.info("通知即将关闭小课任务结束");
     }
 
-
-//    @PostConstruct()
-//    public void init(){
-//        // 测试上线zk是否成功
-//        logger.info("appid------:{}",ConfigUtils.getAppid());
-//        logger.info("act------:{}",redisUtil.get("accessToken"));
-//    }
-
-
-
     private void notifyNearClosePlan() {
         List<ImprovementPlan> underClosedPlans = planService.loadUnderClosePlan();
         underClosedPlans.stream().forEach(improvementPlan -> {
             TemplateMessage templateMessage = new TemplateMessage();
             templateMessage.setTouser(improvementPlan.getOpenid());
             templateMessage.setTemplate_id(ConfigUtils.getUnderCloseMsg());
-            templateMessage.setUrl(ConfigUtils.getAppDomain()+INDEX_URL);
+            templateMessage.setUrl(ConfigUtils.getAppDomain() + INDEX_URL);
 
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
             templateMessage.setData(data);
 
             Problem problem = planService.getProblem(improvementPlan.getProblemId());
 
-            data.put("first",new TemplateMessage.Keyword("你的以下小课还有3天就到期了：\n"));
-            data.put("keyword1",new TemplateMessage.Keyword(problem.getProblem()));
-            data.put("keyword2",new TemplateMessage.Keyword(DateUtils.parseDateToString(improvementPlan.getCloseDate())));
-            data.put("remark",new TemplateMessage.Keyword("\n抓紧在到期前解锁所有练习吧！"));
+            data.put("first", new TemplateMessage.Keyword("你的以下小课还有3天就到期了：\n"));
+            data.put("keyword1", new TemplateMessage.Keyword(problem.getProblem()));
+            data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(improvementPlan.getCloseDate())));
+            data.put("remark", new TemplateMessage.Keyword("\n抓紧在到期前解锁所有练习吧！"));
 
             templateMessageService.sendMessage(templateMessage);
         });

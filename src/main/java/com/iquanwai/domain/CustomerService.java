@@ -132,8 +132,16 @@ public class CustomerService {
         this.userLoginLog(1);
     }
 
-    public Profile getProfile(Integer id) {
-        return profileDao.load(Profile.class, id);
+    public Profile getProfile(Integer profileId) {
+        Profile profile = profileDao.load(Profile.class, profileId);
+        profile.setRiseMember(getRiseMember(profileId));
+        return profile;
+    }
+
+    public Profile getProfile(String openId) {
+        Profile profile = profileDao.loadByOpenId(openId);
+        profile.setRiseMember(getRiseMember(profile.getId()));
+        return profile;
     }
 
     /**
@@ -337,6 +345,24 @@ public class CustomerService {
             templateMessageService.sendMessage(templateMessage);
         }
 
+    }
+
+    private Integer getRiseMember(Integer profileId) {
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+        if (riseMember == null) return 0;
+        Integer memberTypeId = riseMember.getMemberTypeId();
+        if (memberTypeId == null) return 0;
+        // 精英或者专业版用户
+        if (memberTypeId == RiseMember.HALF || memberTypeId == RiseMember.ANNUAL
+                || memberTypeId == RiseMember.ELITE || memberTypeId == RiseMember.HALF_ELITE) {
+            return 1;
+        } else if (memberTypeId == RiseMember.CAMP) {
+            return 3;
+        } else if (memberTypeId == RiseMember.COURSE) {
+            return 2;
+        } else {
+            return 0;
+        }
     }
 
     private String convertMemberTypeStr(Integer memberTypeId) {

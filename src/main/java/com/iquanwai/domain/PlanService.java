@@ -32,6 +32,8 @@ public class PlanService {
     @Autowired
     private ProfileDao profileDao;
     @Autowired
+    private CustomerService customerService;
+    @Autowired
     private RedisUtil redisUtil;
 
     private static final String LOGIN_REDIS_KEY = "login:";
@@ -50,7 +52,6 @@ public class PlanService {
 
     /**
      * 修改plan的状态
-     *
      * @param planId id
      * @param status 状态
      */
@@ -68,7 +69,6 @@ public class PlanService {
 
     /**
      * 获取将要关闭的订单
-     *
      * @return 订单
      */
     public List<ImprovementPlan> loadUnderClosePlan() {
@@ -83,7 +83,6 @@ public class PlanService {
 
     /**
      * 查询Problem
-     *
      * @param problemId id
      * @return Problem
      */
@@ -127,9 +126,9 @@ public class PlanService {
         List<String> openids = Lists.newArrayList();
         improvementPlanDao.loadByProblemId(problemId).forEach(improvementPlan -> {
             Integer profileId = improvementPlan.getProfileId();
-            Profile profile = profileDao.load(Profile.class, profileId);
+            Profile profile = customerService.getProfile(profileId);
             //过滤没报名的用户
-            if (profile != null && (profile.getRiseMember() != 0 )) {
+            if (profile != null && (profile.getRiseMember() != 0)) {
                 //用户去重
                 if (!openids.contains(profile.getOpenid())) {
                     improvementPlans.add(improvementPlan);
@@ -155,7 +154,7 @@ public class PlanService {
                     (lastLoginTime.length() >= 10 &&
                             !lastLoginTime.substring(0, 10).equalsIgnoreCase(todayDateString));
         }).collect(Collectors.toList());
-        Map<Integer,ImprovementPlan> planMap = Maps.newHashMap();
+        Map<Integer, ImprovementPlan> planMap = Maps.newHashMap();
         runningPlans.forEach(plan -> {
             if (planMap.containsKey(plan.getProfileId())) {
                 ImprovementPlan oldPlan = planMap.get(plan.getProfileId());

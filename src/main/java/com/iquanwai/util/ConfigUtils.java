@@ -1,10 +1,12 @@
 package com.iquanwai.util;
 
+import com.google.common.collect.Lists;
 import com.iquanwai.util.zk.ZKConfigUtils;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import java.io.File;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -166,6 +168,11 @@ public class ConfigUtils {
      */
     public static String getAccountChangeMsg() {
         return getValue("account.change.message");
+    }
+
+    public static List<String> getDevelopOpenIds() {
+        String openIdsStr = getValue("sms.alarm.openids");
+        return Lists.newArrayList(openIdsStr.split(","));
     }
 
     public static Integer getBsApplicationActivity() {

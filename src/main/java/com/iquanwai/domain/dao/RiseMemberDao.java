@@ -33,6 +33,18 @@ public class RiseMemberDao extends DBUtil {
         return true;
     }
 
+    public RiseMember loadValidRiseMember(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseMember WHERE ProfileId = ? AND Expired = 0 AND Del = 0";
+        ResultSetHandler<RiseMember> h = new BeanHandler<RiseMember>(RiseMember.class);
+        try {
+            return runner.query(sql, h, profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
+
     public List<RiseMember> loadWillCloseMembers() {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from RiseMember where Expired = 0 and ExpireDate <= CURRENT_TIMESTAMP AND Del = 0";
@@ -52,19 +64,6 @@ public class RiseMemberDao extends DBUtil {
         try {
             ResultSetHandler<List<RiseMember>> handler = new BeanListHandler<>(RiseMember.class);
             return runner.query(sql, handler);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
-    public RiseMember loadValidRiseMember(Integer profileId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from RiseMember where ProfileId = ? and Expired = 0 AND Del = 0";
-
-        try {
-            ResultSetHandler<RiseMember> handler = new BeanHandler<>(RiseMember.class);
-            return runner.query(sql, handler, profileId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
