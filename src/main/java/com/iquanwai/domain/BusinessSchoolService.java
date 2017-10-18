@@ -195,7 +195,7 @@ public class BusinessSchoolService {
         templateMessage.setTouser(application.getOpenid());
         data.put(checkKey, new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime())));
         logger.info("发送模版消息id ：{}", templateMessage.getTemplate_id());
-        templateMessageService.sendMessage(templateMessage, true);
+        templateMessageService.sendMessage(templateMessage);
         // 更新提醒状态
         businessSchoolApplicationDao.updateNoticeAction(application.getId());
     }

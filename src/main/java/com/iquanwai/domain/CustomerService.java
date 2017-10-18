@@ -201,7 +201,7 @@ public class CustomerService {
                     data.put("remark", new TemplateMessage.Keyword("\n点击卡片，立即办理入学", "#f57f16"));
                 }
 
-                templateMessageService.sendMessage(templateMessage, true);
+                templateMessageService.sendMessage(templateMessage);
             }
         }
     }
@@ -277,7 +277,7 @@ public class CustomerService {
             data.put("name", new TemplateMessage.Keyword(convertMemberTypeStr(riseMember.getMemberTypeId()), "#000000"));
             data.put("expDate", new TemplateMessage.Keyword(DateUtils.parseDateToString(DateUtils.beforeDays(riseMember.getExpireDate(), 1)) + "\n\n到期前加入商学院，可以免申请入学哦！到期后可以复习，但不能选新课啦", "#000000"));
             data.put("remark", new TemplateMessage.Keyword("\n点击卡片，立即加入商学院，加速你的职业发展吧！", "#f57f16"));
-            templateMessageService.sendMessage(templateMessage, true);
+            templateMessageService.sendMessage(templateMessage);
         }
     }
 
@@ -342,7 +342,7 @@ public class CustomerService {
             data.put("keyword3", new TemplateMessage.Keyword(coupon.getAmount().intValue() + "元", "#000000"));
             data.put("remark", new TemplateMessage.Keyword("\n点击卡片查看详情。", "#f57f16"));
 
-            templateMessageService.sendMessage(templateMessage, true);
+            templateMessageService.sendMessage(templateMessage);
         }
 
     }

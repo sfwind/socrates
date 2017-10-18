@@ -66,7 +66,7 @@ public class NotifyInactiveUserJob {
                 data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())));
                 data.put("remark", new TemplateMessage.Keyword("\n想念刷题的爽快感受？点击“详情”，立刻开始提升自己！"));
 
-                templateMessageService.sendMessage(templateMessage, true);
+                templateMessageService.sendMessage(templateMessage);
             } catch (Exception e){
                 logger.error("发送"+improvementPlan.getOpenid()+"失败", e);
             }

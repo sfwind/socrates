@@ -56,7 +56,7 @@ public class NotifyNearCloseJob {
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(improvementPlan.getCloseDate())));
             data.put("remark", new TemplateMessage.Keyword("\n抓紧在到期前解锁所有练习吧！"));
 
-            templateMessageService.sendMessage(templateMessage, true);
+            templateMessageService.sendMessage(templateMessage);
         });
     }
 }
