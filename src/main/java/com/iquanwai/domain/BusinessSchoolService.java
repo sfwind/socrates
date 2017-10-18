@@ -86,6 +86,7 @@ public class BusinessSchoolService {
                     // 之前没有处理过,一个月之内,并且当前不是精英版
                     if (riseMember != null && (riseMember.getMemberTypeId() == RiseMember.ELITE || riseMember.getMemberTypeId() == RiseMember.HALF_ELITE)) {
                         logger.info("精英版自动关闭:{}", profile.getId());
+                        application.setComment("精英版自动关闭");
                         status = BusinessSchoolApplication.AUTO_CLOSE;
                     } else {
                         status = BusinessSchoolApplication.APPLYING;
@@ -100,6 +101,7 @@ public class BusinessSchoolService {
                 } else {
                     logger.info("已经处理过:{}", profile.getId());
                     status = BusinessSchoolApplication.AUTO_CLOSE;
+                    application.setComment("近期已经处理过");
                 }
                 application.setStatus(status);
                 // 常规数据初始化
