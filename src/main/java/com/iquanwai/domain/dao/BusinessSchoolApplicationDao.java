@@ -35,7 +35,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     public BusinessSchoolApplication loadBySubmitId(Integer submitId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Select * from BusinessSchoolApplication where SubmitId = ?";
+        String sql = "Select * from BusinessSchoolApplication where SubmitId = ? AND Del = 0";
         try {
             return runner.query(sql, new BeanHandler<BusinessSchoolApplication>(BusinessSchoolApplication.class), submitId);
         } catch (SQLException e) {
