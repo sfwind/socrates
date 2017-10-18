@@ -82,7 +82,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     public Integer autoCloseApplication(Integer id) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE BusinessSchoolApplication SET Status = 4,Comment='关掉老的申请',CheckTime = CURRENT_TIMESTAMP,Deal = 1, DealTime = CURRENT_TIMESTAMP WHERE Id = ?";
+        String sql = "UPDATE BusinessSchoolApplication SET Status = 4,Comment='关掉老的申请',CheckTime = CURRENT_TIMESTAMP,Deal = 1, DealTime = CURRENT_TIMESTAMP WHERE Id = ? AND Status = 0";
         try {
             return runner.update(sql, id);
         } catch (SQLException e) {

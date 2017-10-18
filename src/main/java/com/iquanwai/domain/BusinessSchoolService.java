@@ -92,7 +92,7 @@ public class BusinessSchoolService {
                         status = BusinessSchoolApplication.APPLYING;
                     }
                     if (CollectionUtils.isNotEmpty(otherBatch)) {
-                        // 之前没处理过，并且有老的申请，将老的申请关掉
+                        // 之前没处理过，并且有老的申请，将老的申请关掉,注意，只会关闭未处理(status=0)的订单
                         otherBatch.forEach(item -> {
                             logger.info("关掉老的申请:{}", profile.getId());
                             businessSchoolApplicationDao.autoCloseApplication(item.getId());
