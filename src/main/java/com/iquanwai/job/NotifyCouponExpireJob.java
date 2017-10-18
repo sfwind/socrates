@@ -21,7 +21,7 @@ public class NotifyCouponExpireJob {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Scheduled(cron = "*/20 * * * * ?")
+    @Scheduled(cron = "0 0 21 * * ?")
     public void work() {
         logger.info("优惠券即将过期提醒任务开始");
         sendCouponExpireNotify();
