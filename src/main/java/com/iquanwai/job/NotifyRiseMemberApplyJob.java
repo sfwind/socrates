@@ -15,7 +15,6 @@ import java.util.Date;
  */
 @Component
 public class NotifyRiseMemberApplyJob {
-
     @Autowired
     private CustomerService customerService;
 
