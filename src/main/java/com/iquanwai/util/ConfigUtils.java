@@ -175,4 +175,16 @@ public class ConfigUtils {
         return Lists.newArrayList(openIdsStr.split(","));
     }
 
+    public static Integer getBsApplicationActivity() {
+        return getIntValue("business.school.application.activity");
+    }
+
+    public static String getRejectApplyMsgId() {
+        return getValue("application.reject.msg");
+    }
+
+    public static String getApproveApplyMsgId(){
+        return getValue("application.approve.msg");
+    }
+
 }

@@ -42,4 +42,16 @@ public class CouponDao extends DBUtil {
         }
         return Lists.newArrayList();
     }
+
+    public List<Coupon> loadCouponsByExpireDate(String expireDate) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM Coupon WHERE ExpiredDate = ? AND Used = 0 GROUP BY ProfileId";
+        ResultSetHandler<List<Coupon>> h = new BeanListHandler<>(Coupon.class);
+        try {
+            return runner.query(sql, h, expireDate);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
 }
