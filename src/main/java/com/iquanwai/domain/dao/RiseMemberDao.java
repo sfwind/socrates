@@ -60,7 +60,7 @@ public class RiseMemberDao extends DBUtil {
 
     public RiseMember loadValidRiseMember(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from RiseMember where ProfileId = ? and Expired = 0";
+        String sql = "select * from RiseMember where ProfileId = ? and Expired = 0 AND Del = 0";
 
         try {
             ResultSetHandler<RiseMember> handler = new BeanHandler<>(RiseMember.class);
