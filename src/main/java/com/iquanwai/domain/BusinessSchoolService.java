@@ -79,8 +79,8 @@ public class BusinessSchoolService {
                 // 固化当前会员类型
                 RiseMember riseMember = riseMemberDao.loadValidRiseMember(profile.getId());
                 application.setOriginMemberType(riseMember != null ? riseMember.getMemberTypeId() : null);
-                // 判断status
-                boolean findOld = otherBatch.stream().anyMatch(item -> item.getStatus() != BusinessSchoolApplication.APPLYING);
+                // 判断status,不是申请中和自动关闭
+                boolean findOld = otherBatch.stream().anyMatch(item -> item.getStatus() != BusinessSchoolApplication.APPLYING && item.getStatus() != BusinessSchoolApplication.AUTO_CLOSE);
                 Integer status;
                 if (!findOld) {
                     // 之前没有处理过,一个月之内,并且当前不是精英版
