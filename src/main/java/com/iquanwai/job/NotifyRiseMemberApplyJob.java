@@ -15,13 +15,12 @@ import java.util.Date;
  */
 @Component
 public class NotifyRiseMemberApplyJob {
-
     @Autowired
     private CustomerService customerService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Scheduled(cron = "0 0 21 * * ?")
+    @Scheduled(cron = "0 0 20 * * ?")
     public void work() {
         logger.info("商学院申请未报名用户提醒任务开始");
         sendRiseMemberApplyMessage();
