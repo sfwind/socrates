@@ -65,10 +65,11 @@ public class CustomerService {
 
     private static final String RISE_PAY_PAGE = "/pay/rise";
 
+    private static final String PERSON_ACCOUNT_PAGE = "/rise/static/customer/account"; // 个人账户页面
+
     // 会员购买申请 发放优惠券的 Category 和 Description
     private static final String RISE_APPLY_COUPON_CATEGORY = "ELITE_RISE_MEMBER";
     private static final String RISE_APPLY_COUPON_DESCRIPTION = "商学院奖学金";
-
 
     @PostConstruct
     public void init() {
@@ -135,6 +136,9 @@ public class CustomerService {
         return profileDao.load(Profile.class, id);
     }
 
+    /**
+     * 商学院申请通过模板消息
+     */
     public void sendRiseMemberApplyMessageByAddTime(Date addTime, Integer distanceDay) {
         String addTimeStr = DateUtils.parseDateToString(addTime);
         // 全部的数据
@@ -195,7 +199,7 @@ public class CustomerService {
     }
 
     /**
-     * 会员的短信
+     * 商学院申请通过短信
      */
     public void sendRiseMemberApplyShortMessageByAddTime(Date addTime) {
         String addTimeStr = DateUtils.parseDateToString(addTime);
@@ -231,11 +235,17 @@ public class CustomerService {
         }
     }
 
+    /**
+     * 在特定日期内，即将过期的会员人数
+     */
     public List<RiseMember> loadRiseMembersByExpireDate(Date expireDate) {
         String dateStr = DateUtils.parseDateToString(expireDate);
         return riseMemberDao.loadRiseMembersByExpireDate(dateStr);
     }
 
+    /**
+     * 给即将过期会员发送模板消息
+     */
     public void sendWillExpireMessage(List<RiseMember> riseMembers, Integer distanceDay) {
         List<Integer> profileIds = riseMembers.stream().map(RiseMember::getProfileId).collect(Collectors.toList());
         List<Profile> profiles = profileDao.loadByProfileIds(profileIds);
@@ -263,6 +273,9 @@ public class CustomerService {
         }
     }
 
+    /**
+     * 给即将过期的会员发送短信
+     */
     public void sendWillExpireShortMessage(List<RiseMember> riseMembers, Integer distanceDay) {
         List<Integer> profileIds = riseMembers.stream().map(RiseMember::getProfileId).collect(Collectors.toList());
         List<Profile> profiles = profileDao.loadByProfileIds(profileIds);
@@ -290,6 +303,40 @@ public class CustomerService {
             smsDto.setType(SMSDto.PROMOTION);
             shortMessageService.sendShorMessage(smsDto);
         }
+    }
+
+    /**
+     * 给优惠券即将过期的人发送模板消息
+     */
+    public void sendWillExpireCouponMessage(Date distanceDay) {
+        String distanceDayStr = DateUtils.parseDateToString(distanceDay);
+        List<Coupon> coupons = couponDao.loadCouponsByExpireDate(distanceDayStr);
+        List<Integer> profileIds = coupons.stream().map(Coupon::getProfileId).collect(Collectors.toList());
+        Map<Integer, Coupon> couponMap = coupons.stream().collect(Collectors.toMap(Coupon::getProfileId, coupon -> coupon));
+
+        List<Profile> profiles = profileDao.loadByProfileIds(profileIds);
+
+        for (Profile profile : profiles) {
+            Coupon coupon = couponMap.get(profile.getId());
+
+            TemplateMessage templateMessage = new TemplateMessage();
+            templateMessage.setTouser(profile.getOpenid());
+            templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
+            templateMessage.setUrl(ConfigUtils.getAppDomain() + PERSON_ACCOUNT_PAGE);
+            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+            templateMessage.setData(data);
+
+            String description = coupon.getDescription().contains("奖学金") ? "奖学金" : "优惠券";
+            String first = "Hi " + profile.getNickname() + "，你的" + description + "即将到期，请尽快使用吧！\n";
+            data.put("first", new TemplateMessage.Keyword(first, "#000000"));
+            data.put("keyword1", new TemplateMessage.Keyword("1天后（" + DateUtils.parseDateToString(DateUtils.beforeDays(coupon.getExpiredDate(), 1)) + "）", "#000000"));
+            data.put("keyword2", new TemplateMessage.Keyword(description, "#000000"));
+            data.put("keyword3", new TemplateMessage.Keyword(coupon.getAmount().intValue() + "元", "#000000"));
+            data.put("remark", new TemplateMessage.Keyword("\n点击卡片查看详情。", "#f57f16"));
+
+            templateMessageService.sendMessage(templateMessage);
+        }
+
     }
 
     private String convertMemberTypeStr(Integer memberTypeId) {
