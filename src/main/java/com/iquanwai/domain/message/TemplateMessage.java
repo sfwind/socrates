@@ -15,6 +15,7 @@ public class TemplateMessage {
     private String touser;
     private String template_id;
     private String url;
+    private String comment;
 
     private Map<String, Keyword> data = Maps.newHashMap();
 

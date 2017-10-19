@@ -31,6 +31,7 @@ public class BusinessSchoolService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     public Integer BS_APPLICATION;
     public static String PAY_URL = "https://www.iquanwai.com/pay/rise";
+    public static String PAY_CAMP_URL = "https://www.iquanwai.com/pay/camp";
 
     @PostConstruct
     public void init() {
@@ -135,13 +136,13 @@ public class BusinessSchoolService {
         templateMessage.setTemplate_id(ConfigUtils.getRejectApplyMsgId());
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
-        templateMessage.setUrl(PAY_URL);
+        templateMessage.setUrl(PAY_CAMP_URL);
+        templateMessage.setComment("发送拒信");
         data.put("keyword1", new TemplateMessage.Keyword("【圈外商学院】"));
         data.put("keyword2", new TemplateMessage.Keyword("未通过"));
-        data.put("remark", new TemplateMessage.Keyword("本期商学院的申请者都异常优秀，我们无法为每位申请者提供学习机会，但是很高兴你有一颗追求卓越的心！点击下方“详情”，了解预科班--圈外训练营。"));
+        data.put("remark", new TemplateMessage.Keyword("\n本期商学院的申请者都异常优秀，我们无法为每位申请者提供学习机会，但是很高兴你有一颗追求卓越的心！\n\n点击下方“详情”，了解商学院预科班--圈外训练营。"));
         // 同样的对象不需要定义两次
-        data.put("first", new TemplateMessage.Keyword("在认真审核过你的入学申请后，我们很遗憾地通知你不能加入我们的【圈外同学商学院】。" +
-                "\n在此之前，我们推荐你先加入我们的【训练营】进行学习。训练营能够帮你快速集中地提高专项能力，为你下次申请商学院提高录取通率。\n点击下方“详情”即可了解训练营。\n"));
+        data.put("first", new TemplateMessage.Keyword("认真审核过你的入学申请后，我们很遗憾地通知，你本次未被商学院录取。\n\n在此之前，我们推荐你进入【训练营】进行学习。训练营能够帮你快速提高专项能力，为你进入商学院做好准备。点击了解训练营。\n"));
         applications.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword3"));
     }
 
@@ -164,6 +165,7 @@ public class BusinessSchoolService {
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
         templateMessage.setUrl(PAY_URL);
+        templateMessage.setComment("商学院审核通过");
         data.put("keyword1", new TemplateMessage.Keyword("通过"));
         data.put("remark", new TemplateMessage.Keyword("入学方式：点击本通知书，即可办理\n\n在未来的日子里，希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！"));
         // 同样的对象不需要定义两次
@@ -178,6 +180,7 @@ public class BusinessSchoolService {
         TemplateMessage noCouponMsg = new TemplateMessage();
         noCouponMsg.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
         noCouponMsg.setUrl(PAY_URL);
+        noCouponMsg.setComment("商学院审核通过,无优惠券");
         Map<String, TemplateMessage.Keyword> noCouponData = Maps.newHashMap();
         noCouponMsg.setData(noCouponData);
         noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！\n本期商学院的申请者都异常优秀，能够占有一席是很值得自豪的。\n点击本通知书下方的“详情”即可办理入学。\n"));
