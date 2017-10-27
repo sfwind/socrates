@@ -1,4 +1,4 @@
-package com.iquanwai.domain.accessToken;
+package com.iquanwai.domain.accesstoken;
 
 
 import com.google.common.collect.Maps;
