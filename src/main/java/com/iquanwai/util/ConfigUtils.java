@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.iquanwai.util.zk.ZKConfigUtils;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
@@ -12,25 +14,18 @@ import java.util.TimerTask;
 
 public class ConfigUtils {
     private static Config config;
-    private static Config localconfig;
     private static Config fileconfig;
     private static ZKConfigUtils zkConfigUtils;
 
-    private static Timer timer;
+    private static Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
 
     static {
-        loadConfig();
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                loadConfig();
-            }
-        }, 0, 1000 * 60);
+        loadLocalConfig();
         zkConfigUtils = new ZKConfigUtils();
     }
 
-    private static void loadConfig() {
+    private static void loadLocalConfig() {
+        logger.info("load local config");
         config = ConfigFactory.load("localconfig");
         fileconfig = ConfigFactory.parseFile(new File("/data/config/localconfig"));
         config = fileconfig.withFallback(config);
@@ -79,14 +74,6 @@ public class ConfigUtils {
 
     public static String getFragmentJdbcUrl() {
         return getValue("db.fragment.url");
-    }
-
-    public static String getFragmentUsername() {
-        return getValue("db.fragment.name");
-    }
-
-    public static String getFragmentPassword() {
-        return getValue("db.fragment.password");
     }
 
     public static String getForumJdbcUrl() {

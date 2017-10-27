@@ -1,6 +1,6 @@
 package com.iquanwai.job;
 
-import com.iquanwai.domain.accessToken.AccessTokenService;
+import com.iquanwai.domain.accesstoken.AccessTokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

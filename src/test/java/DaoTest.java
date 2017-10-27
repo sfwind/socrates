@@ -1,4 +1,4 @@
-import com.iquanwai.domain.accessToken.AccessTokenService;
+import com.iquanwai.domain.accesstoken.AccessTokenService;
 import com.iquanwai.domain.dao.HomeworkVoteDao;
 import com.iquanwai.domain.dao.ImprovementPlanDao;
 import com.iquanwai.domain.dao.RedisUtil;

@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,8 +28,6 @@ public class PlanService {
     private ProblemDao problemDao;
     @Autowired
     private RiseUserLoginDao riseUserLoginDao;
-    @Autowired
-    private ProfileDao profileDao;
     @Autowired
     private CustomerService customerService;
     @Autowired
@@ -98,7 +95,7 @@ public class PlanService {
 
         // 一次性获取所有的 Problem 信息
         List<Problem> problemList = problemDao.loadAll(Problem.class);
-        Map<Integer, String> problemMap = new HashMap<>();
+        Map<Integer, String> problemMap = Maps.newHashMap();
         problemList.forEach(problem -> problemMap.put(problem.getId(), problem.getProblem()));
 
         // 获取三天前学员 OpenId 和最近一次的 LoginDate

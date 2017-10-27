@@ -2,6 +2,7 @@ package com.iquanwai.domain.dao;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.domain.po.OperationLog;
+import com.iquanwai.util.ThreadPool;
 import org.apache.commons.dbutils.AsyncQueryRunner;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
@@ -25,7 +25,7 @@ public class OperationLogDao extends DBUtil {
 
     public int insert(OperationLog log){
         QueryRunner run = new QueryRunner(getDataSource());
-        AsyncQueryRunner asyncRun = new AsyncQueryRunner(Executors.newSingleThreadExecutor(), run);
+        AsyncQueryRunner asyncRun = new AsyncQueryRunner(ThreadPool.createSingleThreadExecutor(), run);
         try {
             String insertSql = "INSERT INTO OperatingLog(Openid, Module, Function, Action, OperateTime, OperateDate, Memo) " +
                     "VALUES(?, ?, ?, ?, now(), curdate(), ?)";
@@ -54,7 +54,7 @@ public class OperationLogDao extends DBUtil {
                 "                     (Action = 'PC端加载小课论坛')) ";
 
         try{
-            ResultSetHandler<List<String>> handler = new ColumnListHandler<String>();
+            ResultSetHandler<List<String>> handler = new ColumnListHandler<>();
             return runner.query(sql, handler, days);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

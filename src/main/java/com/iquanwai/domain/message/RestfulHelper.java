@@ -1,6 +1,6 @@
 package com.iquanwai.domain.message;
 
-import com.iquanwai.domain.accessToken.AccessTokenService;
+import com.iquanwai.domain.accesstoken.AccessTokenService;
 import com.iquanwai.domain.exception.WeixinException;
 import com.iquanwai.util.CommonUtils;
 import okhttp3.*;
