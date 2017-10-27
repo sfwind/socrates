@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -25,6 +24,7 @@ public class ThreadPool {
     private final static int INIT_SIZE = 10;
     private final static int IDLE_TIME = 1;
     private final static int MAX_QUEUE_SIZE = 2000;
+    private final static int SLEEP_SECONDS = 60;
 
     public static void execute(Runnable runnable) {
         if (runnable == null) {
@@ -45,13 +45,13 @@ public class ThreadPool {
         if (POOL != null) {
             POOL.shutdown();
             try {
-                if (!POOL.awaitTermination(60, TimeUnit.SECONDS)) {
+                if (!POOL.awaitTermination(SLEEP_SECONDS, TimeUnit.SECONDS)) {
                     logger.info("thread pool is terminate now");
                     // pool didn't terminate after the first try
                     POOL.shutdownNow();
                 }
 
-                if (!POOL.awaitTermination(60, TimeUnit.SECONDS)) {
+                if (!POOL.awaitTermination(SLEEP_SECONDS, TimeUnit.SECONDS)) {
                     logger.error("thread pool is hanging, leave it alone");
                     // pool didn't terminate after the second try
                 }
@@ -72,10 +72,7 @@ public class ThreadPool {
     }
 
 
-    public static ThreadPoolExecutor createSingleThreadExecutor() {
-        return new ThreadPoolExecutor(1, 1,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),
-                new ThreadPoolExecutor.CallerRunsPolicy());
+    public static ThreadPoolExecutor getThreadExecutor() {
+        return POOL;
     }
 }
