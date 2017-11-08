@@ -148,8 +148,12 @@ public class MessageService {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof VoteMessage)) return false;
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof VoteMessage)) {
+                return false;
+            }
 
             VoteMessage that = (VoteMessage) o;
 
