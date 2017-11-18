@@ -52,42 +52,4 @@ public class CustomerMessageLogDao extends DBUtil {
         return Lists.newArrayList();
     }
 
-    // 获取在一定时间段之内的所有记录
-    public List<CustomerMessageLog> loadInDistanceDate(String openId, String distanceDate) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM CustomerMessageLog WHERE Date(PublishTime) > ? AND OpenId = ? AND ValidPush = 1";
-        ResultSetHandler<List<CustomerMessageLog>> h = new BeanListHandler<>(CustomerMessageLog.class);
-        try {
-            return runner.query(sql, h, distanceDate, openId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
-
-    public List<CustomerMessageLog> loadInDistanceTime(String openId, String distanceTime) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM CustomerMessageLog WHERE PublishTime > ? AND OpenId = ? AND ValidPush = 1";
-        ResultSetHandler<List<CustomerMessageLog>> h = new BeanListHandler<>(CustomerMessageLog.class);
-        try {
-            return runner.query(sql, h, distanceTime, openId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
-
-    // 根据发送内容的 hashCode 来获取模板消息发送记录
-    public List<CustomerMessageLog> loadByContentHashCode(String openId, String contentHashCode) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM CustomerMessageLog WHERE OpenId = ? AND ContentHash = ? AND ValidPush = 1";
-        ResultSetHandler<List<CustomerMessageLog>> h = new BeanListHandler<>(CustomerMessageLog.class);
-        try {
-            return runner.query(sql, h, openId, contentHashCode);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
-
 }
