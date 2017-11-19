@@ -1,7 +1,7 @@
 package com.iquanwai.domain;
 
-import com.google.common.collect.Lists;
 import com.iquanwai.domain.dao.ApplicationSubmitDao;
+import com.iquanwai.domain.dao.AuditionClassMemberDao;
 import com.iquanwai.domain.dao.ImprovementPlanDao;
 import com.iquanwai.domain.dao.PracticePlanDao;
 import com.iquanwai.domain.po.*;
@@ -29,13 +29,15 @@ public class AuditionService {
     private PracticePlanDao practicePlanDao;
     @Autowired
     private ApplicationSubmitDao applicationSubmitDao;
+    @Autowired
+    private AuditionClassMemberDao auditionClassMemberDao;
 
 
     private static final int AUDITION_PROBLEM_ID = 9;
 
     public void sendAuditionCompleteReward() {
-        // TODO
-        List<AuditionClassMember> auditionClassMembers = Lists.newArrayList();
+        // TODO 确认金额
+        List<AuditionClassMember> auditionClassMembers = auditionClassMemberDao.loadByStartDate(DateUtils.getMonday(new Date()));
 
         List<Integer> auditionProfileIds = auditionClassMembers.stream().map(AuditionClassMember::getProfileId).collect(Collectors.toList());
 
@@ -98,11 +100,10 @@ public class AuditionService {
                     coupon.setOpenid(improvementPlan.getOpenid());
                     coupon.setProfileId(improvementPlan.getProfileId());
                     // TODO 确定金额
-                    coupon.setAmount(100.00);
+                    coupon.setAmount(200.00);
                     coupon.setUsed(0);
-                    coupon.setExpiredDate(DateUtils.afterMonths(new Date(), 1));
+                    coupon.setExpiredDate(DateUtils.afterDays(new Date(), 7));
                     coupon.setDescription("试听课奖学金");
-
                 }
             }
         });
