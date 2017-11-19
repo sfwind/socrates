@@ -103,6 +103,7 @@ public class AuditionService {
                     coupon.setAmount(200.00);
                     coupon.setUsed(0);
                     coupon.setExpiredDate(DateUtils.afterDays(new Date(), 7));
+                    coupon.setCategory("ELITE_RISE_MEMBER");
                     coupon.setDescription("试听课奖学金");
                 }
             }
