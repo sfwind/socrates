@@ -2,6 +2,7 @@ package com.iquanwai.domain;
 
 import com.iquanwai.domain.dao.*;
 import com.iquanwai.domain.po.*;
+import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +32,6 @@ public class AuditionService {
     @Autowired
     private CouponDao couponDao;
 
-
-    private static final int AUDITION_PROBLEM_ID = 9;
-
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public void sendAuditionCompleteReward() {
@@ -44,7 +42,7 @@ public class AuditionService {
 
         List<Integer> auditionProfileIds = auditionClassMembers.stream().map(AuditionClassMember::getProfileId).collect(Collectors.toList());
 
-        List<ImprovementPlan> improvementPlans = improvementPlanDao.loadPlansByProfileIds(auditionProfileIds, AUDITION_PROBLEM_ID);
+        List<ImprovementPlan> improvementPlans = improvementPlanDao.loadPlansByProfileIds(auditionProfileIds, ConfigUtils.getTrialProblemId());
         Map<Integer, ImprovementPlan> improvementPlanMap = improvementPlans.stream().collect(Collectors.toMap(ImprovementPlan::getId, improvementPlan -> improvementPlan));
         List<Integer> riseClassMemberPlanIds = improvementPlans.stream().map(ImprovementPlan::getId).collect(Collectors.toList());
 
