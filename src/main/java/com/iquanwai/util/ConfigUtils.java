@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class ConfigUtils {
     private static Config config;
@@ -170,8 +168,12 @@ public class ConfigUtils {
         return getValue("application.reject.msg");
     }
 
-    public static String getApproveApplyMsgId(){
+    public static String getApproveApplyMsgId() {
         return getValue("application.approve.msg");
+    }
+
+    public static Integer getTrialProblemId() {
+        return getIntValue("rise.trial.problem.id");
     }
 
 }
