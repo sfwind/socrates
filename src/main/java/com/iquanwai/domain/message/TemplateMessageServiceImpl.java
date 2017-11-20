@@ -3,7 +3,9 @@ package com.iquanwai.domain.message;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.domain.CustomerService;
+import com.iquanwai.domain.dao.AuditionClassMemberDao;
 import com.iquanwai.domain.dao.CustomerMessageLogDao;
+import com.iquanwai.domain.po.AuditionClassMember;
 import com.iquanwai.domain.po.CustomerMessageLog;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.util.CommonUtils;
@@ -29,6 +31,8 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     private CustomerMessageLogDao customerMessageLogDao;
     @Autowired
     private CustomerService customerService;
+    @Autowired
+    private AuditionClassMemberDao auditionClassMemberDao;
 
     @Override
     public boolean sendMessage(TemplateMessage templateMessage) {
@@ -91,7 +95,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
 
         boolean authority;
         // 1. 会员用户每周最多收到 7 条消息
-        if (profile.getRiseMember() == 1) {
+        if (profile.getRiseMember() == 1 || checkOtherAuthority(profile.getId())) {
             Date distanceDate = DateUtils.beforeDays(new Date(), 7);
             Long result = customerMessageLogs.stream().filter(messageLog -> messageLog.getPublishTime().compareTo(distanceDate) > 0).count();
             authority = result.intValue() < 7;
@@ -149,6 +153,11 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         customerMessageLog.setValidPush(validPush ? 1 : 0);
         customerMessageLog.setComment(templateMessage.getComment());
         customerMessageLogDao.insert(customerMessageLog);
+    }
+
+    private boolean checkOtherAuthority(Integer profileId) {
+        AuditionClassMember auditionClassMember = auditionClassMemberDao.loadByProfileId(profileId);
+        return auditionClassMember != null;
     }
 
 }

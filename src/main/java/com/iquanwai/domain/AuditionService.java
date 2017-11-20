@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 public class AuditionService {
 
     @Autowired
+    private CustomerService customerService;
+    @Autowired
     private ImprovementPlanDao improvementPlanDao;
     @Autowired
     private PracticePlanDao practicePlanDao;
@@ -48,6 +50,8 @@ public class AuditionService {
 
         riseClassMemberPlanIds.forEach(planId -> {
             logger.info("正在处理：" + planId);
+
+            // 处理到某条记录，将该条记录 checked 状态改为 1
             ImprovementPlan improvementPlan = improvementPlanMap.get(planId);
             AuditionClassMember auditionClassMember = auditionClassMemberMap.get(improvementPlan.getProfileId());
             auditionClassMemberDao.updateChecked(auditionClassMember.getId(), true);
@@ -108,7 +112,25 @@ public class AuditionService {
                     coupon.setExpiredDate(DateUtils.afterDays(new Date(), 7));
                     coupon.setCategory(Coupon.Category.ELITE_RISE_MEMBER);
                     coupon.setDescription("试听课奖学金");
-                    couponDao.insert(coupon);
+                    int result = couponDao.insert(coupon);
+                    if (result > 0) {
+                        // TemplateMessage templateMessage = new TemplateMessage();
+                        // templateMessage.setTouser(profile.getOpenid());
+                        // Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+                        // templateMessage.setData(data);
+                        // templateMessage.setUrl(ConfigUtils.getAppDomain() + RISE_PAY_PAGE);
+                        //
+                        // // 设置消息 message id
+                        // templateMessage.setTemplate_id(ConfigUtils.getApplySuccessMsg());
+                        //
+                        // // 无优惠券模板消息内容
+                        // CustomerStatus customerStatus = customerStatusMap.get(profileId);
+                        // String first = "我们很荣幸地通知你被商学院录取，请尽快办理入学，及时开始学习并结识优秀的校友吧！\n";
+                        // data.put("first", new TemplateMessage.Keyword(first, "#000000"));
+                        // data.put("keyword1", new TemplateMessage.Keyword("已录取", "#000000"));
+                        // data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(customerStatus.getAddTime()), "#000000"));
+                        // data.put("remark", new TemplateMessage.Keyword("\n点击卡片，立即办理入学", "#f57f16"));
+                    }
                 }
             }
         });

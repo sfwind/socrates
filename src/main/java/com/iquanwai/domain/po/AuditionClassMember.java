@@ -13,7 +13,12 @@ public class AuditionClassMember {
     private String className;
     private Date startDate;
     private Boolean active;
+    private Integer identity;
     private Boolean checked;
     private Boolean del;
+
+    public interface Identity {
+        int NORMAL = 0;
+    }
 
 }
