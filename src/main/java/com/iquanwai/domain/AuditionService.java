@@ -1,11 +1,10 @@
 package com.iquanwai.domain;
 
-import com.iquanwai.domain.dao.ApplicationSubmitDao;
-import com.iquanwai.domain.dao.AuditionClassMemberDao;
-import com.iquanwai.domain.dao.ImprovementPlanDao;
-import com.iquanwai.domain.dao.PracticePlanDao;
+import com.iquanwai.domain.dao.*;
 import com.iquanwai.domain.po.*;
 import com.iquanwai.util.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +21,6 @@ import java.util.stream.Collectors;
 public class AuditionService {
 
     @Autowired
-    private CustomerService customerService;
-    @Autowired
     private ImprovementPlanDao improvementPlanDao;
     @Autowired
     private PracticePlanDao practicePlanDao;
@@ -31,13 +28,19 @@ public class AuditionService {
     private ApplicationSubmitDao applicationSubmitDao;
     @Autowired
     private AuditionClassMemberDao auditionClassMemberDao;
+    @Autowired
+    private CouponDao couponDao;
 
 
     private static final int AUDITION_PROBLEM_ID = 9;
 
+    private Logger logger = LoggerFactory.getLogger(getClass());
+
     public void sendAuditionCompleteReward() {
-        // TODO 确认金额
         List<AuditionClassMember> auditionClassMembers = auditionClassMemberDao.loadByStartDate(DateUtils.getMonday(new Date()));
+        Map<Integer, AuditionClassMember> auditionClassMemberMap = auditionClassMembers.stream().collect(Collectors.toMap(AuditionClassMember::getProfileId, auditionClassMember -> auditionClassMember));
+
+        auditionClassMembers = auditionClassMembers.stream().filter(auditionClassMember -> !auditionClassMember.getChecked()).collect(Collectors.toList());
 
         List<Integer> auditionProfileIds = auditionClassMembers.stream().map(AuditionClassMember::getProfileId).collect(Collectors.toList());
 
@@ -46,6 +49,7 @@ public class AuditionService {
         List<Integer> riseClassMemberPlanIds = improvementPlans.stream().map(ImprovementPlan::getId).collect(Collectors.toList());
 
         riseClassMemberPlanIds.forEach(planId -> {
+            logger.info("正在处理：" + planId);
             boolean sendAuditionReward = true;
             List<PracticePlan> practicePlans = practicePlanDao.loadPracticePlan(planId);
 
@@ -55,11 +59,10 @@ public class AuditionService {
                         .filter(practicePlan ->
                                 PracticePlan.WARM_UP == practicePlan.getType() || PracticePlan.WARM_UP_REVIEW == practicePlan.getType()
                                         || PracticePlan.KNOWLEDGE == practicePlan.getType() || PracticePlan.KNOWLEDGE_REVIEW == practicePlan.getType())
-                        .filter(practicePlan ->
-                                practicePlan.getStatus() == 0)
+                        .filter(practicePlan -> practicePlan.getStatus() == 0)
                         .count();
                 if ((unCompleteNecessaryCountLong.intValue()) > 0) {
-                    // 必须完成知识点、选择题的题数大于 0，不发结课证书
+                    // 必须完成知识点、选择题的题数大于 0，不发奖学金
                     sendAuditionReward = false;
                 } else {
                     // 所有必须完成的知识点、选择题都已经完成
@@ -97,19 +100,21 @@ public class AuditionService {
                 if (sendAuditionReward) {
                     ImprovementPlan improvementPlan = improvementPlanMap.get(planId);
                     Coupon coupon = new Coupon();
-                    coupon.setOpenid(improvementPlan.getOpenid());
+                    coupon.setOpenId(improvementPlan.getOpenid());
                     coupon.setProfileId(improvementPlan.getProfileId());
-                    // TODO 确定金额
-                    coupon.setAmount(200.00);
+                    coupon.setAmount(200);
                     coupon.setUsed(0);
                     coupon.setExpiredDate(DateUtils.afterDays(new Date(), 7));
-                    coupon.setCategory("ELITE_RISE_MEMBER");
+                    coupon.setCategory(Coupon.Category.ELITE_RISE_MEMBER);
                     coupon.setDescription("试听课奖学金");
+                    int result = couponDao.insert(coupon);
+                    if (result > 0) {
+                        AuditionClassMember auditionClassMember = auditionClassMemberMap.get(improvementPlan.getProfileId());
+                        auditionClassMemberDao.updateChecked(auditionClassMember.getId(), true);
+                    }
                 }
             }
         });
-
-
     }
 
 }

@@ -30,4 +30,15 @@ public class AuditionClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    public int updateChecked(Integer auditionClassMemberId, Boolean checked) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE AuditionClassMember SET Checked = ? WHERE Id = ?";
+        try {
+            return runner.update(sql, checked, auditionClassMemberId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
 }

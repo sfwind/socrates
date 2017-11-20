@@ -15,7 +15,8 @@ public class AuditionCompleteRewardJob {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Scheduled(cron = "")
+    // @Scheduled(cron = "0 30 21 * * ?")
+    @Scheduled(cron = "5 * * * * ?")
     public void sendAuditionCompleteReward() {
         logger.info("发送试听课奖学金 job 开始...");
         auditionService.sendAuditionCompleteReward();
