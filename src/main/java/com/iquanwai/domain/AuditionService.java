@@ -50,6 +50,10 @@ public class AuditionService {
 
         riseClassMemberPlanIds.forEach(planId -> {
             logger.info("正在处理：" + planId);
+            ImprovementPlan improvementPlan = improvementPlanMap.get(planId);
+            AuditionClassMember auditionClassMember = auditionClassMemberMap.get(improvementPlan.getProfileId());
+            auditionClassMemberDao.updateChecked(auditionClassMember.getId(), true);
+
             boolean sendAuditionReward = true;
             List<PracticePlan> practicePlans = practicePlanDao.loadPracticePlan(planId);
 
@@ -98,7 +102,6 @@ public class AuditionService {
                 }
 
                 if (sendAuditionReward) {
-                    ImprovementPlan improvementPlan = improvementPlanMap.get(planId);
                     Coupon coupon = new Coupon();
                     coupon.setOpenId(improvementPlan.getOpenid());
                     coupon.setProfileId(improvementPlan.getProfileId());
@@ -107,11 +110,7 @@ public class AuditionService {
                     coupon.setExpiredDate(DateUtils.afterDays(new Date(), 7));
                     coupon.setCategory(Coupon.Category.ELITE_RISE_MEMBER);
                     coupon.setDescription("试听课奖学金");
-                    int result = couponDao.insert(coupon);
-                    if (result > 0) {
-                        AuditionClassMember auditionClassMember = auditionClassMemberMap.get(improvementPlan.getProfileId());
-                        auditionClassMemberDao.updateChecked(auditionClassMember.getId(), true);
-                    }
+                    couponDao.insert(coupon);
                 }
             }
         });
