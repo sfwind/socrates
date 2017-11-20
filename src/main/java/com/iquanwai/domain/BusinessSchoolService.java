@@ -118,7 +118,8 @@ public class BusinessSchoolService {
     public void noticeApplication(Date date) {
         List<BusinessSchoolApplication> applications = businessSchoolApplicationDao.loadCheckApplicationsForNotice(date);
         logger.info("待发送通知:{} 条", applications.size());
-        Map<Integer, List<BusinessSchoolApplication>> waitNoticeMap = applications.stream().collect(Collectors.groupingBy(BusinessSchoolApplication::getStatus));
+        Map<Integer, List<BusinessSchoolApplication>> waitNoticeMap = applications.stream()
+                .collect(Collectors.groupingBy(BusinessSchoolApplication::getStatus));
         // 通知 通过的
         List<BusinessSchoolApplication> approveGroup = waitNoticeMap.getOrDefault(BusinessSchoolApplication.APPROVE, Lists.newArrayList());
         this.noticeApplicationForApprove(approveGroup);
@@ -165,7 +166,7 @@ public class BusinessSchoolService {
         templateMessage.setUrl(PAY_URL);
         templateMessage.setComment("商学院审核通过");
         data.put("keyword1", new TemplateMessage.Keyword("通过"));
-        data.put("remark", new TemplateMessage.Keyword("奖学金和录取通知7天内有效，请及时点击本通知书，办理入学。", "#f57f16"));
+        data.put("remark", new TemplateMessage.Keyword("奖学金和录取通知2天内有效，请及时点击本通知书，办理入学。", "#f57f16"));
         // 同样的对象不需要定义两次
         coupons.forEach((amount, applicationGroup) -> {
             data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！" +
@@ -183,7 +184,7 @@ public class BusinessSchoolService {
         noCouponMsg.setData(noCouponData);
         noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
         noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
-        noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知书7天内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
+        noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知书2天内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
         // 发送没有优惠券的
         if (noCouponGroup != null) {
             noCouponGroup.forEach(app -> this.sendMsg(noCouponMsg, noCouponData, app, "keyword2"));

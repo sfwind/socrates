@@ -29,11 +29,13 @@ public class NotifyRiseMemberApplyJob {
 
     private void sendRiseMemberApplyMessage() {
         // 优惠券的过期展示日期要比数据库中减少一天
-        // 会员申请通过之后，优惠券的有效日期是 7 天，提醒日期为第六天晚上
-        Date sixDate = DateUtils.beforeDays(new Date(), 6);
-        customerService.sendRiseMemberApplyMessageByAddTime(sixDate, 1);
+        // 会员申请通过之后，优惠券的有效日期是 2 天，提醒日期为第六天晚上
+        Date oneDay = DateUtils.beforeDays(new Date(), 1);
+        Date twoDay = DateUtils.beforeDays(new Date(), 2);
+        customerService.sendRiseMemberApplyMessageByAddTime(oneDay, 1);
+        customerService.sendRiseMemberApplyMessageByAddTime(twoDay, 0);
 
-        customerService.sendRiseMemberApplyShortMessageByAddTime(sixDate);
+//        customerService.sendRiseMemberApplyShortMessageByAddTime(sixDate);
     }
 
 }

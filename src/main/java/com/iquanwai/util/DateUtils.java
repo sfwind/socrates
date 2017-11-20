@@ -12,6 +12,8 @@ public class DateUtils {
     private static DateTimeFormatter format2 = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
     private static DateTimeFormatter format3 = DateTimeFormat.forPattern("yyyyMMddHHmmss");
     private static DateTimeFormatter format4 = DateTimeFormat.forPattern("yyyy.MM.dd");
+    private static DateTimeFormatter format5 = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+    private static DateTimeFormatter format6 = DateTimeFormat.forPattern("HH:mm");
 
     public static String parseDateToString(Date date) {
         return format1.print(new DateTime(date));
@@ -64,6 +66,14 @@ public class DateUtils {
 
     public static long currentTimestamp(){
         return System.currentTimeMillis()/1000;
+    }
+
+    public static String parseDateToString5(Date date) {
+        return format5.print(new DateTime(date));
+    }
+
+    public static String parseDateToString6(Date date) {
+        return format6.print(new DateTime(date));
     }
 
     public static String parseDateToString3(Date date) {
