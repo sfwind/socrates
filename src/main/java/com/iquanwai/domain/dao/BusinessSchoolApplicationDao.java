@@ -22,22 +22,11 @@ import java.util.List;
 public class BusinessSchoolApplicationDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public BusinessSchoolApplication loadByOpenId(String openId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM BusinessSchoolApplication WHERE Openid = ? AND Del = 0";
-        try {
-            return runner.query(sql, new BeanHandler<BusinessSchoolApplication>(BusinessSchoolApplication.class), openId);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
     public BusinessSchoolApplication loadBySubmitId(Integer submitId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "Select * from BusinessSchoolApplication where SubmitId = ? AND Del = 0";
         try {
-            return runner.query(sql, new BeanHandler<BusinessSchoolApplication>(BusinessSchoolApplication.class), submitId);
+            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), submitId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -49,7 +38,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "Select * from BusinessSchoolApplication where ProfileId = ? and CheckTime >= ? AND Del = 0";
         try {
-            return runner.query(sql, new BeanListHandler<BusinessSchoolApplication>(BusinessSchoolApplication.class), profileId, DateUtils.beforeDays(date, checkTime));
+            return runner.query(sql, new BeanListHandler<>(BusinessSchoolApplication.class), profileId, DateUtils.beforeDays(date, checkTime));
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -58,11 +47,17 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     public Integer insert(BusinessSchoolApplication businessSchoolApplication) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO BusinessSchoolApplication(SubmitId, ProfileId, Openid, Status, CheckTime, IsDuplicate, Deal, OriginMemberType,SubmitTime,DealTime,Comment) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO BusinessSchoolApplication(SubmitId, ProfileId, Openid, Status, CheckTime, " +
+                "IsDuplicate, Deal, OriginMemberType,SubmitTime,DealTime,Comment) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         try {
-            return runner.insert(sql, new ScalarHandler<Long>(), businessSchoolApplication.getSubmitId(), businessSchoolApplication.getProfileId(), businessSchoolApplication.getOpenid(),
-                    businessSchoolApplication.getStatus(), businessSchoolApplication.getCheckTime(), businessSchoolApplication.getIsDuplicate(),
-                    businessSchoolApplication.getDeal(), businessSchoolApplication.getOriginMemberType(), businessSchoolApplication.getSubmitTime(), businessSchoolApplication.getDealTime(), businessSchoolApplication.getComment()).intValue();
+            return runner.insert(sql, new ScalarHandler<Long>(), businessSchoolApplication.getSubmitId(),
+                    businessSchoolApplication.getProfileId(), businessSchoolApplication.getOpenid(),
+                    businessSchoolApplication.getStatus(), businessSchoolApplication.getCheckTime(),
+                    businessSchoolApplication.getIsDuplicate(), businessSchoolApplication.getDeal(),
+                    businessSchoolApplication.getOriginMemberType(),
+                    businessSchoolApplication.getSubmitTime(), businessSchoolApplication.getDealTime(),
+                    businessSchoolApplication.getComment()).intValue();
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -73,7 +68,18 @@ public class BusinessSchoolApplicationDao extends DBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from BusinessSchoolApplication where DATE(CheckTime) = ? AND Status in (1,2) AND Deal = 0 AND Del = 0";
         try {
-            return runner.query(sql, new BeanListHandler<BusinessSchoolApplication>(BusinessSchoolApplication.class), DateUtils.parseDateToString(date));
+            return runner.query(sql, new BeanListHandler<>(BusinessSchoolApplication.class), DateUtils.parseDateToString(date));
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public List<BusinessSchoolApplication> loadDealApplicationsForNotice(Date date) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from BusinessSchoolApplication where DATE(DealTime) = ? AND Status = 1 AND Del = 0";
+        try {
+            return runner.query(sql, new BeanListHandler<>(BusinessSchoolApplication.class), DateUtils.parseDateToString(date));
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -82,7 +88,8 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     public Integer autoCloseApplication(Integer id) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE BusinessSchoolApplication SET Status = 4,Comment='关掉老的申请',CheckTime = CURRENT_TIMESTAMP,Deal = 1, DealTime = CURRENT_TIMESTAMP WHERE Id = ? AND Status = 0";
+        String sql = "UPDATE BusinessSchoolApplication SET Status = 4,Comment='关掉老的申请',CheckTime = CURRENT_TIMESTAMP, Deal = 1, " +
+                "DealTime = CURRENT_TIMESTAMP WHERE Id = ? AND Status = 0";
         try {
             return runner.update(sql, id);
         } catch (SQLException e) {
@@ -101,5 +108,16 @@ public class BusinessSchoolApplicationDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return -1;
+    }
+
+    public BusinessSchoolApplication loadLastApproveApplication(Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM BusinessSchoolApplication WHERE ProfileId = ? AND Del = 0 AND Status = 1 Order by Id desc";
+        try {
+            return runner.query(sql, new BeanHandler<>(BusinessSchoolApplication.class), profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 }

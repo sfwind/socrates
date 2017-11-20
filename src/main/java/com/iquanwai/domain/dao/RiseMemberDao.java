@@ -2,6 +2,7 @@ package com.iquanwai.domain.dao;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.domain.po.RiseMember;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -83,6 +84,9 @@ public class RiseMemberDao extends DBUtil {
     }
 
     public List<RiseMember> loadValidRiseMemberByProfileIds(List<Integer> profileIds) {
+        if(CollectionUtils.isEmpty(profileIds)){
+            return Lists.newArrayList();
+        }
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseMember WHERE ProfileId in (" + produceQuestionMark(profileIds.size()) + ") AND Expired = 0 AND Del = 0";
         ResultSetHandler<List<RiseMember>> h = new BeanListHandler<>(RiseMember.class);

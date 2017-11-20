@@ -29,6 +29,8 @@ public class JobTest extends TestBase {
     private NotifyRunningLogin notifyRunningLogin;
     @Autowired
     private BusinessSchoolService businessSchoolService;
+    @Autowired
+    private NotifyRiseMemberApplyJob notifyRiseMemberApplyJob;
 
     @Test
     public void expiredTest() {
@@ -47,7 +49,7 @@ public class JobTest extends TestBase {
     }
     @Test
     public void testNotify(){
-        // notifyRunningLogin.notifyHasRunningPlansLogin();;
+        notifyRiseMemberApplyJob.work();
     }
 
     @Test
