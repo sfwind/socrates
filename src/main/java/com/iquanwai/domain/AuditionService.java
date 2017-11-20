@@ -86,10 +86,10 @@ public class AuditionService {
                                 .map(PracticePlan::getPracticeId)
                                 .map(Integer::parseInt)
                                 .collect(Collectors.toList());
-                        // 每个 Series 中至少存在一节内容完成
+                        // 每个 Series 中至少存在一节内容完成，无内容长度限制
                         Long seriesApplicationCheckLong = practiceIds.stream().filter(practiceId -> {
                             ApplicationSubmit applicationSubmit = applicationSubmitMap.get(practiceId);
-                            return applicationSubmit != null && (applicationSubmit.getContent().contains("img") || applicationSubmit.getLength() > 10);
+                            return applicationSubmit != null;
                         }).count();
                         return seriesApplicationCheckLong.intValue() > 0;
                     }).count();
