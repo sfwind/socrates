@@ -5,6 +5,7 @@ import com.iquanwai.domain.po.Coupon;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -18,6 +19,27 @@ import java.util.List;
 @Repository
 public class CouponDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
+
+    public int insert(Coupon coupon) {
+        coupon.setUsed(0);
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "INSERT INTO Coupon (OpenId, ProfileId, Amount, Used, ExpiredDate, Category, Description) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try {
+            Long result = runner.insert(sql, new ScalarHandler<>(),
+                    coupon.getOpenId(),
+                    coupon.getProfileId(),
+                    coupon.getAmount(),
+                    coupon.getUsed(),
+                    coupon.getExpiredDate(),
+                    coupon.getCategory(),
+                    coupon.getDescription());
+            return result.intValue();
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
 
     public void updateCouponByOrderId(Integer status, String orderId) {
         QueryRunner run = new QueryRunner(getDataSource());
