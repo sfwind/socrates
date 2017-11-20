@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -18,9 +17,9 @@ public class AuditionClassMemberDao extends PracticeDBUtil {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public List<AuditionClassMember> loadByStartDate(Date startDate) {
+    public List<AuditionClassMember> loadByStartDate(String startDate) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM AuditionClassMember WHERE StartDate = ?";
+        String sql = "SELECT * FROM AuditionClassMember WHERE Active = 1 AND StartDate = ? AND Del = 0";
         ResultSetHandler<List<AuditionClassMember>> h = new BeanListHandler<>(AuditionClassMember.class);
         try {
             return runner.query(sql, h, startDate);

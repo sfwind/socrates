@@ -37,7 +37,7 @@ public class AuditionService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public void sendAuditionCompleteReward() {
-        List<AuditionClassMember> auditionClassMembers = auditionClassMemberDao.loadByStartDate(DateUtils.getMonday(new Date()));
+        List<AuditionClassMember> auditionClassMembers = auditionClassMemberDao.loadByStartDate(DateUtils.parseDateToString(DateUtils.getMonday(new Date())));
         Map<Integer, AuditionClassMember> auditionClassMemberMap = auditionClassMembers.stream().collect(Collectors.toMap(AuditionClassMember::getProfileId, auditionClassMember -> auditionClassMember));
 
         auditionClassMembers = auditionClassMembers.stream().filter(auditionClassMember -> !auditionClassMember.getChecked()).collect(Collectors.toList());
