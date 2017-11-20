@@ -1,3 +1,4 @@
+import com.iquanwai.domain.AuditionService;
 import com.iquanwai.domain.BusinessSchoolService;
 import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.dao.RiseUserLandingDao;
@@ -13,6 +14,7 @@ import java.util.Date;
  * Created by justin on 17/3/21.
  */
 public class JobTest extends TestBase {
+
     @Autowired
     private RiseMemberJob riseMemberJob;
     @Autowired
@@ -71,9 +73,12 @@ public class JobTest extends TestBase {
         businessSchoolService.searchApplications(DateUtils.parseStringToDate("2017-09-22"));
     }
 
+    @Autowired
+    private AuditionService auditionService;
+
     @Test
-    public void noticeTest(){
-        businessSchoolService.noticeApplication(new Date());
+    public void test() {
+        auditionService.sendAuditionCompleteReward();
     }
 
 }

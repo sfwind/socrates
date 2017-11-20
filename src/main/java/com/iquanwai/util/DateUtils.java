@@ -1,6 +1,7 @@
 package com.iquanwai.util;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -95,6 +96,10 @@ public class DateUtils {
         return new DateTime(date).withTimeAtStartOfDay().toDate();
     }
 
+    public static Date afterMonths(Date date, int increment) {
+        return new DateTime(date).plusMonths(increment).toDate();
+    }
+
     public static Date afterYears(Date date, int increment){
         return new DateTime(date).plusYears(increment).toDate();
     }
@@ -121,4 +126,7 @@ public class DateUtils {
         return format4.print(new DateTime(date));
     }
 
+    public static Date getMonday(Date date) {
+        return new DateTime(date.getTime()).withDayOfWeek(DateTimeConstants.MONDAY).toDate();
+    }
 }
