@@ -60,25 +60,6 @@ public class NotifyRunningLogin {
                     + "如不需要学习提醒，点击<a href='" + ConfigUtils.getAppDomain() + PERSONAL_URL + "'>这里</a>关闭";
             customerMessageService.sendCustomerMessage(openId, content, Constants.WEIXIN_MESSAGE_TYPE.TEXT);
 
-            // TemplateMessage templateMessage = new TemplateMessage();
-            // templateMessage.setTouser(plan.getOpenid());
-            // Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-            // templateMessage.setData(data);
-            // templateMessage.setTemplate_id(ConfigUtils.getLearningNotifyMsg());
-            // templateMessage.setUrl(ConfigUtils.getAppDomain() + INDEX_URL);
-            // String first = profile.getNickname() + "同学，晚上好！快来学习今天的小课，拿下一个职场新技能！\n";
-            // data.put("first", new TemplateMessage.Keyword(first, "#000000"));
-            // data.put("keyword1", new TemplateMessage.Keyword(plan.getProblemName(), "#000000"));
-            // data.put("keyword2",
-            //         new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()) + "\n\n不需要提醒？可以点此卡片，进入“我的”去关闭",
-            //                 "#000000"));
-            // data.put("remark", new TemplateMessage.Keyword("\n点此卡片开始学习", "#f57f16"));
-            // templateMessageService.sendMessage(templateMessage);
-            // CustomerMessageLog log = new CustomerMessageLog();
-            // log.setComment("进行中小课未登录提醒");
-            // log.setOpenid(profile.getOpenid());
-            // log.setPublishTime(new Date());
-            // customerMessageLogDao.insert(log);
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }

@@ -30,7 +30,7 @@ public class NotifyNearCloseJob {
 
     private static final String INDEX_URL = "/rise/static/learn";
 
-    @Scheduled(cron = "0 35 21 * * ?")
+    @Scheduled(cron = "0 25 21 * * ?")
     public void work() {
         logger.info("通知即将关闭小课任务开始");
         //发送点赞数统计
