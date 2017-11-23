@@ -64,7 +64,6 @@ public class AuditionService {
         // 根据 AuditionId 分组
         Map<Integer, List<AuditionIdentity>> auditionMap = auditionIdentities.stream().collect(Collectors.groupingBy(AuditionIdentity::getAuditionId));
 
-
         // 根据 ProfileId 集合，获取 ImprovementPlan 集合（ProblemId 是 试听课 Id）
         List<ImprovementPlan> improvementPlans = improvementPlanDao.loadPlansByProfileIds(auditionProfileIds, ConfigUtils.getTrialProblemId());
         // PlanId => ImprovementPlan
@@ -112,7 +111,7 @@ public class AuditionService {
         coupon.setProfileId(profileId);
         coupon.setAmount(100);
         coupon.setUsed(0);
-        coupon.setExpiredDate(DateUtils.afterDays(new Date(), 8));
+        coupon.setExpiredDate(DateUtils.afterDays(new Date(), 3));
         coupon.setCategory(Coupon.Category.ELITE_RISE_MEMBER);
         coupon.setDescription("试听课奖学金");
         int result = couponDao.insert(coupon);
@@ -127,11 +126,11 @@ public class AuditionService {
             // 设置消息 message id
             templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
 
-            String first = "嗨，恭喜6班1组的同学在小组PK中获胜，成为圈外商学院试听课程优秀团队，额外获得￥100元圈外礼品卡\n\n";
+            String first = "嗨，恭喜你的小组在PK中获胜，成为圈外商学院试听课优秀团队。作为小组得力干将，你已获得￥100元圈外礼品卡一张，希望你在商学院成长过程中再接再厉，更优秀！\n";
             data.put("first", new TemplateMessage.Keyword(first, "#000000"));
             data.put("keyword1", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()), "#000000"));
             data.put("keyword2", new TemplateMessage.Keyword("优秀团队", "#000000"));
-            data.put("keyword3", new TemplateMessage.Keyword("100\n有效期：7天\n\n", "#000000"));
+            data.put("keyword3", new TemplateMessage.Keyword("100\n有效期：48小时\n", "#000000"));
             data.put("remark", new TemplateMessage.Keyword("点击详情，立即领取奖学金（购买圈外线上课程时可以直接抵扣喔）", "#f57f16"));
             templateMessageService.sendMessage(templateMessage, false);
         }
@@ -145,7 +144,7 @@ public class AuditionService {
         coupon.setProfileId(profileId);
         coupon.setAmount(200);
         coupon.setUsed(0);
-        coupon.setExpiredDate(DateUtils.afterDays(new Date(), 8));
+        coupon.setExpiredDate(DateUtils.afterDays(new Date(), 3));
         coupon.setCategory(Coupon.Category.ELITE_RISE_MEMBER);
         coupon.setDescription("试听课奖学金");
         int result = couponDao.insert(coupon);
@@ -160,12 +159,12 @@ public class AuditionService {
             // 设置消息 message id
             templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
 
-            String first = "嗨，恭喜你通过努力完成圈外商学院试听课程学习，成为试听课优秀学员，额外获得￥200元商学院奖学金\n\n";
+            String first = "嗨，恭喜你通过努力完成圈外商学院试听课程学习，成为试听课优秀学员，额外获得￥200元商学院奖学金\n";
             data.put("first", new TemplateMessage.Keyword(first, "#000000"));
             data.put("keyword1", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()), "#000000"));
             data.put("keyword2", new TemplateMessage.Keyword("优秀学员", "#000000"));
-            data.put("keyword3", new TemplateMessage.Keyword("200\n有效期：7天\n\n", "#000000"));
-            data.put("remark", new TemplateMessage.Keyword("点击详情，立即领取奖学金（购买圈外线上课程时可以直接抵扣喔）", "#f57f16"));
+            data.put("keyword3", new TemplateMessage.Keyword("200\n有效期：48小时\n\n如本周内申请商学院被录取并获得入学奖学金，可以叠加使用哦~\n", "#000000"));
+            data.put("remark", new TemplateMessage.Keyword("点击详情，立即领取奖学金", "#f57f16"));
             templateMessageService.sendMessage(templateMessage, false);
         }
     }
@@ -178,7 +177,7 @@ public class AuditionService {
         coupon.setProfileId(profileId);
         coupon.setAmount(200);
         coupon.setUsed(0);
-        coupon.setExpiredDate(DateUtils.afterDays(new Date(), 8));
+        coupon.setExpiredDate(DateUtils.afterDays(new Date(), 3));
         coupon.setCategory(Coupon.Category.ELITE_RISE_MEMBER);
         coupon.setDescription("试听课奖学金");
         int result = couponDao.insert(coupon);
@@ -193,12 +192,12 @@ public class AuditionService {
             // 设置消息 message id
             templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
 
-            String first = "嗨，恭喜你通过努力完成圈外商学院试听课程学习，成为试听课优秀学员，额外获得￥200元商学院奖学金\n\n";
+            String first = "嗨，恭喜你在圈外商学院试听课程中认真负责努力学习，成为试听课优秀学委，额外获得￥200元商学院奖学金\n";
             data.put("first", new TemplateMessage.Keyword(first, "#000000"));
             data.put("keyword1", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()), "#000000"));
-            data.put("keyword2", new TemplateMessage.Keyword("优秀学员", "#000000"));
-            data.put("keyword3", new TemplateMessage.Keyword("200\n有效期：7天\n\n", "#000000"));
-            data.put("remark", new TemplateMessage.Keyword("点击详情，立即领取奖学金（购买圈外线上课程时可以直接抵扣喔）", "#f57f16"));
+            data.put("keyword2", new TemplateMessage.Keyword("优秀学委", "#000000"));
+            data.put("keyword3", new TemplateMessage.Keyword("200\n有效期：48小时\n\n如本周内申请商学院被录取并获得入学奖学金，可以叠加使用哦~\n", "#000000"));
+            data.put("remark", new TemplateMessage.Keyword("点击详情，立即领取奖学金", "#f57f16"));
             templateMessageService.sendMessage(templateMessage, false);
         }
     }
