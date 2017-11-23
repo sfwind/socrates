@@ -1,6 +1,9 @@
 package com.iquanwai.domain;
 
+import com.google.common.collect.Maps;
 import com.iquanwai.domain.dao.*;
+import com.iquanwai.domain.message.TemplateMessage;
+import com.iquanwai.domain.message.TemplateMessageService;
 import com.iquanwai.domain.po.*;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
@@ -24,6 +27,8 @@ public class AuditionService {
     @Autowired
     private CustomerService customerService;
     @Autowired
+    private TemplateMessageService templateMessageService;
+    @Autowired
     private ImprovementPlanDao improvementPlanDao;
     @Autowired
     private PracticePlanDao practicePlanDao;
@@ -32,20 +37,40 @@ public class AuditionService {
     @Autowired
     private AuditionClassMemberDao auditionClassMemberDao;
     @Autowired
+    private AuditionIdentityDao auditionIdentityDao;
+    @Autowired
     private CouponDao couponDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public void sendAuditionCompleteReward() {
-        List<AuditionClassMember> auditionClassMembers = auditionClassMemberDao.loadByStartDate(DateUtils.parseDateToString(DateUtils.getMonday(new Date())));
-        Map<Integer, AuditionClassMember> auditionClassMemberMap = auditionClassMembers.stream().collect(Collectors.toMap(AuditionClassMember::getProfileId, auditionClassMember -> auditionClassMember));
+    private static final String RISE_PAY_PAGE = "/pay/rise";
 
+    public void sendAuditionCompleteReward() {
+        // 获取当前时间所在周的周一的前一天
+        Date startDate = DateUtils.beforeDays(DateUtils.getMonday(new Date()), 1);
+        List<AuditionClassMember> auditionClassMembers = auditionClassMemberDao.loadByStartDate(DateUtils.parseDateToString(startDate));
+        // 过滤出还没有校验过的人员
         auditionClassMembers = auditionClassMembers.stream().filter(auditionClassMember -> !auditionClassMember.getChecked()).collect(Collectors.toList());
 
+        // ProfileId => AuditionClassMember
+        Map<Integer, AuditionClassMember> auditionClassMemberMap = auditionClassMembers.stream().collect(Collectors.toMap(AuditionClassMember::getProfileId, auditionClassMember -> auditionClassMember));
+        // 获取过滤出人员的 ProfileId 的集合
         List<Integer> auditionProfileIds = auditionClassMembers.stream().map(AuditionClassMember::getProfileId).collect(Collectors.toList());
 
+        // 获取过滤出人员的 Id 集合
+        List<Integer> auditionIds = auditionClassMembers.stream().map(AuditionClassMember::getId).collect(Collectors.toList());
+        // 获取所有人员 Id 的 AuditionIdentity 身份信息
+        List<AuditionIdentity> auditionIdentities = auditionIdentityDao.loadByAuditionIds(auditionIds);
+        // 根据 AuditionId 分组
+        Map<Integer, List<AuditionIdentity>> auditionMap = auditionIdentities.stream().collect(Collectors.groupingBy(AuditionIdentity::getAuditionId));
+
+
+        // 根据 ProfileId 集合，获取 ImprovementPlan 集合（ProblemId 是 试听课 Id）
         List<ImprovementPlan> improvementPlans = improvementPlanDao.loadPlansByProfileIds(auditionProfileIds, ConfigUtils.getTrialProblemId());
+        // PlanId => ImprovementPlan
         Map<Integer, ImprovementPlan> improvementPlanMap = improvementPlans.stream().collect(Collectors.toMap(ImprovementPlan::getId, improvementPlan -> improvementPlan));
+
+        // 获取所有的 ImprovementPlan 的 Id 集合，即 PlanId
         List<Integer> riseClassMemberPlanIds = improvementPlans.stream().map(ImprovementPlan::getId).collect(Collectors.toList());
 
         riseClassMemberPlanIds.forEach(planId -> {
@@ -53,87 +78,187 @@ public class AuditionService {
 
             // 处理到某条记录，将该条记录 checked 状态改为 1
             ImprovementPlan improvementPlan = improvementPlanMap.get(planId);
-            AuditionClassMember auditionClassMember = auditionClassMemberMap.get(improvementPlan.getProfileId());
+            Integer profileId = improvementPlan.getProfileId();
+            AuditionClassMember auditionClassMember = auditionClassMemberMap.get(profileId);
             auditionClassMemberDao.updateChecked(auditionClassMember.getId(), true);
 
-            boolean sendAuditionReward = true;
-            List<PracticePlan> practicePlans = practicePlanDao.loadPracticePlan(planId);
+            List<AuditionIdentity> personalIdentities = auditionMap.get(auditionClassMember.getId());
 
-            if (practicePlans.size() != 0) {
-                // 应该完成的知识点、选择题中未完成的题数
-                Long unCompleteNecessaryCountLong = practicePlans.stream()
-                        .filter(practicePlan ->
-                                PracticePlan.WARM_UP == practicePlan.getType() || PracticePlan.WARM_UP_REVIEW == practicePlan.getType()
-                                        || PracticePlan.KNOWLEDGE == practicePlan.getType() || PracticePlan.KNOWLEDGE_REVIEW == practicePlan.getType())
-                        .filter(practicePlan -> practicePlan.getStatus() == 0)
-                        .count();
-                if ((unCompleteNecessaryCountLong.intValue()) > 0) {
-                    // 必须完成知识点、选择题的题数大于 0，不发奖学金
-                    sendAuditionReward = false;
+            // 如果某个人是优胜团队中，发送优秀奖
+            boolean isWinningGroup = personalIdentities.stream().filter(identity -> AuditionIdentity.Identity.WINNINGGROUP == identity.getIdentity()).count() > 0;
+            if (isWinningGroup) {
+                sendWinningGroupMessage(profileId);
+            }
+
+            boolean sendAuditionReward = checkPracticeCompleteStatus(planId);
+
+            if (sendAuditionReward) {
+                boolean isCommittee = personalIdentities.stream().filter(identity -> AuditionIdentity.Identity.COMMITTEE == identity.getIdentity()).count() > 0;
+                if (isCommittee) {
+                    sendCommitteeMessage(profileId);
                 } else {
-                    // 所有必须完成的知识点、选择题都已经完成
-                    // 对应用题完成情况进行复查
-                    List<PracticePlan> applicationPracticePlans = practicePlans.stream()
-                            .filter(practicePlan -> PracticePlan.APPLICATION == practicePlan.getType() || PracticePlan.APPLICATION_REVIEW == practicePlan.getType())
-                            .collect(Collectors.toList());
-                    List<Integer> applicationIds = applicationPracticePlans.stream().map(PracticePlan::getPracticeId).map(Integer::parseInt).collect(Collectors.toList());
-                    List<ApplicationSubmit> applicationSubmits = applicationSubmitDao.loadApplicationSubmitsByApplicationIds(applicationIds, planId);
-                    Map<Integer, ApplicationSubmit> applicationSubmitMap = applicationSubmits.stream().collect(Collectors.toMap(ApplicationSubmit::getApplicationId, applicationSubmit -> applicationSubmit));
-
-                    // 根据 planId 和 practicePlan 中的 PracticeId 来获取应用题完成数据
-                    Set<Integer> seriesSet = applicationPracticePlans.stream().map(PracticePlan::getSeries).collect(Collectors.toSet());
-
-                    // Plan 中每节至少优质完成一道应用题的小节数
-                    Long planApplicationCheckLong = seriesSet.stream().filter(series -> {
-                        List<Integer> practiceIds = applicationPracticePlans.stream()
-                                .filter(practicePlan -> practicePlan.getSeries().equals(series))
-                                .map(PracticePlan::getPracticeId)
-                                .map(Integer::parseInt)
-                                .collect(Collectors.toList());
-                        // 每个 Series 中至少存在一节内容完成，无内容长度限制
-                        Long seriesApplicationCheckLong = practiceIds.stream().filter(practiceId -> {
-                            ApplicationSubmit applicationSubmit = applicationSubmitMap.get(practiceId);
-                            return applicationSubmit != null;
-                        }).count();
-                        return seriesApplicationCheckLong.intValue() > 0;
-                    }).count();
-
-                    if (planApplicationCheckLong.intValue() != seriesSet.size()) {
-                        sendAuditionReward = false;
-                    }
-                }
-
-                if (sendAuditionReward) {
-                    Coupon coupon = new Coupon();
-                    coupon.setOpenId(improvementPlan.getOpenid());
-                    coupon.setProfileId(improvementPlan.getProfileId());
-                    coupon.setAmount(200);
-                    coupon.setUsed(0);
-                    coupon.setExpiredDate(DateUtils.afterDays(new Date(), 7));
-                    coupon.setCategory(Coupon.Category.ELITE_RISE_MEMBER);
-                    coupon.setDescription("试听课奖学金");
-                    int result = couponDao.insert(coupon);
-                    if (result > 0) {
-                        // TemplateMessage templateMessage = new TemplateMessage();
-                        // templateMessage.setTouser(profile.getOpenid());
-                        // Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-                        // templateMessage.setData(data);
-                        // templateMessage.setUrl(ConfigUtils.getAppDomain() + RISE_PAY_PAGE);
-                        //
-                        // // 设置消息 message id
-                        // templateMessage.setTemplate_id(ConfigUtils.getApplySuccessMsg());
-                        //
-                        // // 无优惠券模板消息内容
-                        // CustomerStatus customerStatus = customerStatusMap.get(profileId);
-                        // String first = "我们很荣幸地通知你被商学院录取，请尽快办理入学，及时开始学习并结识优秀的校友吧！\n";
-                        // data.put("first", new TemplateMessage.Keyword(first, "#000000"));
-                        // data.put("keyword1", new TemplateMessage.Keyword("已录取", "#000000"));
-                        // data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(customerStatus.getAddTime()), "#000000"));
-                        // data.put("remark", new TemplateMessage.Keyword("\n点击卡片，立即办理入学", "#f57f16"));
-                    }
+                    sendNormalMessage(profileId);
                 }
             }
         });
+    }
+
+    // 发送优秀团队奖学金
+    private void sendWinningGroupMessage(Integer profileId) {
+        Profile profile = customerService.getProfile(profileId);
+
+        Coupon coupon = new Coupon();
+        coupon.setOpenId(profile.getOpenid());
+        coupon.setProfileId(profileId);
+        coupon.setAmount(100);
+        coupon.setUsed(0);
+        coupon.setExpiredDate(DateUtils.afterDays(new Date(), 8));
+        coupon.setCategory(Coupon.Category.ELITE_RISE_MEMBER);
+        coupon.setDescription("试听课奖学金");
+        int result = couponDao.insert(coupon);
+
+        if (result > 0) {
+            TemplateMessage templateMessage = new TemplateMessage();
+            templateMessage.setTouser(profile.getOpenid());
+            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+            templateMessage.setData(data);
+            templateMessage.setUrl(ConfigUtils.getAppDomain() + RISE_PAY_PAGE);
+
+            // 设置消息 message id
+            templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
+
+            String first = "嗨，恭喜6班1组的同学在小组PK中获胜，成为圈外商学院试听课程优秀团队，额外获得￥100元圈外礼品卡\n\n";
+            data.put("first", new TemplateMessage.Keyword(first, "#000000"));
+            data.put("keyword1", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()), "#000000"));
+            data.put("keyword2", new TemplateMessage.Keyword("优秀团队", "#000000"));
+            data.put("keyword3", new TemplateMessage.Keyword("100\n有效期：7天\n\n", "#000000"));
+            data.put("remark", new TemplateMessage.Keyword("点击详情，立即领取奖学金（购买圈外线上课程时可以直接抵扣喔）", "#f57f16"));
+            templateMessageService.sendMessage(templateMessage, false);
+        }
+    }
+
+    private void sendNormalMessage(Integer profileId) {
+        Profile profile = customerService.getProfile(profileId);
+
+        Coupon coupon = new Coupon();
+        coupon.setOpenId(profile.getOpenid());
+        coupon.setProfileId(profileId);
+        coupon.setAmount(200);
+        coupon.setUsed(0);
+        coupon.setExpiredDate(DateUtils.afterDays(new Date(), 8));
+        coupon.setCategory(Coupon.Category.ELITE_RISE_MEMBER);
+        coupon.setDescription("试听课奖学金");
+        int result = couponDao.insert(coupon);
+
+        if (result > 0) {
+            TemplateMessage templateMessage = new TemplateMessage();
+            templateMessage.setTouser(profile.getOpenid());
+            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+            templateMessage.setData(data);
+            templateMessage.setUrl(ConfigUtils.getAppDomain() + RISE_PAY_PAGE);
+
+            // 设置消息 message id
+            templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
+
+            String first = "嗨，恭喜你通过努力完成圈外商学院试听课程学习，成为试听课优秀学员，额外获得￥200元商学院奖学金\n\n";
+            data.put("first", new TemplateMessage.Keyword(first, "#000000"));
+            data.put("keyword1", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()), "#000000"));
+            data.put("keyword2", new TemplateMessage.Keyword("优秀学员", "#000000"));
+            data.put("keyword3", new TemplateMessage.Keyword("200\n有效期：7天\n\n", "#000000"));
+            data.put("remark", new TemplateMessage.Keyword("点击详情，立即领取奖学金（购买圈外线上课程时可以直接抵扣喔）", "#f57f16"));
+            templateMessageService.sendMessage(templateMessage, false);
+        }
+    }
+
+    private void sendCommitteeMessage(Integer profileId) {
+        Profile profile = customerService.getProfile(profileId);
+
+        Coupon coupon = new Coupon();
+        coupon.setOpenId(profile.getOpenid());
+        coupon.setProfileId(profileId);
+        coupon.setAmount(200);
+        coupon.setUsed(0);
+        coupon.setExpiredDate(DateUtils.afterDays(new Date(), 8));
+        coupon.setCategory(Coupon.Category.ELITE_RISE_MEMBER);
+        coupon.setDescription("试听课奖学金");
+        int result = couponDao.insert(coupon);
+
+        if (result > 0) {
+            TemplateMessage templateMessage = new TemplateMessage();
+            templateMessage.setTouser(profile.getOpenid());
+            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+            templateMessage.setData(data);
+            templateMessage.setUrl(ConfigUtils.getAppDomain() + RISE_PAY_PAGE);
+
+            // 设置消息 message id
+            templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
+
+            String first = "嗨，恭喜你通过努力完成圈外商学院试听课程学习，成为试听课优秀学员，额外获得￥200元商学院奖学金\n\n";
+            data.put("first", new TemplateMessage.Keyword(first, "#000000"));
+            data.put("keyword1", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()), "#000000"));
+            data.put("keyword2", new TemplateMessage.Keyword("优秀学员", "#000000"));
+            data.put("keyword3", new TemplateMessage.Keyword("200\n有效期：7天\n\n", "#000000"));
+            data.put("remark", new TemplateMessage.Keyword("点击详情，立即领取奖学金（购买圈外线上课程时可以直接抵扣喔）", "#f57f16"));
+            templateMessageService.sendMessage(templateMessage, false);
+        }
+    }
+
+    /**
+     * 查看某个学习计划是否完成<br/>
+     * 1. 完成所有的知识点和选择题<br/>
+     * 2. 每节应用题至少完成一道
+     */
+    private boolean checkPracticeCompleteStatus(Integer planId) {
+        List<PracticePlan> practicePlans = practicePlanDao.loadPracticePlan(planId);
+        boolean completeStatus = true;
+
+        if (practicePlans.size() != 0) {
+            // 应该完成的知识点、选择题中未完成的题数
+            Long unCompleteNecessaryCountLong = practicePlans.stream()
+                    .filter(practicePlan ->
+                            PracticePlan.WARM_UP == practicePlan.getType() || PracticePlan.WARM_UP_REVIEW == practicePlan.getType()
+                                    || PracticePlan.KNOWLEDGE == practicePlan.getType() || PracticePlan.KNOWLEDGE_REVIEW == practicePlan.getType())
+                    .filter(practicePlan -> practicePlan.getStatus() == 0)
+                    .count();
+            if ((unCompleteNecessaryCountLong.intValue()) > 0) {
+                // 必须完成知识点、选择题的题数大于 0，不发奖学金
+                completeStatus = false;
+            } else {
+                // 所有必须完成的知识点、选择题都已经完成
+                // 对应用题完成情况进行复查
+                List<PracticePlan> applicationPracticePlans = practicePlans.stream()
+                        .filter(practicePlan -> PracticePlan.APPLICATION == practicePlan.getType() || PracticePlan.APPLICATION_REVIEW == practicePlan.getType())
+                        .collect(Collectors.toList());
+                List<Integer> applicationIds = applicationPracticePlans.stream().map(PracticePlan::getPracticeId).map(Integer::parseInt).collect(Collectors.toList());
+                List<ApplicationSubmit> applicationSubmits = applicationSubmitDao.loadApplicationSubmitsByApplicationIds(applicationIds, planId);
+                Map<Integer, ApplicationSubmit> applicationSubmitMap = applicationSubmits.stream().collect(Collectors.toMap(ApplicationSubmit::getApplicationId, applicationSubmit -> applicationSubmit));
+
+                // 根据 planId 和 practicePlan 中的 PracticeId 来获取应用题完成数据
+                Set<Integer> seriesSet = applicationPracticePlans.stream().map(PracticePlan::getSeries).collect(Collectors.toSet());
+
+                // Plan 中每节至少优质完成一道应用题的小节数
+                Long planApplicationCheckLong = seriesSet.stream().filter(series -> {
+                    List<Integer> practiceIds = applicationPracticePlans.stream()
+                            .filter(practicePlan -> practicePlan.getSeries().equals(series))
+                            .map(PracticePlan::getPracticeId)
+                            .map(Integer::parseInt)
+                            .collect(Collectors.toList());
+                    // 每个 Series 中至少存在一节内容完成，无内容长度限制
+                    Long seriesApplicationCheckLong = practiceIds.stream().filter(practiceId -> {
+                        ApplicationSubmit applicationSubmit = applicationSubmitMap.get(practiceId);
+                        return applicationSubmit != null;
+                    }).count();
+                    return seriesApplicationCheckLong.intValue() > 0;
+                }).count();
+
+                if (planApplicationCheckLong.intValue() != seriesSet.size()) {
+                    completeStatus = false;
+                }
+            }
+        } else {
+            completeStatus = false;
+        }
+        return completeStatus;
     }
 
 }

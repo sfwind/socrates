@@ -39,7 +39,8 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         return sendMessage(templateMessage, true);
     }
 
-    private boolean sendMessage(TemplateMessage templateMessage, boolean forwardlyPush) {
+    @Override
+    public boolean sendMessage(TemplateMessage templateMessage, boolean forwardlyPush) {
         boolean sendTag = true;
         if (forwardlyPush) {
             // 发送权限校验
