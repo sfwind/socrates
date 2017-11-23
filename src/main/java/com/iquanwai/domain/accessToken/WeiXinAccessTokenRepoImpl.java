@@ -20,6 +20,7 @@ public class WeiXinAccessTokenRepoImpl implements WeiXinAccessTokenRepo {
 
     private Logger logger = LoggerFactory.getLogger(WeiXinAccessTokenRepoImpl.class);
 
+    @Override
     public String getAccessToken() {
         Map<String, String> map = Maps.newHashMap();
         map.put("appid", ConfigUtils.getAppid());

@@ -130,12 +130,12 @@ public class AuditionService {
             // 设置消息 message id
             templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
 
-            String first = "嗨，恭喜你的小组在PK中获胜，成为圈外商学院试听课优秀团队。作为小组得力干将，你已获得￥100元圈外礼品卡一张，希望你在商学院成长过程中再接再厉，更优秀！\n";
+            String first = "嗨，恭喜你的小组在PK中获胜，成为圈外商学院试听课优秀团队。作为小组得力干将，你已获得￥100元商学院奖学金，希望你在商学院成长过程中再接再厉，更优秀！\n";
             data.put("first", new TemplateMessage.Keyword(first, "#000000"));
             data.put("keyword1", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date()), "#000000"));
             data.put("keyword2", new TemplateMessage.Keyword("优秀团队", "#000000"));
             data.put("keyword3", new TemplateMessage.Keyword("100\n有效期：48小时\n", "#000000"));
-            data.put("remark", new TemplateMessage.Keyword("点击详情，立即领取奖学金（购买圈外线上课程时可以直接抵扣喔）", "#f57f16"));
+            data.put("remark", new TemplateMessage.Keyword("点击详情，立即领取奖学金", "#f57f16"));
             templateMessageService.sendMessage(templateMessage, false);
         }
     }

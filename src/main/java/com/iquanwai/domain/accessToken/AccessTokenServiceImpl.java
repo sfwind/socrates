@@ -20,6 +20,7 @@ public class AccessTokenServiceImpl implements AccessTokenService {
     @Autowired
     private AccessTokenDao accessTokenDao;
 
+    @Override
     public String getAccessToken() {
         if(accessToken!=null){
             return accessToken;
@@ -47,6 +48,7 @@ public class AccessTokenServiceImpl implements AccessTokenService {
         return accessToken;
     }
 
+    @Override
     public String refreshAccessToken(boolean force) {
         if(force) {
             forceUpdateAccessToken();
