@@ -12,4 +12,5 @@ public interface TemplateMessageService {
 
     String SEND_MESSAGE_URL = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={access_token}";
 
+    boolean sendMessage(TemplateMessage templateMessage, boolean forwardlyPush);
 }
