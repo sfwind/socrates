@@ -30,6 +30,29 @@ public class AuditionClassMemberDao extends PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    public List<AuditionClassMember> loadNullProfileId() {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM AuditionClassMember WHERE ProfileId IS NULL AND Del = 0";
+        ResultSetHandler<List<AuditionClassMember>> h = new BeanListHandler<>(AuditionClassMember.class);
+        try {
+            return runner.query(sql, h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
+    public int updateProfileId(Integer auditionClassMemberId, Integer profileId) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "UPDATE AuditionClassMember SET ProfileId = ? WHERE Id = ?";
+        try {
+            return runner.update(sql, profileId, auditionClassMemberId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return -1;
+    }
+
     public AuditionClassMember loadByProfileId(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM AuditionClassMember WHERE ProfileId = ? AND Del = 0";

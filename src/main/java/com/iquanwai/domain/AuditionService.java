@@ -46,15 +46,28 @@ public class AuditionService {
 
     private static final String RISE_PAY_PAGE = "/pay/rise";
 
+    private void preUpdateProfileId() {
+        List<AuditionClassMember> auditionClassMembers = auditionClassMemberDao.loadNullProfileId();
+        auditionClassMembers.forEach(auditionClassMember -> {
+            String openId = auditionClassMember.getOpenId();
+            if (openId != null) {
+                Profile profile = customerService.getProfile(openId);
+                if (profile != null) {
+                    auditionClassMemberDao.updateProfileId(auditionClassMember.getId(), profile.getId());
+                }
+            }
+        });
+    }
+
     public void sendAuditionCompleteReward() {
+        preUpdateProfileId();
+
         // 获取当前时间所在周的周一的前一天
         Date startDate = DateUtils.beforeDays(DateUtils.getMonday(new Date()), 1);
         List<AuditionClassMember> auditionClassMembers = auditionClassMemberDao.loadByStartDate(DateUtils.parseDateToString(startDate));
         // 过滤出还没有校验过的人员
         auditionClassMembers = auditionClassMembers.stream().filter(auditionClassMember -> !auditionClassMember.getChecked()).collect(Collectors.toList());
 
-        // ProfileId => AuditionClassMember
-        Map<Integer, AuditionClassMember> auditionClassMemberMap = auditionClassMembers.stream().collect(Collectors.toMap(AuditionClassMember::getProfileId, auditionClassMember -> auditionClassMember));
         // 获取过滤出人员的 ProfileId 的集合
         List<Integer> auditionProfileIds = auditionClassMembers.stream().map(AuditionClassMember::getProfileId).collect(Collectors.toList());
 
@@ -67,22 +80,17 @@ public class AuditionService {
 
         // 根据 ProfileId 集合，获取 ImprovementPlan 集合（ProblemId 是 试听课 Id）
         List<ImprovementPlan> improvementPlans = improvementPlanDao.loadPlansByProfileIds(auditionProfileIds, ConfigUtils.getTrialProblemId());
-        // PlanId => ImprovementPlan
-        Map<Integer, ImprovementPlan> improvementPlanMap = improvementPlans.stream().collect(Collectors.toMap(ImprovementPlan::getId, improvementPlan -> improvementPlan));
+        // ProfileId => ImprovementPlan
+        Map<Integer, ImprovementPlan> improvementPlanMap = improvementPlans.stream().collect(Collectors.toMap(ImprovementPlan::getProfileId, improvementPlan -> improvementPlan));
 
-        // 获取所有的 ImprovementPlan 的 Id 集合，即 PlanId
-        List<Integer> riseClassMemberPlanIds = improvementPlans.stream().map(ImprovementPlan::getId).collect(Collectors.toList());
-
-        riseClassMemberPlanIds.forEach(planId -> {
-            logger.info("正在处理：" + planId);
+        auditionClassMembers.forEach(classMember -> {
+            logger.info("正在处理：" + classMember.getId());
 
             // 处理到某条记录，将该条记录 checked 状态改为 1
-            ImprovementPlan improvementPlan = improvementPlanMap.get(planId);
-            Integer profileId = improvementPlan.getProfileId();
-            AuditionClassMember auditionClassMember = auditionClassMemberMap.get(profileId);
-            auditionClassMemberDao.updateChecked(auditionClassMember.getId(), true);
+            Integer profileId = classMember.getProfileId();
+            auditionClassMemberDao.updateChecked(classMember.getId(), true);
 
-            List<AuditionReward> personalAuditionRewards = auditionMap.get(auditionClassMember.getId());
+            List<AuditionReward> personalAuditionRewards = auditionMap.get(classMember.getId());
             if (personalAuditionRewards == null) {
                 personalAuditionRewards = Lists.newArrayList();
             }
@@ -93,14 +101,16 @@ public class AuditionService {
                 sendWinningGroupMessage(profileId);
             }
 
-            boolean sendAuditionReward = checkPracticeCompleteStatus(planId);
-
-            if (sendAuditionReward) {
-                boolean isCommittee = personalAuditionRewards.stream().filter(identity -> AuditionReward.Identity.COMMITTEE == identity.getIdentity()).count() > 0;
-                if (isCommittee) {
-                    sendCommitteeMessage(profileId);
-                } else {
-                    sendNormalMessage(profileId);
+            ImprovementPlan improvementPlan = improvementPlanMap.get(profileId);
+            if (improvementPlan != null) {
+                boolean sendAuditionReward = checkPracticeCompleteStatus(improvementPlan.getId());
+                if (sendAuditionReward) {
+                    boolean isCommittee = personalAuditionRewards.stream().filter(identity -> AuditionReward.Identity.COMMITTEE == identity.getIdentity()).count() > 0;
+                    if (isCommittee) {
+                        sendCommitteeMessage(profileId);
+                    } else {
+                        sendNormalMessage(profileId);
+                    }
                 }
             }
         });
