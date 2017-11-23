@@ -3,7 +3,7 @@ package com.iquanwai.domain.po;
 import lombok.Data;
 
 @Data
-public class AuditionIdentity {
+public class AuditionReward {
 
     private Integer id;
     private Integer auditionId;

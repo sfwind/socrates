@@ -1,5 +1,6 @@
 package com.iquanwai.domain;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.dao.*;
 import com.iquanwai.domain.message.TemplateMessage;
@@ -37,7 +38,7 @@ public class AuditionService {
     @Autowired
     private AuditionClassMemberDao auditionClassMemberDao;
     @Autowired
-    private AuditionIdentityDao auditionIdentityDao;
+    private AuditionRewardDao auditionRewardDao;
     @Autowired
     private CouponDao couponDao;
 
@@ -60,9 +61,9 @@ public class AuditionService {
         // 获取过滤出人员的 Id 集合
         List<Integer> auditionIds = auditionClassMembers.stream().map(AuditionClassMember::getId).collect(Collectors.toList());
         // 获取所有人员 Id 的 AuditionIdentity 身份信息
-        List<AuditionIdentity> auditionIdentities = auditionIdentityDao.loadByAuditionIds(auditionIds);
+        List<AuditionReward> auditionIdentities = auditionRewardDao.loadByAuditionIds(auditionIds);
         // 根据 AuditionId 分组
-        Map<Integer, List<AuditionIdentity>> auditionMap = auditionIdentities.stream().collect(Collectors.groupingBy(AuditionIdentity::getAuditionId));
+        Map<Integer, List<AuditionReward>> auditionMap = auditionIdentities.stream().collect(Collectors.groupingBy(AuditionReward::getAuditionId));
 
         // 根据 ProfileId 集合，获取 ImprovementPlan 集合（ProblemId 是 试听课 Id）
         List<ImprovementPlan> improvementPlans = improvementPlanDao.loadPlansByProfileIds(auditionProfileIds, ConfigUtils.getTrialProblemId());
@@ -81,10 +82,13 @@ public class AuditionService {
             AuditionClassMember auditionClassMember = auditionClassMemberMap.get(profileId);
             auditionClassMemberDao.updateChecked(auditionClassMember.getId(), true);
 
-            List<AuditionIdentity> personalIdentities = auditionMap.get(auditionClassMember.getId());
+            List<AuditionReward> personalAuditionRewards = auditionMap.get(auditionClassMember.getId());
+            if (personalAuditionRewards == null) {
+                personalAuditionRewards = Lists.newArrayList();
+            }
 
             // 如果某个人是优胜团队中，发送优秀奖
-            boolean isWinningGroup = personalIdentities.stream().filter(identity -> AuditionIdentity.Identity.WINNINGGROUP == identity.getIdentity()).count() > 0;
+            boolean isWinningGroup = personalAuditionRewards.stream().filter(identity -> AuditionReward.Identity.WINNINGGROUP == identity.getIdentity()).count() > 0;
             if (isWinningGroup) {
                 sendWinningGroupMessage(profileId);
             }
@@ -92,7 +96,7 @@ public class AuditionService {
             boolean sendAuditionReward = checkPracticeCompleteStatus(planId);
 
             if (sendAuditionReward) {
-                boolean isCommittee = personalIdentities.stream().filter(identity -> AuditionIdentity.Identity.COMMITTEE == identity.getIdentity()).count() > 0;
+                boolean isCommittee = personalAuditionRewards.stream().filter(identity -> AuditionReward.Identity.COMMITTEE == identity.getIdentity()).count() > 0;
                 if (isCommittee) {
                     sendCommitteeMessage(profileId);
                 } else {
@@ -136,6 +140,7 @@ public class AuditionService {
         }
     }
 
+    // 发送优秀学员奖学金
     private void sendNormalMessage(Integer profileId) {
         Profile profile = customerService.getProfile(profileId);
 
@@ -169,6 +174,7 @@ public class AuditionService {
         }
     }
 
+    // 发送优秀学委奖学金
     private void sendCommitteeMessage(Integer profileId) {
         Profile profile = customerService.getProfile(profileId);
 
