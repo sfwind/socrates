@@ -20,7 +20,7 @@ public class AuditionClassMemberDao extends PracticeDBUtil {
 
     public List<AuditionClassMember> loadByStartDate(String startDate) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM AuditionClassMember WHERE Active = 1 AND StartDate = ? AND Del = 0";
+        String sql = "SELECT * FROM AuditionClassMember WHERE StartDate = ? AND Del = 0";
         ResultSetHandler<List<AuditionClassMember>> h = new BeanListHandler<>(AuditionClassMember.class);
         try {
             return runner.query(sql, h, startDate);
