@@ -142,7 +142,9 @@ public class CustomerService {
 
     public Profile getProfile(String openId) {
         Profile profile = profileDao.loadByOpenId(openId);
-        profile.setRiseMember(getRiseMember(profile.getId()));
+        if (profile != null) {
+            profile.setRiseMember(getRiseMember(profile.getId()));
+        }
         return profile;
     }
 
