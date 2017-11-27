@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -34,12 +35,24 @@ public class NotifyRiseMemberExpireJob {
     private void riseMemberExpireCheck() {
         // 会员过期前7、1天发送模板消息提醒
         Date sevenExpireDate = DateUtils.afterDays(new Date(), 8);
-        List<RiseMember> sevenRiseMembers = customerService.loadRiseMembersByExpireDate(sevenExpireDate);
+        List<RiseMember> sevenRiseMembers = customerService.loadRiseMembersByExpireDate(sevenExpireDate)
+                .stream()
+                .filter(item -> item.getMemberTypeId().equals(RiseMember.HALF) ||
+                        item.getMemberTypeId().equals(RiseMember.ANNUAL) ||
+                        item.getMemberTypeId().equals(RiseMember.ELITE) ||
+                        item.getMemberTypeId().equals(RiseMember.HALF_ELITE))
+                .collect(Collectors.toList());
         logger.info("7天人数：{}", sevenRiseMembers.size());
         customerService.sendWillExpireMessage(sevenRiseMembers, 7);
 
         Date oneDate = DateUtils.afterDays(new Date(), 2);
-        List<RiseMember> oneRiseMembers = customerService.loadRiseMembersByExpireDate(oneDate);
+        List<RiseMember> oneRiseMembers = customerService.loadRiseMembersByExpireDate(oneDate)
+                .stream()
+                .filter(item -> item.getMemberTypeId().equals(RiseMember.HALF) ||
+                        item.getMemberTypeId().equals(RiseMember.ANNUAL) ||
+                        item.getMemberTypeId().equals(RiseMember.ELITE) ||
+                        item.getMemberTypeId().equals(RiseMember.HALF_ELITE))
+                .collect(Collectors.toList());
         logger.info("1天人数：{}", oneRiseMembers.size());
         customerService.sendWillExpireMessage(oneRiseMembers, 1);
         customerService.sendWillExpireShortMessage(oneRiseMembers, 1);
