@@ -32,7 +32,7 @@ public class ActivityService {
             problem.setPassword(eventWall.getSubHead());
             return problem;
         }).collect(Collectors.toList());
-        //小课去重
+        //课程去重
         List<Integer> problemIds = Lists.newArrayList();
         return problems.stream().filter(problem -> {
             if (problemIds.contains(problem.getId())) {

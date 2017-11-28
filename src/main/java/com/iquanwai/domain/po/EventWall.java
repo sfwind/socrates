@@ -21,6 +21,6 @@ public class EventWall {
     private Date updateTime;
     private Boolean del;
     private Boolean showTime; // 是否显示时间
-    private Integer problemId; //小课id
+    private Integer problemId; //课程id
 
 }

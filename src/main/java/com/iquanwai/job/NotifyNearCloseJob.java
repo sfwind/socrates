@@ -32,10 +32,10 @@ public class NotifyNearCloseJob {
 
     @Scheduled(cron = "0 25 21 * * ?")
     public void work() {
-        logger.info("通知即将关闭小课任务开始");
+        logger.info("通知即将关闭课程任务开始");
         //发送点赞数统计
         notifyNearClosePlan();
-        logger.info("通知即将关闭小课任务结束");
+        logger.info("通知即将关闭课程任务结束");
     }
 
     private void notifyNearClosePlan() {
@@ -51,7 +51,7 @@ public class NotifyNearCloseJob {
 
             Problem problem = planService.getProblem(improvementPlan.getProblemId());
 
-            data.put("first", new TemplateMessage.Keyword("你的以下小课还有3天就到期了：\n"));
+            data.put("first", new TemplateMessage.Keyword("你的以下课程还有3天就到期了：\n"));
             data.put("keyword1", new TemplateMessage.Keyword(problem.getProblem()));
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(improvementPlan.getCloseDate())));
             data.put("remark", new TemplateMessage.Keyword("\n抓紧在到期前解锁所有练习吧！"));

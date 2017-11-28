@@ -35,7 +35,7 @@ public class PlanService {
 
     private static final String LOGIN_REDIS_KEY = "login:";
 
-    //提前3天通知用户,小课即将关闭
+    //提前3天通知用户,课程即将关闭
     private static final int NOTIFY_CLOSE_DAYS = 3;
     //3天未登录
     private static final int NOLOGIN_DAYS = 3;
