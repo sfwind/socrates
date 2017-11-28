@@ -18,9 +18,9 @@ public class AuditionCompleteRewardJob {
     @Scheduled(cron = "0 40 10 ? * FRI")
     // @Scheduled(cron = "*/10 * * ? * THU")
     public void sendAuditionCompleteReward() {
-        logger.info("发送试听课奖学金 job 开始...");
-        auditionService.sendAuditionCompleteReward();
-        logger.info("发送试听课奖学金 job 结束...");
+        // logger.info("发送试听课奖学金 job 开始...");
+        // auditionService.sendAuditionCompleteReward();
+        // logger.info("发送试听课奖学金 job 结束...");
     }
 
 }
