@@ -40,27 +40,27 @@ public class NotifyDiaoDaJob {
     }
 
     private void notifyDiaoDaUser() {
-        List<Problem> problems = activityService.loadDiaoDaProblem();
-        problems.forEach(problem -> {
-            Integer problemId = problem.getId();
-            List<ImprovementPlan> improvementPlans = planService.getLearningPlan(problemId);
-
-            improvementPlans.forEach(improvementPlan -> {
-                TemplateMessage templateMessage = new TemplateMessage();
-                templateMessage.setTouser(improvementPlan.getOpenid());
-                templateMessage.setTemplate_id(ConfigUtils.getActivityStartMsg());
-
-                Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-                templateMessage.setData(data);
-                templateMessage.setUrl(problem.getActivityUrl());
-
-                data.put("first", new TemplateMessage.Keyword("你学习的课程“"+problem.getProblem()
-                        +"”半小时后有作业吊打哦！快来听听教练的精彩分析吧！\n\n"+problem.getPassword()));
-                data.put("keyword1", new TemplateMessage.Keyword("作业吊打"));
-                data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())+" 20:30"));
-
-                templateMessageService.sendMessage(templateMessage);
-            });
-        });
+//        List<Problem> problems = activityService.loadDiaoDaProblem();
+//        problems.forEach(problem -> {
+//            Integer problemId = problem.getId();
+//            List<ImprovementPlan> improvementPlans = planService.getLearningPlan(problemId);
+//
+//            improvementPlans.forEach(improvementPlan -> {
+//                TemplateMessage templateMessage = new TemplateMessage();
+//                templateMessage.setTouser(improvementPlan.getOpenid());
+//                templateMessage.setTemplate_id(ConfigUtils.getActivityStartMsg());
+//
+//                Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+//                templateMessage.setData(data);
+//                templateMessage.setUrl(problem.getActivityUrl());
+//
+//                data.put("first", new TemplateMessage.Keyword("你学习的课程“"+problem.getProblem()
+//                        +"”半小时后有作业吊打哦！快来听听教练的精彩分析吧！\n\n"+problem.getPassword()));
+//                data.put("keyword1", new TemplateMessage.Keyword("作业吊打"));
+//                data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(new Date())+" 20:30"));
+//
+//                templateMessageService.sendMessage(templateMessage);
+//            });
+//        });
     }
 }

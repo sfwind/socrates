@@ -33,7 +33,7 @@ public class NotifyInactiveUserJob {
     @Autowired
     private CustomerService customerService;
 
-    private static final String INDEX_URL = "/rise/static/learn";
+    private static final String INDEX_URL = "/rise/static/rise";
 
     @Scheduled(cron = "0 0 21 ? * THU")
     public void work() {
