@@ -28,7 +28,7 @@ public class NotifyNearCloseJob {
     @Autowired
     private TemplateMessageService templateMessageService;
 
-    private static final String INDEX_URL = "/rise/static/rise";
+    private static final String INDEX_URL = "/rise/static/learn";
 
     @Scheduled(cron = "0 25 21 * * ?")
     public void work() {

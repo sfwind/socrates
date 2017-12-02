@@ -22,7 +22,7 @@ import java.util.List;
 public class NotifyRunningLogin {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private static final String INDEX_URL = "/rise/static/rise";
+    private static final String INDEX_URL = "/rise/static/learn";
     private static final String PERSONAL_URL = "/rise/static/customer/personal";
 
     @Autowired
