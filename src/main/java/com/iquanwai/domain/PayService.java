@@ -100,7 +100,7 @@ public class PayService {
                 monthlyCampOrderDao.closeOrder(orderId);
                 quanwaiOrderDao.closeOrder(orderId);
             }
-            if(QuanwaiOrder.FRAGMENT_CAMP.equals(quanwaiOrder.getGoodsType())) {
+            if(QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
                 businessSchoolApplicationOrderDao.closeOrder(orderId);
                 quanwaiOrderDao.closeOrder(orderId);
             }
