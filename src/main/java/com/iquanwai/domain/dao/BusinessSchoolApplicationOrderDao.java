@@ -8,24 +8,20 @@ import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 
 /**
- * Created by nethunder on 2017/7/14.
+ * Created by justin on 2017/11/30.
  */
 @Repository
-public class RiseCourseOrderDao extends DBUtil {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+public class BusinessSchoolApplicationOrderDao extends DBUtil {
 
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     public void closeOrder(String orderId) {
-        QueryRunner run = new QueryRunner(getDataSource());
-        String sql = "Update RiseCourseOrder set Del=1 where OrderId=?";
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update BusinessSchoolApplicationOrder SET Del = 1 WHERE OrderId = ?";
         try {
-            run.update(sql, orderId);
+            runner.update(sql, orderId);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
-
-
-
-
 }
