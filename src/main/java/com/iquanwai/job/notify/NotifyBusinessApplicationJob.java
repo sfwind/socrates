@@ -1,4 +1,4 @@
-package com.iquanwai.job;
+package com.iquanwai.job.notify;
 
 import com.iquanwai.domain.BusinessSchoolService;
 import org.slf4j.Logger;
@@ -13,7 +13,7 @@ import java.util.Date;
  * Created by nethunder on 2017/10/4.
  */
 @Component
-public class BusinessApplicationNoticeJob {
+public class NotifyBusinessApplicationJob {
     @Autowired
     BusinessSchoolService businessSchoolService;
 

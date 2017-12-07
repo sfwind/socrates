@@ -18,8 +18,8 @@ public class RefreshTokenJob {
 
     @Scheduled(cron="0 0 0/2 * * ?")
     public void work(){
-        logger.info("AccessTokenJob start");
+        logger.info("刷新token任务开始");
         accessTokenService.refreshAccessToken(true);
-        logger.info("AccessTokenJob end");
+        logger.info("刷新token任务结束");
     }
 }

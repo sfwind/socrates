@@ -1,4 +1,4 @@
-package com.iquanwai.job;
+package com.iquanwai.job.notify;
 
 import com.iquanwai.domain.ForumService;
 import com.iquanwai.domain.MessageService;
@@ -15,7 +15,7 @@ import java.util.List;
  * Created by justin on 17/6/27.
  */
 @Component
-public class ForumNotifyJob {
+public class NotifyForumJob {
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private MessageService messageService;

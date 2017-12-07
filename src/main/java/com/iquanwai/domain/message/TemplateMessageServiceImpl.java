@@ -40,13 +40,13 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     }
 
     @Override
-    public boolean sendMessage(TemplateMessage templateMessage, boolean forwardlyPush) {
+    public boolean sendMessage(TemplateMessage templateMessage, boolean validation) {
         boolean sendTag = true;
-        if (forwardlyPush) {
+        if (validation) {
             // 发送权限校验
-            boolean validPush = checkTemplateMessageAuthority(templateMessage, forwardlyPush);
+            boolean validPush = checkTemplateMessageAuthority(templateMessage, true);
             // 模板消息发送记录
-            saveTemplateMessageSendLog(templateMessage, forwardlyPush, validPush);
+            saveTemplateMessageSendLog(templateMessage, true, validPush);
             if (!validPush) {
                 sendTag = false;
             }
