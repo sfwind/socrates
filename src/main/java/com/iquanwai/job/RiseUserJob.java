@@ -19,8 +19,8 @@ public class RiseUserJob {
 
     @Scheduled(cron = "0 0 1 * * ?")
     public void work() {
-        logger.info("start rise user login job");
+        logger.info("记录用户昨日登录任务开始");
         customerService.userLoginLog();
-        logger.info("end  rise user login job");
+        logger.info("记录用户昨日登录任务开始");
     }
 }

@@ -74,11 +74,13 @@ public class BusinessSchoolService {
                 RiseMember riseMember = riseMemberDao.loadValidRiseMember(profile.getId());
                 application.setOriginMemberType(riseMember != null ? riseMember.getMemberTypeId() : null);
                 // 判断status,不是申请中和自动关闭
-                boolean findOld = otherBatch.stream().anyMatch(item -> item.getStatus() != BusinessSchoolApplication.APPLYING && item.getStatus() != BusinessSchoolApplication.AUTO_CLOSE);
+                boolean findOld = otherBatch.stream().anyMatch(item -> item.getStatus() != BusinessSchoolApplication.APPLYING
+                        && item.getStatus() != BusinessSchoolApplication.AUTO_CLOSE);
                 Integer status;
                 if (!findOld) {
                     // 之前没有处理过,一个月之内,并且当前不是精英版
-                    if (riseMember != null && (riseMember.getMemberTypeId() == RiseMember.ELITE || riseMember.getMemberTypeId() == RiseMember.HALF_ELITE)) {
+                    if (riseMember != null && (riseMember.getMemberTypeId() == RiseMember.ELITE
+                            || riseMember.getMemberTypeId() == RiseMember.HALF_ELITE)) {
                         logger.info("精英版自动关闭:{}", profile.getId());
                         application.setComment("精英版自动关闭");
                         status = BusinessSchoolApplication.AUTO_CLOSE;
@@ -139,9 +141,12 @@ public class BusinessSchoolService {
         templateMessage.setComment("发送拒信");
         data.put("keyword1", new TemplateMessage.Keyword("【圈外商学院】"));
         data.put("keyword2", new TemplateMessage.Keyword("未通过"));
-        data.put("remark", new TemplateMessage.Keyword("\n本期商学院的申请者都异常优秀，我们无法为每位申请者提供学习机会，但是很高兴你有一颗追求卓越的心！\n\n点击下方“详情”，了解商学院预科班--圈外训练营。"));
+        data.put("remark", new TemplateMessage.Keyword(
+                "\n本期商学院的申请者都异常优秀，我们无法为每位申请者提供学习机会，但是很高兴你有一颗追求卓越的心！\n\n点击下方“详情”，了解商学院预科班--圈外训练营。"));
         // 同样的对象不需要定义两次
-        data.put("first", new TemplateMessage.Keyword("认真审核过你的入学申请后，我们很遗憾地通知，你本次未被商学院录取。\n\n在此之前，我们推荐你进入【训练营】进行学习。训练营能够帮你快速提高专项能力，为你进入商学院做好准备。点击了解训练营。\n"));
+        data.put("first", new TemplateMessage.Keyword(
+                "认真审核过你的入学申请后，我们很遗憾地通知，你本次未被商学院录取。\n\n" +
+                        "在此之前，我们推荐你进入【训练营】进行学习。训练营能够帮你快速提高专项能力，为你进入商学院做好准备。点击了解训练营。\n"));
         applications.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword3"));
     }
 
@@ -154,9 +159,7 @@ public class BusinessSchoolService {
         Map<Double, List<BusinessSchoolApplication>> coupons = applications.stream().collect(Collectors.groupingBy(BusinessSchoolApplication::getCoupon));
         // 没有优惠券
         List<BusinessSchoolApplication> noCouponGroup = coupons.remove(0d);
-        coupons.forEach((amount, group) -> {
-            logger.info("{}元优惠券,{}条", amount, group.size());
-        });
+        coupons.forEach((amount, group) -> logger.info("{}元优惠券,{}条", amount, group.size()));
         logger.info("无优惠券,{}条", noCouponGroup == null ? 0 : noCouponGroup.size());
         // 发送有优惠券的
         TemplateMessage templateMessage = new TemplateMessage();
@@ -170,7 +173,8 @@ public class BusinessSchoolService {
         // 同样的对象不需要定义两次
         coupons.forEach((amount, applicationGroup) -> {
             data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！" +
-                    "\n\n根据你的申请，入学委员会决定发放给你" + amount.intValue() + "元奖学金，付款时自动抵扣学费。希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
+                    "\n\n根据你的申请，入学委员会决定发放给你" + amount.intValue()
+                    + "元奖学金，付款时自动抵扣学费。希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
             applicationGroup.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword2"));
         });
 
@@ -196,7 +200,8 @@ public class BusinessSchoolService {
         templateMessage.setTouser(application.getOpenid());
         data.put(checkKey, new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime())));
         logger.info("发送模版消息id ：{}", templateMessage.getTemplate_id());
-        templateMessageService.sendMessage(templateMessage);
+        // 录取通知强制发送
+        templateMessageService.sendMessage(templateMessage, false);
         // 更新提醒状态
         businessSchoolApplicationDao.updateNoticeAction(application.getId());
     }
