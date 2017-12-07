@@ -1,4 +1,4 @@
-package com.iquanwai.job.notify;
+package com.iquanwai.job;
 
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.ActivityService;

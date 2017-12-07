@@ -1,4 +1,4 @@
-package com.iquanwai.job.notify;
+package com.iquanwai.job;
 
 import com.iquanwai.domain.MessageService;
 import com.iquanwai.domain.PracticeService;
