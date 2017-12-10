@@ -12,6 +12,7 @@ import com.iquanwai.mq.RabbitMQPublisher;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,7 +173,12 @@ public class CustomerService {
             if (riseMember == null ||
                     (!riseMember.getMemberTypeId().equals(RiseMember.ELITE) && !riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
 
-                List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId, RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION);
+                // 只查看未过期的
+                List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId, RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION)
+                        .stream()
+                        .filter(coupon -> new DateTime(coupon.getExpiredDate()).isAfterNow())
+                        .collect(Collectors.toList());
+
                 Profile profile = profileDao.load(Profile.class, profileId);
 
                 TemplateMessage templateMessage = new TemplateMessage();
@@ -236,7 +242,11 @@ public class CustomerService {
         for (Integer profileId : customerStatusProfileIds) {
             RiseMember riseMember = existRiseMemberMap.get(profileId);
             if (riseMember == null || (!riseMember.getMemberTypeId().equals(RiseMember.ELITE) && !riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
-                List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId, RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION);
+                // 只查看未过期的
+                List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId, RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION)
+                        .stream()
+                        .filter(coupon -> new DateTime(coupon.getExpiredDate()).isAfterNow())
+                        .collect(Collectors.toList());
 
                 Profile profile = getProfile(profileId);
 
