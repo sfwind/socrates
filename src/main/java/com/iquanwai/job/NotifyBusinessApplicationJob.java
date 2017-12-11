@@ -13,7 +13,7 @@ import java.util.Date;
  * Created by nethunder on 2017/10/4.
  */
 @Component
-public class BusinessApplicationNoticeJob {
+public class NotifyBusinessApplicationJob {
     @Autowired
     BusinessSchoolService businessSchoolService;
 

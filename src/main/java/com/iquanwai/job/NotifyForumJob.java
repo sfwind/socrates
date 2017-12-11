@@ -15,7 +15,7 @@ import java.util.List;
  * Created by justin on 17/6/27.
  */
 @Component
-public class ForumNotifyJob {
+public class NotifyForumJob {
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private MessageService messageService;

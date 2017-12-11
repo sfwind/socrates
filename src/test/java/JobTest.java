@@ -4,6 +4,9 @@ import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.dao.RiseUserLandingDao;
 import com.iquanwai.domain.po.RiseUserLanding;
 import com.iquanwai.job.*;
+import com.iquanwai.job.NotifyForumJob;
+import com.iquanwai.job.NotifyBusinessApplicationExpireJob;
+import com.iquanwai.job.NotifyRunningLogin;
 import com.iquanwai.util.DateUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +23,7 @@ public class JobTest extends TestBase {
     @Autowired
     private RiseUserJob riseUserJob;
     @Autowired
-    private ForumNotifyJob forumNotifyJob;
+    private NotifyForumJob forumNotifyJob;
     @Autowired
     private CustomerService customerService;
     @Autowired
@@ -32,7 +35,7 @@ public class JobTest extends TestBase {
     @Autowired
     private BusinessSchoolService businessSchoolService;
     @Autowired
-    private NotifyRiseMemberApplyJob notifyRiseMemberApplyJob;
+    private NotifyBusinessApplicationExpireJob notifyRiseMemberApplyJob;
 
     @Test
     public void expiredTest() {
