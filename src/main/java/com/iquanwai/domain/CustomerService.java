@@ -12,6 +12,7 @@ import com.iquanwai.mq.RabbitMQPublisher;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,8 @@ public class CustomerService {
     @Autowired
     private RiseUserLoginDao riseUserLoginDao;
     @Autowired
+    private CustomerStatusDao customerStatusDao;
+    @Autowired
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
     @Autowired
     private CouponDao couponDao;
@@ -55,6 +58,7 @@ public class CustomerService {
     private RabbitMQPublisher userLoadRabbitMQPublisher;
 
     private static final String LOGIN_USER_RELOAD = "login_user_reload";
+
     //训练营用户
     private static final int MEMBER_TYPE_CAMP = 5;
     private static final String RISE_PAY_URL = "/pay/rise";
@@ -165,7 +169,12 @@ public class CustomerService {
             if (riseMember == null ||
                     (!riseMember.getMemberTypeId().equals(RiseMember.ELITE) && !riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
 
-                List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId, RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION);
+                // 只查看未过期的
+                List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId, RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION)
+                        .stream()
+                        .filter(coupon -> new DateTime(coupon.getExpiredDate()).isAfterNow())
+                        .collect(Collectors.toList());
+
                 Profile profile = profileDao.load(Profile.class, profileId);
 
                 TemplateMessage templateMessage = new TemplateMessage();
