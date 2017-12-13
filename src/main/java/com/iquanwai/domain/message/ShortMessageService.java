@@ -14,7 +14,7 @@ public class ShortMessageService {
     @Autowired
     private RestfulHelper restfulHelper;
 
-    public void sendShorMessage(SMSDto smsDto) {
+    public void sendShortMessage(SMSDto smsDto) {
         String shortMessageUrl = ConfigUtils.sendShortMessageUrl();
         Gson gson = new Gson();
         restfulHelper.post(shortMessageUrl, gson.toJson(smsDto));
