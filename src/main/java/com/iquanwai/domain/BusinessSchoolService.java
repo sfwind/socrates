@@ -3,15 +3,15 @@ package com.iquanwai.domain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.dao.*;
+import com.iquanwai.domain.message.SMSDto;
+import com.iquanwai.domain.message.ShortMessageService;
 import com.iquanwai.domain.message.TemplateMessage;
 import com.iquanwai.domain.message.TemplateMessageService;
-import com.iquanwai.domain.po.BusinessSchoolApplication;
-import com.iquanwai.domain.po.Profile;
-import com.iquanwai.domain.po.RiseMember;
-import com.iquanwai.domain.po.SurveySubmit;
+import com.iquanwai.domain.po.*;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +48,16 @@ public class BusinessSchoolService {
     private RiseMemberDao riseMemberDao;
     @Autowired
     private TemplateMessageService templateMessageService;
+    @Autowired
+    private ShortMessageService shortMessageService;
+    @Autowired
+    private CouponDao couponDao;
+
+    private static final String RISE_PAY_PAGE = "/pay/rise";
+
+    // 会员购买申请 发放优惠券的 Category 和 Description
+    private static final String RISE_APPLY_COUPON_CATEGORY = "ELITE_RISE_MEMBER";
+    private static final String RISE_APPLY_COUPON_DESCRIPTION = "商学院奖学金";
 
     public void searchApplications(Date date) {
         List<SurveySubmit> surveySubmits = surveySubmitDao.loadSubmitGroup(BS_APPLICATION, date).stream().filter(item -> {
@@ -196,14 +206,131 @@ public class BusinessSchoolService {
     }
 
 
-    private void sendMsg(TemplateMessage templateMessage, Map<String, TemplateMessage.Keyword> data, BusinessSchoolApplication application, String checkKey) {
+    private void sendMsg(TemplateMessage templateMessage, Map<String, TemplateMessage.Keyword> data,
+                         BusinessSchoolApplication application, String checkKey) {
         templateMessage.setTouser(application.getOpenid());
         data.put(checkKey, new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime())));
         logger.info("发送模版消息id ：{}", templateMessage.getTemplate_id());
         // 录取通知强制发送
         templateMessageService.sendMessage(templateMessage, false);
+        // 有优惠券短信内容
+        Integer profileId = application.getProfileId();
+        Profile profile = profileDao.load(Profile.class, profileId);
+        SMSDto smsDto = new SMSDto();
+        if (profile != null && profile.getMobileNo() != null) {
+            smsDto.setProfileId(profileId);
+            smsDto.setPhone(profile.getMobileNo());
+            smsDto.setType(SMSDto.PROMOTION);
+            String content = "Hi " + profile.getNickname() +
+                    "，感谢申请圈外商学院，您的申请结果已公布，现在就去「圈外同学」微信公众号查收吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
+            smsDto.setContent(content);
+            shortMessageService.sendShortMessage(smsDto);
+        }
+
         // 更新提醒状态
         businessSchoolApplicationDao.updateNoticeAction(application.getId());
     }
 
+    /**
+     * 商学院申请通过模板消息
+     */
+    public void sendRiseMemberApplyMessageByAddTime(Date addTime, Integer distanceDay) {
+        List<BusinessSchoolApplication> applications = businessSchoolApplicationDao.loadDealApplicationsForNotice(addTime);
+        // 过滤已经过期的申请,dealtime+48小时内不过期
+        applications = applications.stream().filter(application ->
+                DateUtils.afterDays(application.getDealTime(), 2).after(new Date()))
+                .collect(Collectors.toList());
+
+        List<Integer> applyProfileIds = applications.stream().map(BusinessSchoolApplication::getProfileId)
+                .collect(Collectors.toList());
+
+        // 在 RiseMember 中存在的数据
+        List<RiseMember> customerRiseMembers = riseMemberDao.loadValidRiseMemberByProfileIds(applyProfileIds);
+        Map<Integer, RiseMember> existRiseMemberMap = customerRiseMembers.stream()
+                .collect(Collectors.toMap(RiseMember::getProfileId, riseMember -> riseMember));
+
+        for (BusinessSchoolApplication businessSchoolApplication : applications) {
+            Integer profileId = businessSchoolApplication.getProfileId();
+            RiseMember riseMember = existRiseMemberMap.get(profileId);
+            if (riseMember == null ||
+                    (!riseMember.getMemberTypeId().equals(RiseMember.ELITE) && !riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
+
+                // 只查看未过期的
+                List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId,
+                        RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION)
+                        .stream()
+                        .filter(coupon -> new DateTime(coupon.getExpiredDate()).isAfterNow())
+                        .collect(Collectors.toList());
+
+                Profile profile = profileDao.load(Profile.class, profileId);
+
+                TemplateMessage templateMessage = new TemplateMessage();
+                templateMessage.setTouser(profile.getOpenid());
+                Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+                templateMessage.setData(data);
+                templateMessage.setUrl(ConfigUtils.getAppDomain() + RISE_PAY_PAGE);
+
+                if (coupons.size() > 0) {
+                    Coupon coupon = coupons.get(0);
+                    // 设置消息 message id
+                    templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
+                    String expiredHourStr = DateUtils.parseDateToString6(
+                            DateUtils.afterDays(businessSchoolApplication.getDealTime(), 2));
+                    String expiredDateStr = DateUtils.parseDateToString(
+                            DateUtils.afterDays(businessSchoolApplication.getDealTime(), 2));
+                    // 有优惠券模板消息内容
+                    String first = "Hi " + profile.getNickname() + "，您的圈外商学院录取资格及奖学金即将到期，请尽快办理入学！\n";
+                    data.put("first", new TemplateMessage.Keyword(first, "#000000"));
+
+                    if (distanceDay == 1) {
+                        data.put("keyword1", new TemplateMessage.Keyword("明天" + expiredHourStr + "（" + expiredDateStr + "）", "#000000"));
+                    } else if (distanceDay == 0) {
+                        data.put("keyword1", new TemplateMessage.Keyword("今天" + expiredHourStr + "（" + expiredDateStr + "）到期", "#000000"));
+                    }
+                    data.put("keyword2", new TemplateMessage.Keyword("商学院入学奖学金", "#000000"));
+                    data.put("keyword3", new TemplateMessage.Keyword(coupon.getAmount() + "元", "#000000"));
+                    data.put("remark", new TemplateMessage.Keyword("\n点此卡片，立即办理入学", "#f57f16"));
+
+                    // 有优惠券短信内容
+                    SMSDto smsDto = new SMSDto();
+                    if (profile.getMobileNo() != null) {
+                        smsDto.setProfileId(profileId);
+                        smsDto.setPhone(profile.getMobileNo());
+                        smsDto.setType(SMSDto.PROMOTION);
+                        String content = "Hi " + profile.getNickname() +
+                                "，你申请的商学院入学奖学金即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
+                        smsDto.setContent(content);
+                    }
+                    shortMessageService.sendShortMessage(smsDto);
+                } else {
+                    String expiredDateStr = DateUtils.parseDateToString5(
+                            DateUtils.afterDays(businessSchoolApplication.getDealTime(), 2));
+                    // 设置消息 message id
+                    templateMessage.setTemplate_id(ConfigUtils.getApplySuccessMsg());
+                    // 无优惠券模板消息内容
+                    String first = "我们很荣幸地通知您被商学院录取，录取有效期48小时，请尽快办理入学，及时开始学习并结识优秀的校友吧！\n";
+                    data.put("first", new TemplateMessage.Keyword(first, "#000000"));
+                    data.put("keyword1", new TemplateMessage.Keyword("已录取", "#000000"));
+                    BusinessSchoolApplication application = businessSchoolApplicationDao.loadLastApproveApplication(profileId);
+                    data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime()), "#000000"));
+                    data.put("remark", new TemplateMessage.Keyword("过期时间 :  " + expiredDateStr + "\n\n点击卡片，立即办理入学", "#f57f16"));
+
+                    // 有优惠券短信内容
+                    SMSDto smsDto = new SMSDto();
+                    if (profile.getMobileNo() != null) {
+                        smsDto.setProfileId(profileId);
+                        smsDto.setPhone(profile.getMobileNo());
+                        smsDto.setType(SMSDto.PROMOTION);
+                        String content = "Hi " + profile.getNickname() +
+                                "，你申请的商学院入学资格即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
+                        smsDto.setContent(content);
+                        shortMessageService.sendShortMessage(smsDto);
+                    }
+
+                }
+
+                templateMessageService.sendMessage(templateMessage);
+            }
+        }
+    }
 }

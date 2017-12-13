@@ -1,6 +1,6 @@
 package com.iquanwai.job;
 
-import com.iquanwai.domain.CustomerService;
+import com.iquanwai.domain.BusinessSchoolService;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ import java.util.Date;
 @Component
 public class NotifyBusinessApplicationExpireJob {
     @Autowired
-    private CustomerService customerService;
+    private BusinessSchoolService businessSchoolService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -32,8 +32,8 @@ public class NotifyBusinessApplicationExpireJob {
         // 会员申请通过之后，优惠券的有效日期是 2 天，提醒日期为第六天晚上
         Date oneDay = DateUtils.beforeDays(new Date(), 1);
         Date twoDay = DateUtils.beforeDays(new Date(), 2);
-        customerService.sendRiseMemberApplyMessageByAddTime(oneDay, 1);
-        customerService.sendRiseMemberApplyMessageByAddTime(twoDay, 0);
+        businessSchoolService.sendRiseMemberApplyMessageByAddTime(oneDay, 1);
+        businessSchoolService.sendRiseMemberApplyMessageByAddTime(twoDay, 0);
     }
 
 }
