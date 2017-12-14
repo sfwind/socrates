@@ -53,8 +53,6 @@ public class BusinessSchoolService {
     @Autowired
     private CouponDao couponDao;
 
-    private static final String RISE_PAY_PAGE = "/pay/rise";
-
     // 会员购买申请 发放优惠券的 Category 和 Description
     private static final String RISE_APPLY_COUPON_CATEGORY = "ELITE_RISE_MEMBER";
     private static final String RISE_APPLY_COUPON_DESCRIPTION = "商学院奖学金";
@@ -277,7 +275,7 @@ public class BusinessSchoolService {
         templateMessage.setTouser(profile.getOpenid());
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
-        templateMessage.setUrl(ConfigUtils.getAppDomain() + RISE_PAY_PAGE);
+        templateMessage.setUrl(PAY_URL);
 
         if (CollectionUtils.isNotEmpty(coupons)) {
             Coupon coupon = coupons.get(0);
