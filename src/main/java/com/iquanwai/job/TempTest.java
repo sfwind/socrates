@@ -17,7 +17,7 @@ public class TempTest {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Scheduled(cron = "/10 * * * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
     public void main() {
         logger.info("开始获取黑名单列表");
         List<String> openIds = customerService.loadBlackListOpenIds();
