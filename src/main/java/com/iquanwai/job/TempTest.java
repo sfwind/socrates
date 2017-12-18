@@ -21,7 +21,9 @@ public class TempTest {
     public void main() {
         logger.info("开始获取黑名单列表");
         List<String> openIds = customerService.loadBlackListOpenIds();
-        openIds.forEach(openId -> System.out.println(openId));
+        openIds.forEach(openId -> {
+            logger.info(openId);
+        });
         logger.info("黑名单列表获取结束");
     }
 
