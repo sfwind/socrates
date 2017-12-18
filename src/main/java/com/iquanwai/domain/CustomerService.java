@@ -4,6 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.dao.*;
+import com.iquanwai.domain.message.SMSDto;
+import com.iquanwai.domain.message.ShortMessageService;
+import com.iquanwai.domain.message.TemplateMessage;
+import com.iquanwai.domain.message.TemplateMessageService;
+import com.iquanwai.domain.po.Coupon;
+import com.iquanwai.domain.po.Profile;
+import com.iquanwai.domain.po.RiseMember;
+import com.iquanwai.domain.po.RiseUserLanding;
 import com.iquanwai.domain.message.*;
 import com.iquanwai.domain.po.Coupon;
 import com.iquanwai.domain.po.Profile;
@@ -57,6 +65,7 @@ public class CustomerService {
     private RabbitMQPublisher userLoadRabbitMQPublisher;
 
     private static final String LOGIN_USER_RELOAD = "login_user_reload";
+
     //训练营用户
     private static final int MEMBER_TYPE_CAMP = 5;
     private static final String RISE_PAY_URL = "/pay/rise";
