@@ -262,6 +262,7 @@ public class CustomerService {
 
         List<Profile> profiles = profileDao.loadByProfileIds(profileIds);
 
+        // 过滤出黑名单人员，对于在黑名单中的人员，不发送提醒消息
         List<String> blackListOpenIds = loadBlackListOpenIds();
         profiles = profiles.stream().filter(profile -> !blackListOpenIds.contains(profile.getOpenid()))
                 .collect(Collectors.toList());
