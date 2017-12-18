@@ -262,6 +262,10 @@ public class CustomerService {
 
         List<Profile> profiles = profileDao.loadByProfileIds(profileIds);
 
+        List<String> blackListOpenIds = loadBlackListOpenIds();
+        profiles = profiles.stream().filter(profile -> !blackListOpenIds.contains(profile.getOpenid()))
+                .collect(Collectors.toList());
+
         for (Profile profile : profiles) {
             Coupon coupon = couponMap.get(profile.getId());
 
