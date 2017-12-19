@@ -1,11 +1,18 @@
 package com.iquanwai.domain;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.dao.*;
 import com.iquanwai.domain.message.SMSDto;
 import com.iquanwai.domain.message.ShortMessageService;
 import com.iquanwai.domain.message.TemplateMessage;
 import com.iquanwai.domain.message.TemplateMessageService;
+import com.iquanwai.domain.po.Coupon;
+import com.iquanwai.domain.po.Profile;
+import com.iquanwai.domain.po.RiseMember;
+import com.iquanwai.domain.po.RiseUserLanding;
+import com.iquanwai.domain.message.*;
 import com.iquanwai.domain.po.Coupon;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.domain.po.RiseMember;
@@ -21,10 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -45,6 +49,8 @@ public class CustomerService {
     @Autowired
     private RiseUserLoginDao riseUserLoginDao;
     @Autowired
+    private BusinessSchoolApplicationDao businessSchoolApplicationDao;
+    @Autowired
     private CouponDao couponDao;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
@@ -52,6 +58,9 @@ public class CustomerService {
     private TemplateMessageService templateMessageService;
     @Autowired
     private ShortMessageService shortMessageService;
+    @Autowired
+    private RestfulHelper restfulHelper;
+
 
     private RabbitMQPublisher userLoadRabbitMQPublisher;
 
@@ -62,6 +71,14 @@ public class CustomerService {
     private static final String RISE_PAY_URL = "/pay/rise";
 
     private static final String PERSON_ACCOUNT_PAGE = "/rise/static/customer/account"; // 个人账户页面
+
+    // 会员购买申请 发放优惠券的 Category 和 Description
+    private static final String RISE_APPLY_COUPON_CATEGORY = "ELITE_RISE_MEMBER";
+    private static final String RISE_APPLY_COUPON_DESCRIPTION = "商学院奖学金";
+
+
+    String LIST_BLACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/getblacklist?access_token={access_token}";
+    private final int WX_BLACKLIST_DEFAULT_PAGE_SIZE = 10000;
 
     @PostConstruct
     public void init() {
@@ -135,6 +152,41 @@ public class CustomerService {
             profile.setRiseMember(getRiseMember(profile.getId()));
         }
         return profile;
+    }
+
+    public List<String> loadBlackListOpenIds() {
+        String url = LIST_BLACKLIST_URL;
+        int count = 0;
+        List<String> blackList = new ArrayList<>();
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("begin_openid", "");
+        String body = restfulHelper.post(url, jsonObject.toJSONString());
+        String data = JSON.parseObject(body).getString("data");
+        //获取data中的openidList
+        if (data != null) {
+            JSONObject dataJSON = JSON.parseObject(data);
+            String openidList = dataJSON.getString("openid");
+            blackList.addAll(Arrays.asList(openidList.substring(1, openidList.length() - 1).split(",")));
+            String nextOpenid = JSON.parseObject(body).getString("next_openid");
+
+            int total = Integer.valueOf(JSON.parseObject(body).getString("total"));
+            //取出所有的openid
+            while ((total - 1) / WX_BLACKLIST_DEFAULT_PAGE_SIZE > count) {
+                jsonObject = new JSONObject();
+                jsonObject.put("begin_openid", nextOpenid);
+                body = restfulHelper.post(url, jsonObject.toJSONString());
+                data = JSON.parseObject(body).getString("data");
+
+                dataJSON = JSON.parseObject(data);
+                openidList = dataJSON.getString("openid");
+                blackList.addAll(Arrays.asList(openidList.substring(1, openidList.length() - 1).split(",")));
+                nextOpenid = JSON.parseObject(body).getString("next_openid");
+
+                count++;
+            }
+        }
+        return blackList;
     }
 
     /**
@@ -218,6 +270,11 @@ public class CustomerService {
         Map<Integer, Coupon> couponMap = coupons.stream().collect(Collectors.toMap(Coupon::getProfileId, coupon -> coupon));
 
         List<Profile> profiles = profileDao.loadByProfileIds(profileIds);
+
+        // 过滤出黑名单人员，对于在黑名单中的人员，不发送提醒消息
+        List<String> blackListOpenIds = loadBlackListOpenIds();
+        profiles = profiles.stream().filter(profile -> !blackListOpenIds.contains(profile.getOpenid()))
+                .collect(Collectors.toList());
 
         for (Profile profile : profiles) {
             Coupon coupon = couponMap.get(profile.getId());
