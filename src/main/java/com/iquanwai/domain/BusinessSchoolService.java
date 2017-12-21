@@ -11,7 +11,6 @@ import com.iquanwai.domain.po.*;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,15 +46,20 @@ public class BusinessSchoolService {
     @Autowired
     private RiseMemberDao riseMemberDao;
     @Autowired
+    private CustomerStatusDao customerStatusDao;
+    @Autowired
     private TemplateMessageService templateMessageService;
     @Autowired
     private ShortMessageService shortMessageService;
     @Autowired
     private CouponDao couponDao;
+    @Autowired
+    private QuanwaiOrderDao quanwaiOrderDao;
 
     // 会员购买申请 发放优惠券的 Category 和 Description
     private static final String RISE_APPLY_COUPON_CATEGORY = "ELITE_RISE_MEMBER";
     private static final String RISE_APPLY_COUPON_DESCRIPTION = "商学院奖学金";
+    private static final String APPLY_COUPON_DESCRIPTION = "商学院抵用券";
 
     public void searchApplications(Date date) {
         List<SurveySubmit> surveySubmits = surveySubmitDao.loadSubmitGroup(BS_APPLICATION, date).stream().filter(item -> {
@@ -164,6 +168,57 @@ public class BusinessSchoolService {
         if (count == 0) {
             return;
         }
+
+        applications.forEach(application -> {
+            // 发放优惠券，开白名单
+
+            // 是否有优惠券
+            List<Coupon> coupons = couponDao.loadCouponsByProfileId(application.getProfileId(),
+                    RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION);
+            if(CollectionUtils.isEmpty(coupons)){
+                if (application.getCoupon() != null && application.getCoupon() > 0) {
+                    Coupon couponBean = new Coupon();
+                    couponBean.setAmount(application.getCoupon().intValue());
+                    couponBean.setOpenId(application.getOpenid());
+                    couponBean.setProfileId(application.getProfileId());
+                    couponBean.setUsed(Coupon.UNUSED);
+                    couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 3));
+                    couponBean.setCategory("ELITE_RISE_MEMBER");
+                    couponBean.setDescription("商学院奖学金");
+                    couponDao.insert(couponBean);
+                }
+            }
+
+            // 如果收了申请费,则添加一张等价优惠券
+            String orderId = application.getOrderId();
+            if (orderId != null) {
+                QuanwaiOrder order = quanwaiOrderDao.loadOrder(orderId);
+                if (order != null) {
+                    // 是否有优惠券
+                    coupons = couponDao.loadCouponsByProfileId(application.getProfileId(),
+                            RISE_APPLY_COUPON_CATEGORY, APPLY_COUPON_DESCRIPTION);
+                    if(CollectionUtils.isEmpty(coupons)){
+                        if (order.getStatus().equals(QuanwaiOrder.PAID)) {
+                            // 添加优惠券
+                            Coupon couponBean = new Coupon();
+                            couponBean.setAmount(order.getPrice().intValue());
+                            couponBean.setOpenId(application.getOpenid());
+                            couponBean.setProfileId(application.getProfileId());
+                            couponBean.setUsed(Coupon.UNUSED);
+                            couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 3));
+                            couponBean.setCategory("ELITE_RISE_MEMBER");
+                            couponBean.setDescription("商学院抵用券");
+                            couponDao.insert(couponBean);
+                        }
+                    }
+                }
+            }
+
+            //插入申请通过许可
+            customerStatusDao.insert(application.getProfileId(), CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
+        });
+
+
         Map<Double, List<BusinessSchoolApplication>> coupons = applications.stream().collect(Collectors.groupingBy(BusinessSchoolApplication::getCoupon));
         // 没有优惠券
         List<BusinessSchoolApplication> noCouponGroup = coupons.remove(0d);
@@ -264,10 +319,7 @@ public class BusinessSchoolService {
     private void sendExpiredMessage(Integer distanceDay, BusinessSchoolApplication businessSchoolApplication, Integer profileId) {
         // 只查看未过期的奖学金
         List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId,
-                RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION)
-                .stream()
-                .filter(coupon -> new DateTime(coupon.getExpiredDate()).isAfterNow())
-                .collect(Collectors.toList());
+                RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION);
 
         Profile profile = profileDao.load(Profile.class, profileId);
 

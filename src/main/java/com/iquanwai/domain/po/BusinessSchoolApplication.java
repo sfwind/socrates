@@ -24,6 +24,7 @@ public class BusinessSchoolApplication {
     private String comment;
     private Date submitTime;
     private Date dealTime;
+    private String orderId;
 
     private String originMemberTypeName;
 

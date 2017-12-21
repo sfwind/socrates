@@ -54,7 +54,7 @@ public class JobTest extends TestBase {
     }
     @Test
     public void testNotify(){
-        notifyRiseMemberApplyJob.work();
+        businessSchoolService.noticeApplication(new Date());
     }
 
     @Test
