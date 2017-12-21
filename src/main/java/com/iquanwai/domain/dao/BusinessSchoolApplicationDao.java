@@ -66,7 +66,7 @@ public class BusinessSchoolApplicationDao extends DBUtil {
 
     public List<BusinessSchoolApplication> loadCheckApplicationsForNotice(Date date) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from BusinessSchoolApplication where DATE(CheckTime) = ? AND Status in (1,2) AND Deal = 0 AND Del = 0";
+        String sql = "select * from BusinessSchoolApplication where DATE(CheckTime) <= ? AND Status in (1,2) AND Deal = 0 AND Del = 0";
         try {
             return runner.query(sql, new BeanListHandler<>(BusinessSchoolApplication.class), DateUtils.parseDateToString(date));
         } catch (SQLException e) {
