@@ -38,8 +38,6 @@ public class BusinessSchoolService {
     }
 
     @Autowired
-    private SurveySubmitDao surveySubmitDao;
-    @Autowired
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
     @Autowired
     private ProfileDao profileDao;
@@ -60,74 +58,6 @@ public class BusinessSchoolService {
     private static final String RISE_APPLY_COUPON_CATEGORY = "ELITE_RISE_MEMBER";
     private static final String RISE_APPLY_COUPON_DESCRIPTION = "商学院奖学金";
     private static final String APPLY_COUPON_DESCRIPTION = "商学院抵用券";
-
-    public void searchApplications(Date date) {
-        List<SurveySubmit> surveySubmits = surveySubmitDao.loadSubmitGroup(BS_APPLICATION, date).stream().filter(item -> {
-            // 过滤已经入库的申请
-            return businessSchoolApplicationDao.loadBySubmitId(item.getId()) == null;
-        }).collect(Collectors.toList());
-        logger.info("查找:{} ，共{}条", DateUtils.parseDateToString(date), surveySubmits.size());
-        /*
-          处理步骤：
-          1.判断 status
-          2.固化当前会员类型
-          3.是否重复提交（老数据,这个批次）
-         */
-        Map<String, List<SurveySubmit>> surveyGroup = surveySubmits.stream().collect(Collectors.groupingBy(SurveySubmit::getOpenId));
-        surveyGroup.forEach((openId, thisBatch) -> {
-            Profile profile = profileDao.loadByOpenId(openId);
-            List<BusinessSchoolApplication> otherBatch = businessSchoolApplicationDao.getUserApplications(profile.getId(), date, 60);
-            Integer minSubmitId = thisBatch.stream().mapToInt(SurveySubmit::getId).min().getAsInt();
-            List<BusinessSchoolApplication> waitDeal = thisBatch.stream().map(survey -> {
-                BusinessSchoolApplication application = new BusinessSchoolApplication();
-                // 是否重复提交 !(老批次没有，并且这个批次是最小的id)
-                application.setIsDuplicate(!(CollectionUtils.isEmpty(otherBatch) && survey.getId().equals(minSubmitId)));
-                // 固化当前会员类型
-                RiseMember riseMember = riseMemberDao.loadValidRiseMember(profile.getId());
-                application.setOriginMemberType(riseMember != null ? riseMember.getMemberTypeId() : null);
-                // 判断status,不是申请中和自动关闭
-                boolean findOld = otherBatch.stream().anyMatch(item -> item.getStatus() != BusinessSchoolApplication.APPLYING
-                        && item.getStatus() != BusinessSchoolApplication.AUTO_CLOSE);
-                Integer status;
-                if (!findOld) {
-                    // 之前没有处理过,一个月之内,并且当前不是精英版
-                    if (riseMember != null && (riseMember.getMemberTypeId() == RiseMember.ELITE
-                            || riseMember.getMemberTypeId() == RiseMember.HALF_ELITE)) {
-                        logger.info("精英版自动关闭:{}", profile.getId());
-                        application.setComment("精英版自动关闭");
-                        status = BusinessSchoolApplication.AUTO_CLOSE;
-                    } else {
-                        status = BusinessSchoolApplication.APPLYING;
-                    }
-                    if (CollectionUtils.isNotEmpty(otherBatch)) {
-                        // 之前没处理过，并且有老的申请，将老的申请关掉,注意，只会关闭未处理(status=0)的订单
-                        otherBatch.forEach(item -> {
-                            logger.info("关掉老的申请:{}", profile.getId());
-                            businessSchoolApplicationDao.autoCloseApplication(item.getId());
-                        });
-                    }
-                } else {
-                    logger.info("已经处理过:{}", profile.getId());
-                    status = BusinessSchoolApplication.AUTO_CLOSE;
-                    application.setComment("近期已经处理过");
-                }
-                application.setStatus(status);
-                // 常规数据初始化
-                application.setSubmitId(survey.getId());
-                application.setProfileId(profile.getId());
-                application.setOpenid(profile.getOpenid());
-                application.setCheckTime(status != BusinessSchoolApplication.APPLYING ? new Date() : null);
-                application.setDeal(status != BusinessSchoolApplication.APPLYING);
-                application.setDealTime(status != BusinessSchoolApplication.APPLYING ? new Date() : null);
-                application.setSubmitTime(survey.getSubmitTime());
-                return application;
-            }).collect(Collectors.toList());
-            for (BusinessSchoolApplication application : waitDeal) {
-                Integer id = businessSchoolApplicationDao.insert(application);
-                logger.info("插入商学院申请:{}", id);
-            }
-        });
-    }
 
     public void noticeApplication(Date date) {
         List<BusinessSchoolApplication> applications = businessSchoolApplicationDao.loadCheckApplicationsForNotice(date);
@@ -171,18 +101,24 @@ public class BusinessSchoolService {
 
         applications.forEach(application -> {
             // 发放优惠券，开白名单
+            int profileId = application.getProfileId();
+            RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+            // 已购买商学院的用户不再发通知
+            if (riseMember != null && riseMember.getMemberTypeId() == RiseMember.ELITE) {
+                return;
+            }
 
             // 是否有优惠券
-            List<Coupon> coupons = couponDao.loadCouponsByProfileId(application.getProfileId(),
+            List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId,
                     RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION);
-            if(CollectionUtils.isEmpty(coupons)){
+            if (CollectionUtils.isEmpty(coupons)) {
                 if (application.getCoupon() != null && application.getCoupon() > 0) {
                     Coupon couponBean = new Coupon();
                     couponBean.setAmount(application.getCoupon().intValue());
                     couponBean.setOpenId(application.getOpenid());
-                    couponBean.setProfileId(application.getProfileId());
+                    couponBean.setProfileId(profileId);
                     couponBean.setUsed(Coupon.UNUSED);
-                    couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 3));
+                    couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
                     couponBean.setCategory("ELITE_RISE_MEMBER");
                     couponBean.setDescription("商学院奖学金");
                     couponDao.insert(couponBean);
@@ -195,17 +131,17 @@ public class BusinessSchoolService {
                 QuanwaiOrder order = quanwaiOrderDao.loadOrder(orderId);
                 if (order != null) {
                     // 是否有优惠券
-                    coupons = couponDao.loadCouponsByProfileId(application.getProfileId(),
+                    coupons = couponDao.loadCouponsByProfileId(profileId,
                             RISE_APPLY_COUPON_CATEGORY, APPLY_COUPON_DESCRIPTION);
-                    if(CollectionUtils.isEmpty(coupons)){
+                    if (CollectionUtils.isEmpty(coupons)) {
                         if (order.getStatus().equals(QuanwaiOrder.PAID)) {
                             // 添加优惠券
                             Coupon couponBean = new Coupon();
                             couponBean.setAmount(order.getPrice().intValue());
                             couponBean.setOpenId(application.getOpenid());
-                            couponBean.setProfileId(application.getProfileId());
+                            couponBean.setProfileId(profileId);
                             couponBean.setUsed(Coupon.UNUSED);
-                            couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 3));
+                            couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
                             couponBean.setCategory("ELITE_RISE_MEMBER");
                             couponBean.setDescription("商学院抵用券");
                             couponDao.insert(couponBean);
@@ -215,7 +151,7 @@ public class BusinessSchoolService {
             }
 
             //插入申请通过许可
-            customerStatusDao.insert(application.getProfileId(), CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
+            customerStatusDao.insert(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
         });
 
 
@@ -232,7 +168,7 @@ public class BusinessSchoolService {
         templateMessage.setUrl(PAY_URL);
         templateMessage.setComment("商学院审核通过");
         data.put("keyword1", new TemplateMessage.Keyword("通过"));
-        data.put("remark", new TemplateMessage.Keyword("奖学金和录取通知2天内有效，请及时点击本通知书，办理入学。", "#f57f16"));
+        data.put("remark", new TemplateMessage.Keyword("奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
         // 同样的对象不需要定义两次
         coupons.forEach((amount, applicationGroup) -> {
             data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！" +
@@ -251,7 +187,7 @@ public class BusinessSchoolService {
         noCouponMsg.setData(noCouponData);
         noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
         noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
-        noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知书2天内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
+        noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知书24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
         // 发送没有优惠券的
         if (noCouponGroup != null) {
             noCouponGroup.forEach(app -> this.sendMsg(noCouponMsg, noCouponData, app, "keyword2"));
@@ -289,9 +225,9 @@ public class BusinessSchoolService {
      */
     public void sendRiseMemberApplyMessageByAddTime(Date addTime, Integer distanceDay) {
         List<BusinessSchoolApplication> applications = businessSchoolApplicationDao.loadDealApplicationsForNotice(addTime);
-        // 过滤已经过期的申请,dealtime+48小时内不过期
+        // 过滤已经过期的申请,dealtime+24小时内不过期
         applications = applications.stream().filter(application ->
-                DateUtils.afterDays(application.getDealTime(), 2).after(new Date()))
+                DateUtils.afterDays(application.getDealTime(), 1).after(new Date()))
                 .collect(Collectors.toList());
 
         List<Integer> applyProfileIds = applications.stream().map(BusinessSchoolApplication::getProfileId)
@@ -334,9 +270,9 @@ public class BusinessSchoolService {
             // 设置消息 message id
             templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
             String expiredHourStr = DateUtils.parseDateToString6(
-                    DateUtils.afterDays(businessSchoolApplication.getDealTime(), 2));
+                    DateUtils.afterDays(businessSchoolApplication.getDealTime(), 1));
             String expiredDateStr = DateUtils.parseDateToString(
-                    DateUtils.afterDays(businessSchoolApplication.getDealTime(), 2));
+                    DateUtils.afterDays(businessSchoolApplication.getDealTime(), 1));
             // 有优惠券模板消息内容
             String first = "Hi " + profile.getNickname() + "，您的圈外商学院录取资格及奖学金即将到期，请尽快办理入学！\n";
             data.put("first", new TemplateMessage.Keyword(first, "#000000"));
@@ -364,11 +300,11 @@ public class BusinessSchoolService {
 
         } else {
             String expiredDateStr = DateUtils.parseDateToString5(
-                    DateUtils.afterDays(businessSchoolApplication.getDealTime(), 2));
+                    DateUtils.afterDays(businessSchoolApplication.getDealTime(), 1));
             // 设置消息 message id
             templateMessage.setTemplate_id(ConfigUtils.getApplySuccessMsg());
             // 无优惠券模板消息内容
-            String first = "我们很荣幸地通知您被商学院录取，录取有效期48小时，请尽快办理入学，及时开始学习并结识优秀的校友吧！\n";
+            String first = "我们很荣幸地通知您被商学院录取，录取有效期24小时，请尽快办理入学，及时开始学习并结识优秀的校友吧！\n";
             data.put("first", new TemplateMessage.Keyword(first, "#000000"));
             data.put("keyword1", new TemplateMessage.Keyword("已录取", "#000000"));
             BusinessSchoolApplication application = businessSchoolApplicationDao.loadLastApproveApplication(profileId);

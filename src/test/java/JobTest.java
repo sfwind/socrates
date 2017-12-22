@@ -71,10 +71,10 @@ public class JobTest extends TestBase {
         System.out.println(diff);
     }
 
-    @Test
-    public void searchTest(){
-        businessSchoolService.searchApplications(DateUtils.parseStringToDate("2017-09-22"));
-    }
+//    @Test
+//    public void searchTest(){
+//        businessSchoolService.searchApplications(DateUtils.parseStringToDate("2017-09-22"));
+//    }
 
     @Autowired
     private AuditionService auditionService;
