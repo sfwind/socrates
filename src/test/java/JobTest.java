@@ -54,7 +54,8 @@ public class JobTest extends TestBase {
     }
     @Test
     public void testNotify(){
-        businessSchoolService.noticeApplication(new Date());
+        Date oneDay = DateUtils.beforeDays(new Date(), 1);
+        businessSchoolService.sendRiseMemberApplyMessageByDealTime(oneDay, 0);
     }
 
     @Test

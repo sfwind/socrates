@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -28,14 +27,8 @@ import java.util.stream.Collectors;
 @Service
 public class BusinessSchoolService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    public Integer BS_APPLICATION;
     public static String PAY_URL = "https://www.iquanwai.com/pay/apply";
     public static String PAY_CAMP_URL = "https://www.iquanwai.com/pay/camp";
-
-    @PostConstruct
-    public void init() {
-        BS_APPLICATION = ConfigUtils.getBsApplicationActivity();
-    }
 
     @Autowired
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
@@ -101,65 +94,70 @@ public class BusinessSchoolService {
 
         applications.forEach(application -> {
             // 发放优惠券，开白名单
-            int profileId = application.getProfileId();
-            RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-            // 已购买商学院的用户不再发通知
-            if (riseMember != null && riseMember.getMemberTypeId() == RiseMember.ELITE) {
-                return;
-            }
-
-            // 是否有优惠券
-            List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId,
-                    RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION);
-            if (CollectionUtils.isEmpty(coupons)) {
-                if (application.getCoupon() != null && application.getCoupon() > 0) {
-                    Coupon couponBean = new Coupon();
-                    couponBean.setAmount(application.getCoupon().intValue());
-                    couponBean.setOpenId(application.getOpenid());
-                    couponBean.setProfileId(profileId);
-                    couponBean.setUsed(Coupon.UNUSED);
-                    couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
-                    couponBean.setCategory("ELITE_RISE_MEMBER");
-                    couponBean.setDescription("商学院奖学金");
-                    couponDao.insert(couponBean);
+            try {
+                int profileId = application.getProfileId();
+                RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+                // 已购买商学院的用户不再发通知
+                if (riseMember != null && riseMember.getMemberTypeId() == RiseMember.ELITE) {
+                    logger.info("{}已经报名商学院", profileId);
+                    return;
                 }
-            }
 
-            // 如果收了申请费,则添加一张等价优惠券
-            String orderId = application.getOrderId();
-            if (orderId != null) {
-                QuanwaiOrder order = quanwaiOrderDao.loadOrder(orderId);
-                if (order != null) {
-                    // 是否有优惠券
-                    coupons = couponDao.loadCouponsByProfileId(profileId,
-                            RISE_APPLY_COUPON_CATEGORY, APPLY_COUPON_DESCRIPTION);
-                    if (CollectionUtils.isEmpty(coupons)) {
-                        if (order.getStatus().equals(QuanwaiOrder.PAID)) {
-                            // 添加优惠券
-                            Coupon couponBean = new Coupon();
-                            couponBean.setAmount(order.getPrice().intValue());
-                            couponBean.setOpenId(application.getOpenid());
-                            couponBean.setProfileId(profileId);
-                            couponBean.setUsed(Coupon.UNUSED);
-                            couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
-                            couponBean.setCategory("ELITE_RISE_MEMBER");
-                            couponBean.setDescription("商学院抵用券");
-                            couponDao.insert(couponBean);
+                // 是否有优惠券
+                List<Coupon> coupons = couponDao.loadCouponsByProfileId(profileId,
+                        RISE_APPLY_COUPON_CATEGORY, RISE_APPLY_COUPON_DESCRIPTION);
+                if (CollectionUtils.isEmpty(coupons)) {
+                    if (application.getCoupon() != null && application.getCoupon() > 0) {
+                        Coupon couponBean = new Coupon();
+                        couponBean.setAmount(application.getCoupon().intValue());
+                        couponBean.setOpenId(application.getOpenid());
+                        couponBean.setProfileId(profileId);
+                        couponBean.setUsed(Coupon.UNUSED);
+                        couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
+                        couponBean.setCategory(RISE_APPLY_COUPON_CATEGORY);
+                        couponBean.setDescription(RISE_APPLY_COUPON_DESCRIPTION);
+                        couponDao.insert(couponBean);
+                    }
+                }
+
+                // 如果收了申请费,则添加一张等价优惠券
+                String orderId = application.getOrderId();
+                if (orderId != null) {
+                    QuanwaiOrder order = quanwaiOrderDao.loadOrder(orderId);
+                    if (order != null) {
+                        // 是否有优惠券
+                        coupons = couponDao.loadCouponsByProfileId(profileId,
+                                RISE_APPLY_COUPON_CATEGORY, APPLY_COUPON_DESCRIPTION);
+                        if (CollectionUtils.isEmpty(coupons)) {
+                            if (order.getStatus().equals(QuanwaiOrder.PAID)) {
+                                // 添加优惠券
+                                Coupon couponBean = new Coupon();
+                                couponBean.setAmount(order.getPrice().intValue());
+                                couponBean.setOpenId(application.getOpenid());
+                                couponBean.setProfileId(profileId);
+                                couponBean.setUsed(Coupon.UNUSED);
+                                couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
+                                couponBean.setCategory(RISE_APPLY_COUPON_CATEGORY);
+                                couponBean.setDescription(RISE_APPLY_COUPON_DESCRIPTION);
+                                couponDao.insert(couponBean);
+                            }
                         }
                     }
                 }
-            }
 
-            //插入申请通过许可
-            customerStatusDao.insert(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
+                //插入申请通过许可
+                customerStatusDao.insert(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
+            } catch (Exception e) {
+                logger.error("插入优惠券失败", e);
+            }
         });
 
 
         Map<Double, List<BusinessSchoolApplication>> coupons = applications.stream().collect(Collectors.groupingBy(BusinessSchoolApplication::getCoupon));
         // 没有优惠券
         List<BusinessSchoolApplication> noCouponGroup = coupons.remove(0d);
-        coupons.forEach((amount, group) -> logger.info("{}元优惠券,{}条", amount, group.size()));
-        logger.info("无优惠券,{}条", noCouponGroup == null ? 0 : noCouponGroup.size());
+        coupons.forEach((amount, group) -> logger.info("{}元优惠券:{}条", amount, group.size()));
+        logger.info("无优惠券:{}条", noCouponGroup == null ? 0 : noCouponGroup.size());
         // 发送有优惠券的
         TemplateMessage templateMessage = new TemplateMessage();
         templateMessage.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
@@ -168,7 +166,8 @@ public class BusinessSchoolService {
         templateMessage.setUrl(PAY_URL);
         templateMessage.setComment("商学院审核通过");
         data.put("keyword1", new TemplateMessage.Keyword("通过"));
-        data.put("remark", new TemplateMessage.Keyword("奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
+//        data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
+        data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取结果24小时内有效，过期后需重新申请并面试；本次报名截止12月底，下次报名3月开学。请及时点击本通知书，办理入学。", "#f57f16"));
         // 同样的对象不需要定义两次
         coupons.forEach((amount, applicationGroup) -> {
             data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！" +
@@ -187,7 +186,8 @@ public class BusinessSchoolService {
         noCouponMsg.setData(noCouponData);
         noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
         noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
-        noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知书24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
+//        noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知书24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
+        noCouponData.put("remark", new TemplateMessage.Keyword("\n录取结果24小时内有效，过期后需重新申请并面试；本次报名截止12月底，下次报名3月开学。请及时点击本通知书，办理入学。", "#f57f16"));
         // 发送没有优惠券的
         if (noCouponGroup != null) {
             noCouponGroup.forEach(app -> this.sendMsg(noCouponMsg, noCouponData, app, "keyword2"));
@@ -197,13 +197,21 @@ public class BusinessSchoolService {
 
     private void sendMsg(TemplateMessage templateMessage, Map<String, TemplateMessage.Keyword> data,
                          BusinessSchoolApplication application, String checkKey) {
+
+        int profileId = application.getProfileId();
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+        // 已购买商学院的用户不再发通知
+        if (riseMember != null && (riseMember.getMemberTypeId() == RiseMember.ELITE ||
+                riseMember.getMemberTypeId() == RiseMember.HALF_ELITE)) {
+            logger.info("{}已经报名商学院", profileId);
+            return;
+        }
         templateMessage.setTouser(application.getOpenid());
         data.put(checkKey, new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime())));
         logger.info("发送模版消息id ：{}", templateMessage.getTemplate_id());
         // 录取通知强制发送
         templateMessageService.sendMessage(templateMessage, false);
         // 有优惠券短信内容
-        Integer profileId = application.getProfileId();
         Profile profile = profileDao.load(Profile.class, profileId);
         SMSDto smsDto = new SMSDto();
         if (profile != null && profile.getMobileNo() != null) {
@@ -223,8 +231,8 @@ public class BusinessSchoolService {
     /**
      * 商学院申请通过模板消息
      */
-    public void sendRiseMemberApplyMessageByAddTime(Date addTime, Integer distanceDay) {
-        List<BusinessSchoolApplication> applications = businessSchoolApplicationDao.loadDealApplicationsForNotice(addTime);
+    public void sendRiseMemberApplyMessageByDealTime(Date dealTime, Integer distanceDay) {
+        List<BusinessSchoolApplication> applications = businessSchoolApplicationDao.loadDealApplicationsForNotice(dealTime);
         // 过滤已经过期的申请,dealtime+24小时内不过期
         applications = applications.stream().filter(application ->
                 DateUtils.afterDays(application.getDealTime(), 1).after(new Date()))
@@ -238,18 +246,20 @@ public class BusinessSchoolService {
         Map<Integer, RiseMember> existRiseMemberMap = customerRiseMembers.stream()
                 .collect(Collectors.toMap(RiseMember::getProfileId, riseMember -> riseMember));
 
-        for (BusinessSchoolApplication businessSchoolApplication : applications) {
+        applications.forEach((businessSchoolApplication) -> {
             try {
                 Integer profileId = businessSchoolApplication.getProfileId();
                 RiseMember riseMember = existRiseMemberMap.get(profileId);
                 if (riseMember == null ||
-                        (!riseMember.getMemberTypeId().equals(RiseMember.ELITE) && !riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
+                        (!riseMember.getMemberTypeId().equals(RiseMember.ELITE) &&
+                                !riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
                     sendExpiredMessage(distanceDay, businessSchoolApplication, profileId);
                 }
             } catch (Exception e) {
                 logger.error("发送过期通知失败", e);
             }
-        }
+        });
+
     }
 
     private void sendExpiredMessage(Integer distanceDay, BusinessSchoolApplication businessSchoolApplication, Integer profileId) {
@@ -277,14 +287,11 @@ public class BusinessSchoolService {
             String first = "Hi " + profile.getNickname() + "，您的圈外商学院录取资格及奖学金即将到期，请尽快办理入学！\n";
             data.put("first", new TemplateMessage.Keyword(first, "#000000"));
 
-            if (distanceDay == 1) {
-                data.put("keyword1", new TemplateMessage.Keyword("明天" + expiredHourStr + "（" + expiredDateStr + "）", "#000000"));
-            } else if (distanceDay == 0) {
-                data.put("keyword1", new TemplateMessage.Keyword("今天" + expiredHourStr + "（" + expiredDateStr + "）到期", "#000000"));
-            }
+            data.put("keyword1", new TemplateMessage.Keyword("今天" + expiredHourStr + "（" + expiredDateStr + "）到期", "#000000"));
             data.put("keyword2", new TemplateMessage.Keyword("商学院入学奖学金", "#000000"));
             data.put("keyword3", new TemplateMessage.Keyword(coupon.getAmount() + "元", "#000000"));
-            data.put("remark", new TemplateMessage.Keyword("\n点此卡片，立即办理入学", "#f57f16"));
+//            data.put("remark", new TemplateMessage.Keyword("\n点此卡片，立即办理入学", "#f57f16"));
+            data.put("remark", new TemplateMessage.Keyword("\n过期后需重新申请并面试；本次报名截止12月底，下次报名3月开学。请及时点击本通知书，办理入学。", "#f57f16"));
 
             // 有优惠券短信内容
             SMSDto smsDto = new SMSDto();
@@ -309,7 +316,8 @@ public class BusinessSchoolService {
             data.put("keyword1", new TemplateMessage.Keyword("已录取", "#000000"));
             BusinessSchoolApplication application = businessSchoolApplicationDao.loadLastApproveApplication(profileId);
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime()), "#000000"));
-            data.put("remark", new TemplateMessage.Keyword("过期时间 :  " + expiredDateStr + "\n\n点击卡片，立即办理入学", "#f57f16"));
+//            data.put("remark", new TemplateMessage.Keyword("过期时间 :  " + expiredDateStr + "\n\n点击卡片，立即办理入学", "#f57f16"));
+            data.put("remark", new TemplateMessage.Keyword("过期时间 :  " + expiredDateStr + "\n\n过期后需重新申请并面试；本次报名截止12月底，下次报名3月开学。请及时点击本通知书，办理入学。", "#f57f16"));
 
             // 有优惠券短信内容
             SMSDto smsDto = new SMSDto();
