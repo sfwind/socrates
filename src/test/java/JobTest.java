@@ -54,7 +54,8 @@ public class JobTest extends TestBase {
     }
     @Test
     public void testNotify(){
-        notifyRiseMemberApplyJob.work();
+        Date oneDay = DateUtils.beforeDays(new Date(), 1);
+        businessSchoolService.sendRiseMemberApplyMessageByDealTime(oneDay, 0);
     }
 
     @Test
@@ -71,10 +72,10 @@ public class JobTest extends TestBase {
         System.out.println(diff);
     }
 
-    @Test
-    public void searchTest(){
-        businessSchoolService.searchApplications(DateUtils.parseStringToDate("2017-09-22"));
-    }
+//    @Test
+//    public void searchTest(){
+//        businessSchoolService.searchApplications(DateUtils.parseStringToDate("2017-09-22"));
+//    }
 
     @Autowired
     private AuditionService auditionService;

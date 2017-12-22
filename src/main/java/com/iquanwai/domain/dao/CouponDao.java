@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -55,10 +56,11 @@ public class CouponDao extends DBUtil {
 
     public List<Coupon> loadCouponsByProfileId(Integer profileId, String category, String description) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "SELECT * FROM Coupon WHERE ProfileId = ? AND Used = 0 AND Category = ? AND Description = ? AND Del = 0";
+        String sql = "SELECT * FROM Coupon WHERE ProfileId = ? AND Used = 0 AND Category = ? AND Description = ? " +
+                "AND ExpiredDate > ? AND Del = 0";
         ResultSetHandler<List<Coupon>> h = new BeanListHandler<>(Coupon.class);
         try {
-            return runner.query(sql, h, profileId, category, description);
+            return runner.query(sql, h, profileId, category, description, new Date());
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
