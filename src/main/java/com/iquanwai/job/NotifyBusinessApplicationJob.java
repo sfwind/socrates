@@ -19,7 +19,7 @@ public class NotifyBusinessApplicationJob {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Scheduled(cron = "0 30 21 * * ?")
+    @Scheduled(cron = "0 30 7,21 * * ?")
     public void work() {
         logger.info("商学院申请通知任务开始");
         businessSchoolService.noticeApplication(new Date());
