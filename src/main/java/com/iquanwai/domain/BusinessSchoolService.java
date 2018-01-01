@@ -166,8 +166,7 @@ public class BusinessSchoolService {
         templateMessage.setUrl(PAY_URL);
         templateMessage.setComment("商学院审核通过");
         data.put("keyword1", new TemplateMessage.Keyword("通过"));
-//        data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
-        data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取结果24小时内有效，过期后需重新申请并面试；本次报名截止12月底，下次报名3月开学。请及时点击本通知书，办理入学。", "#f57f16"));
+        data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
         // 同样的对象不需要定义两次
         coupons.forEach((amount, applicationGroup) -> {
             data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！" +
@@ -186,8 +185,7 @@ public class BusinessSchoolService {
         noCouponMsg.setData(noCouponData);
         noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
         noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
-//        noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知书24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
-        noCouponData.put("remark", new TemplateMessage.Keyword("\n录取结果24小时内有效，过期后需重新申请并面试；本次报名截止12月底，下次报名3月开学。请及时点击本通知书，办理入学。", "#f57f16"));
+        noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
         // 发送没有优惠券的
         if (noCouponGroup != null) {
             noCouponGroup.forEach(app -> this.sendMsg(noCouponMsg, noCouponData, app, "keyword2"));
@@ -290,8 +288,7 @@ public class BusinessSchoolService {
             data.put("keyword1", new TemplateMessage.Keyword("今天" + expiredHourStr + "（" + expiredDateStr + "）到期", "#000000"));
             data.put("keyword2", new TemplateMessage.Keyword("商学院入学奖学金", "#000000"));
             data.put("keyword3", new TemplateMessage.Keyword(coupon.getAmount() + "元", "#000000"));
-//            data.put("remark", new TemplateMessage.Keyword("\n点此卡片，立即办理入学", "#f57f16"));
-            data.put("remark", new TemplateMessage.Keyword("\n过期后需重新申请并面试；本次报名截止12月底，下次报名3月开学。请及时点击本通知书，办理入学。", "#f57f16"));
+            data.put("remark", new TemplateMessage.Keyword("\n点此卡片，立即办理入学", "#f57f16"));
 
             // 有优惠券短信内容
             SMSDto smsDto = new SMSDto();
@@ -316,8 +313,7 @@ public class BusinessSchoolService {
             data.put("keyword1", new TemplateMessage.Keyword("已录取", "#000000"));
             BusinessSchoolApplication application = businessSchoolApplicationDao.loadLastApproveApplication(profileId);
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime()), "#000000"));
-//            data.put("remark", new TemplateMessage.Keyword("过期时间 :  " + expiredDateStr + "\n\n点击卡片，立即办理入学", "#f57f16"));
-            data.put("remark", new TemplateMessage.Keyword("过期时间 :  " + expiredDateStr + "\n\n过期后需重新申请并面试；本次报名截止12月底，下次报名3月开学。请及时点击本通知书，办理入学。", "#f57f16"));
+            data.put("remark", new TemplateMessage.Keyword("过期时间 :  " + expiredDateStr + "\n\n点击卡片，立即办理入学", "#f57f16"));
 
             // 有优惠券短信内容
             SMSDto smsDto = new SMSDto();
