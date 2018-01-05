@@ -16,7 +16,7 @@ public class RiseOrderDao extends DBUtil {
 
     public void closeOrder(String orderId) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String sql = "Update RiseOrder set IsDel=1 where OrderId=?";
+        String sql = "Update RiseOrder set Del=1 where OrderId=?";
         try {
             run.update(sql, orderId);
         } catch (SQLException e) {

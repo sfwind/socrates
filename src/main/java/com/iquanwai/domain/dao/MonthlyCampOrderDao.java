@@ -14,7 +14,7 @@ public class MonthlyCampOrderDao extends DBUtil {
 
     public void closeOrder(String orderId) {
         QueryRunner run = new QueryRunner(getDataSource());
-        String sql = "Update MonthlyCampOrder set IsDel=1 where OrderId = ?";
+        String sql = "Update MonthlyCampOrder set Del=1 where OrderId = ?";
         try {
             run.update(sql, orderId);
         } catch (SQLException e) {
