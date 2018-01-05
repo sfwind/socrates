@@ -44,11 +44,14 @@ public class PlanService {
 
 
     public List<ImprovementPlan> loadAllRunningPlan() {
-        return improvementPlanDao.loadAllRunningPlan();
+        List<ImprovementPlan> plans = improvementPlanDao.loadAllRunningPlan();
+        plans = plans.stream().filter(plan -> plan.getStartDate().before(new Date())).collect(Collectors.toList());
+        return plans;
     }
 
     /**
      * 修改plan的状态
+     *
      * @param planId id
      * @param status 状态
      */
@@ -66,6 +69,7 @@ public class PlanService {
 
     /**
      * 获取将要关闭的订单
+     *
      * @return 订单
      */
     public List<ImprovementPlan> loadUnderClosePlan() {
@@ -80,6 +84,7 @@ public class PlanService {
 
     /**
      * 查询Problem
+     *
      * @param problemId id
      * @return Problem
      */

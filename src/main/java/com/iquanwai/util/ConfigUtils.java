@@ -69,7 +69,6 @@ public class ConfigUtils {
         return getValue("db.password");
     }
 
-
     public static String getFragmentJdbcUrl() {
         return getValue("db.fragment.url");
     }
@@ -94,16 +93,8 @@ public class ConfigUtils {
         return getValue("learning.notify.msg");
     }
 
-    public static String getActivityStartMsg() {
-        return getValue("activity.start.msg");
-    }
-
     public static String getAppDomain() {
         return getValue("app.domain");
-    }
-
-    public static Integer getFreeProblem() {
-        return getIntValue("free.problem.id");
     }
 
     public static String getAPIKey() {
@@ -158,10 +149,6 @@ public class ConfigUtils {
     public static List<String> getDevelopOpenIds() {
         String openIdsStr = getValue("sms.alarm.openids");
         return Lists.newArrayList(openIdsStr.split(","));
-    }
-
-    public static Integer getBsApplicationActivity() {
-        return getIntValue("business.school.application.activity");
     }
 
     public static String getRejectApplyMsgId() {
