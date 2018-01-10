@@ -45,6 +45,10 @@ public class NotifyInactiveUserJob {
     private void notifyInactiveUser() {
         List<ImprovementPlan> improvementPlanList = planService.loadPreviouslyLogin();
         improvementPlanList.forEach(improvementPlan -> {
+            //如果开课时间晚于当前日期,不发消息
+            if(improvementPlan.getStartDate().after(new Date())){
+                return;
+            }
             try{
                 Profile profile = customerService.getProfile(improvementPlan.getProfileId());
                 if(profile.getLearningNotify()){

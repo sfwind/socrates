@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -43,6 +44,11 @@ public class NotifyRunningLogin {
 
     private void sendNotifyMsg(ImprovementPlan plan) {
         try {
+            //如果开课时间晚于当前日期,不发消息
+            if(plan.getStartDate().after(new Date())){
+                return;
+            }
+
             Profile profile = customerService.getProfile(plan.getProfileId());
             if (profile == null) {
                 logger.error("用户:{} 未找到", plan.getProfileId());
