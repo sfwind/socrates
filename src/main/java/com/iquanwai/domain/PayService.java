@@ -1,7 +1,18 @@
 package com.iquanwai.domain;
 
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.domain.AlipayTradeCloseModel;
+import com.alipay.api.request.AlipayTradeCloseRequest;
+import com.alipay.api.response.AlipayTradeCloseResponse;
 import com.google.common.collect.Maps;
-import com.iquanwai.domain.dao.*;
+import com.iquanwai.domain.dao.BusinessSchoolApplicationOrderDao;
+import com.iquanwai.domain.dao.CouponDao;
+import com.iquanwai.domain.dao.CourseOrderDao;
+import com.iquanwai.domain.dao.MonthlyCampOrderDao;
+import com.iquanwai.domain.dao.QuanwaiOrderDao;
+import com.iquanwai.domain.dao.RiseCourseOrderDao;
+import com.iquanwai.domain.dao.RiseOrderDao;
 import com.iquanwai.domain.message.RestfulHelper;
 import com.iquanwai.domain.po.Coupon;
 import com.iquanwai.domain.po.PayClose;
@@ -44,11 +55,70 @@ public class PayService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private static final String CLOSE_ORDER_URL ="https://api.mch.weixin.qq.com/pay/closeorder";
+    private static final String CLOSE_ORDER_URL = "https://api.mch.weixin.qq.com/pay/closeorder";
 
     private static final String ERROR_CODE = "FAIL";
 
     private static final String SUCCESS_CODE = "SUCCESS";
+
+    /**
+     * 关闭微信订单
+     *
+     * @param courseOrder 课程订单
+     */
+    private void closeWechatOrder(QuanwaiOrder courseOrder) {
+        String orderId = courseOrder.getOrderId();
+        try {
+            if (courseOrder.getPrepayId() != null) {
+                PayClose payClose = buildPayClose(orderId);
+                String response = restfulHelper.postXML(CLOSE_ORDER_URL, XMLHelper.createXML(payClose));
+                PayCloseReply payCloseReply = XMLHelper.parseXml(PayCloseReply.class, response);
+                if (payCloseReply != null) {
+                    if (SUCCESS_CODE.equals(payCloseReply.getReturn_code())) {
+                        if (ERROR_CODE.equals(payCloseReply.getErr_code()) && payCloseReply.getErr_code_des() != null) {
+                            logger.error(payCloseReply.getErr_code_des() + ", orderId=" + orderId);
+                        }
+                        logger.info("orderId: {} closed automatically", orderId);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("orderId: {} close failed", orderId);
+        }
+    }
+
+    /**
+     * 关闭阿里订单
+     *
+     * @param courseOrder 课程订单
+     */
+    private void closeAliOrder(QuanwaiOrder courseOrder) {
+        String orderId = courseOrder.getOrderId();
+        try {
+            AlipayClient alipayClient = new DefaultAlipayClient(ConfigUtils.getValue("alipay.gateway"),
+                    ConfigUtils.getValue("alipay.appid"),
+                    ConfigUtils.getValue("alipay.private.key"),
+                    "json",
+                    "UTF-8",
+                    ConfigUtils.getValue("alipay.public.key"),
+                    "RSA2");
+            AlipayTradeCloseRequest alipayRequest = new AlipayTradeCloseRequest();
+
+            AlipayTradeCloseModel model = new AlipayTradeCloseModel();
+            model.setOutTradeNo(orderId);
+            alipayRequest.setBizModel(model);
+
+            AlipayTradeCloseResponse alipayResponse = alipayClient.execute(alipayRequest);
+            if (alipayResponse.isSuccess()) {
+                logger.info("关闭成功");
+            } else {
+                logger.error("关闭失败：{}", alipayResponse.getBody());
+            }
+            logger.info("{}", alipayResponse);
+        } catch (Exception e) {
+            logger.error("orderId: {} close failed", orderId);
+        }
+    }
 
     public void closeOrder() {
         //点开付费的保留5分钟
@@ -56,22 +126,13 @@ public class PayService {
         List<QuanwaiOrder> underCloseOrders = quanwaiOrderDao.queryUnderCloseOrders(date);
         for (QuanwaiOrder courseOrder : underCloseOrders) {
             String orderId = courseOrder.getOrderId();
-            try {
-                if (courseOrder.getPrepayId() != null) {
-                    PayClose payClose = buildPayClose(orderId);
-                    String response = restfulHelper.postXML(CLOSE_ORDER_URL, XMLHelper.createXML(payClose));
-                    PayCloseReply payCloseReply = XMLHelper.parseXml(PayCloseReply.class, response);
-                    if (payCloseReply != null) {
-                        if (SUCCESS_CODE.equals(payCloseReply.getReturn_code())) {
-                            if (ERROR_CODE.equals(payCloseReply.getErr_code()) && payCloseReply.getErr_code_des() != null) {
-                                logger.error(payCloseReply.getErr_code_des() + ", orderId=" + orderId);
-                            }
-                            logger.info("orderId: {} closed automatically", orderId);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("orderId: {} close failed", orderId);
+
+            if (QuanwaiOrder.PAY_WECHAT == courseOrder.getPayType()) {
+                closeWechatOrder(courseOrder);
+            } else if (QuanwaiOrder.PAY_ALI == courseOrder.getPayType()) {
+                closeAliOrder(courseOrder);
+            } else {
+                logger.error("订单信息错误:{}", orderId);
             }
 
             //如果有使用优惠券,还原优惠券状态
@@ -80,7 +141,7 @@ public class PayService {
             }
 
             QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
-            if(quanwaiOrder==null){
+            if (quanwaiOrder == null) {
                 logger.error("订单 {} 不存在", orderId);
                 return;
             }
@@ -96,11 +157,11 @@ public class PayService {
                 riseCourseOrderDao.closeOrder(orderId);
                 quanwaiOrderDao.closeOrder(orderId);
             }
-            if(QuanwaiOrder.FRAGMENT_CAMP.equals(quanwaiOrder.getGoodsType())) {
+            if (QuanwaiOrder.FRAGMENT_CAMP.equals(quanwaiOrder.getGoodsType())) {
                 monthlyCampOrderDao.closeOrder(orderId);
                 quanwaiOrderDao.closeOrder(orderId);
             }
-            if(QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
+            if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
                 businessSchoolApplicationOrderDao.closeOrder(orderId);
                 quanwaiOrderDao.closeOrder(orderId);
             }
