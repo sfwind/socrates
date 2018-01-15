@@ -116,7 +116,7 @@ public class PayService {
             }
             logger.info("{}", alipayResponse);
         } catch (Exception e) {
-            logger.error("orderId: {} close failed", orderId);
+            logger.error("orderId: " + orderId + " close failed", e);
         }
     }
 
