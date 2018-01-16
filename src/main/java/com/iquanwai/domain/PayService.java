@@ -149,8 +149,8 @@ public class PayService {
         }
 
 
-        //支付宝保留30分钟
-        Date date2 = DateUtils.afterMinutes(new Date(), -30);
+        //支付宝保留1小时
+        Date date2 = DateUtils.afterMinutes(new Date(), -60);
         List<QuanwaiOrder> aliCloseOrders = quanwaiOrderDao.queryAliCloseOrders(date2);
         for (QuanwaiOrder courseOrder : aliCloseOrders) {
             closeAliOrder(courseOrder);
