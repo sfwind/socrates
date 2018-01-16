@@ -163,4 +163,20 @@ public class ConfigUtils {
         return getIntValue("rise.trial.problem.id");
     }
 
+
+    public static String getAlipayAppId(){
+        return getValue("alipay.appid");
+    }
+
+    public static String getAlipayPrivateKey(){
+        return getValue("alipay.private.key");
+    }
+
+    public static String getAlipayPublicKey(){
+        return getValue("alipay.public.key");
+    }
+
+    public static String getAlipayGateway(){
+        return getValue("alipay.gateway");
+    }
 }

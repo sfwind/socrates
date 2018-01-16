@@ -95,12 +95,12 @@ public class PayService {
     private void closeAliOrder(QuanwaiOrder courseOrder) {
         String orderId = courseOrder.getOrderId();
         try {
-            AlipayClient alipayClient = new DefaultAlipayClient(ConfigUtils.getValue("alipay.gateway"),
-                    ConfigUtils.getValue("alipay.appid"),
-                    ConfigUtils.getValue("alipay.private.key"),
+            AlipayClient alipayClient = new DefaultAlipayClient(ConfigUtils.getAlipayGateway(),
+                    ConfigUtils.getAlipayAppId(),
+                    ConfigUtils.getAlipayPrivateKey(),
                     "json",
                     "UTF-8",
-                    ConfigUtils.getValue("alipay.public.key"),
+                    ConfigUtils.getAlipayPublicKey(),
                     "RSA2");
             AlipayTradeCloseRequest alipayRequest = new AlipayTradeCloseRequest();
 
@@ -127,7 +127,7 @@ public class PayService {
         for (QuanwaiOrder courseOrder : underCloseOrders) {
             String orderId = courseOrder.getOrderId();
 
-            if (QuanwaiOrder.PAY_WECHAT == courseOrder.getPayType()) {
+            if (courseOrder.getPayType() == null || QuanwaiOrder.PAY_WECHAT == courseOrder.getPayType()) {
                 closeWechatOrder(courseOrder);
             } else if (QuanwaiOrder.PAY_ALI == courseOrder.getPayType()) {
                 closeAliOrder(courseOrder);
