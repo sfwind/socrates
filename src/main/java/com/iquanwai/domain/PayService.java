@@ -70,7 +70,23 @@ public class PayService {
         String orderId = courseOrder.getOrderId();
         try {
             if (courseOrder.getPrepayId() != null) {
-                PayClose payClose = buildPayClose(orderId);
+                PayClose payClose = new PayClose();
+                Map<String, String> map = Maps.newHashMap();
+                map.put("out_trade_no", orderId);
+                String appid = ConfigUtils.getAppid();
+                map.put("appid", appid);
+                String mch_id = ConfigUtils.getMch_id();
+                map.put("mch_id", mch_id);
+                String nonce_str = CommonUtils.randomString(16);
+                map.put("nonce_str", nonce_str);
+                String sign = CommonUtils.sign(map);
+
+                payClose.setNonce_str(nonce_str);
+                payClose.setMch_id(mch_id);
+                payClose.setAppid(appid);
+                payClose.setOut_trade_no(orderId);
+                payClose.setSign(sign);
+
                 String response = restfulHelper.postXML(CLOSE_ORDER_URL, XMLHelper.createXML(payClose));
                 PayCloseReply payCloseReply = XMLHelper.parseXml(PayCloseReply.class, response);
                 if (payCloseReply != null) {
@@ -120,72 +136,58 @@ public class PayService {
         }
     }
 
+    /**
+     * 关闭订单
+     */
     public void closeOrder() {
         //点开付费的保留5分钟
-        Date date = DateUtils.afterMinutes(new Date(), -5);
-        List<QuanwaiOrder> underCloseOrders = quanwaiOrderDao.queryUnderCloseOrders(date);
+        Date date1 = DateUtils.afterMinutes(new Date(), -5);
+        List<QuanwaiOrder> underCloseOrders = quanwaiOrderDao.queryWechatCloseOrders(date1);
         for (QuanwaiOrder courseOrder : underCloseOrders) {
-            String orderId = courseOrder.getOrderId();
+            closeWechatOrder(courseOrder);
+            closeOrder(courseOrder);
+        }
 
-            if (courseOrder.getPayType() == null || QuanwaiOrder.PAY_WECHAT == courseOrder.getPayType()) {
-                closeWechatOrder(courseOrder);
-            } else if (QuanwaiOrder.PAY_ALI == courseOrder.getPayType()) {
-                closeAliOrder(courseOrder);
-            } else {
-                logger.error("订单信息错误:{}", orderId);
-            }
 
-            //如果有使用优惠券,还原优惠券状态
-            if (courseOrder.getDiscount() != 0.0) {
-                couponDao.updateCouponByOrderId(Coupon.UNUSED, orderId);
-            }
-
-            QuanwaiOrder quanwaiOrder = quanwaiOrderDao.loadOrder(orderId);
-            if (quanwaiOrder == null) {
-                logger.error("订单 {} 不存在", orderId);
-                return;
-            }
-            if (QuanwaiOrder.SYSTEMATISM.equals(quanwaiOrder.getGoodsType())) {
-                courseOrderDao.closeOrder(orderId);
-                quanwaiOrderDao.closeOrder(orderId);
-            }
-            if (QuanwaiOrder.FRAGMENT_MEMBER.equals(quanwaiOrder.getGoodsType())) {
-                riseOrderDao.closeOrder(orderId);
-                quanwaiOrderDao.closeOrder(orderId);
-            }
-            if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(quanwaiOrder.getGoodsType())) {
-                riseCourseOrderDao.closeOrder(orderId);
-                quanwaiOrderDao.closeOrder(orderId);
-            }
-            if (QuanwaiOrder.FRAGMENT_CAMP.equals(quanwaiOrder.getGoodsType())) {
-                monthlyCampOrderDao.closeOrder(orderId);
-                quanwaiOrderDao.closeOrder(orderId);
-            }
-            if (QuanwaiOrder.BS_APPLICATION.equals(quanwaiOrder.getGoodsType())) {
-                businessSchoolApplicationOrderDao.closeOrder(orderId);
-                quanwaiOrderDao.closeOrder(orderId);
-            }
+        //支付宝保留30分钟
+        Date date2 = DateUtils.afterMinutes(new Date(), -30);
+        List<QuanwaiOrder> aliCloseOrders = quanwaiOrderDao.queryAliCloseOrders(date2);
+        for (QuanwaiOrder courseOrder : aliCloseOrders) {
+            closeAliOrder(courseOrder);
+            closeOrder(courseOrder);
         }
     }
 
-    private PayClose buildPayClose(String orderId) {
-        PayClose payClose = new PayClose();
-        Map<String, String> map = Maps.newHashMap();
-        map.put("out_trade_no", orderId);
-        String appid = ConfigUtils.getAppid();
-        map.put("appid", appid);
-        String mch_id = ConfigUtils.getMch_id();
-        map.put("mch_id", mch_id);
-        String nonce_str = CommonUtils.randomString(16);
-        map.put("nonce_str", nonce_str);
-        String sign = CommonUtils.sign(map);
-
-        payClose.setNonce_str(nonce_str);
-        payClose.setMch_id(mch_id);
-        payClose.setAppid(appid);
-        payClose.setOut_trade_no(orderId);
-        payClose.setSign(sign);
-
-        return payClose;
+    /**
+     * 关闭各种订单表
+     *
+     * @param courseOrder quanwaiOrder
+     */
+    private void closeOrder(QuanwaiOrder courseOrder) {
+        String orderId = courseOrder.getOrderId();
+        //如果有使用优惠券,还原优惠券状态
+        if (courseOrder.getDiscount() != 0.0) {
+            couponDao.updateCouponByOrderId(Coupon.UNUSED, orderId);
+        }
+        if (QuanwaiOrder.SYSTEMATISM.equals(courseOrder.getGoodsType())) {
+            courseOrderDao.closeOrder(orderId);
+            quanwaiOrderDao.closeOrder(orderId);
+        }
+        if (QuanwaiOrder.FRAGMENT_MEMBER.equals(courseOrder.getGoodsType())) {
+            riseOrderDao.closeOrder(orderId);
+            quanwaiOrderDao.closeOrder(orderId);
+        }
+        if (QuanwaiOrder.FRAGMENT_RISE_COURSE.equals(courseOrder.getGoodsType())) {
+            riseCourseOrderDao.closeOrder(orderId);
+            quanwaiOrderDao.closeOrder(orderId);
+        }
+        if (QuanwaiOrder.FRAGMENT_CAMP.equals(courseOrder.getGoodsType())) {
+            monthlyCampOrderDao.closeOrder(orderId);
+            quanwaiOrderDao.closeOrder(orderId);
+        }
+        if (QuanwaiOrder.BS_APPLICATION.equals(courseOrder.getGoodsType())) {
+            businessSchoolApplicationOrderDao.closeOrder(orderId);
+            quanwaiOrderDao.closeOrder(orderId);
+        }
     }
 }

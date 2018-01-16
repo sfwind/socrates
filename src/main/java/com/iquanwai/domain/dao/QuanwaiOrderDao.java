@@ -21,12 +21,12 @@ import java.util.List;
 public class QuanwaiOrderDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public List<QuanwaiOrder> queryUnderCloseOrders(Date openTime) {
+    public List<QuanwaiOrder> queryWechatCloseOrders(Date openTime) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<List<QuanwaiOrder>> h = new BeanListHandler<>(QuanwaiOrder.class);
 
         try {
-            List<QuanwaiOrder> orderList = run.query("SELECT * FROM QuanwaiOrder where Status=0 and createTime<=? ",
+            List<QuanwaiOrder> orderList = run.query("SELECT * FROM QuanwaiOrder where Status=0 and createTime<=? and (PayType = 1 or PayType is null) ",
                     h, openTime);
             return orderList;
         } catch (SQLException e) {
@@ -36,7 +36,22 @@ public class QuanwaiOrderDao extends DBUtil {
         return Lists.newArrayList();
     }
 
-    public QuanwaiOrder loadOrder(String orderId){
+    public List<QuanwaiOrder> queryAliCloseOrders(Date openTime) {
+        QueryRunner run = new QueryRunner(getDataSource());
+        ResultSetHandler<List<QuanwaiOrder>> h = new BeanListHandler<>(QuanwaiOrder.class);
+
+        try {
+            List<QuanwaiOrder> orderList = run.query("SELECT * FROM QuanwaiOrder where Status=0 and createTime<=? and PayType = 2",
+                    h, openTime);
+            return orderList;
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+
+        return Lists.newArrayList();
+    }
+
+    public QuanwaiOrder loadOrder(String orderId) {
         QueryRunner run = new QueryRunner(getDataSource());
         ResultSetHandler<QuanwaiOrder> h = new BeanHandler<>(QuanwaiOrder.class);
 
@@ -50,7 +65,7 @@ public class QuanwaiOrderDao extends DBUtil {
         return null;
     }
 
-    public void closeOrder(String orderId){
+    public void closeOrder(String orderId) {
         QueryRunner run = new QueryRunner(getDataSource());
 
         try {
