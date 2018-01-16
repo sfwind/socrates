@@ -61,6 +61,8 @@ public class PayService {
 
     private static final String SUCCESS_CODE = "SUCCESS";
 
+    private static final String TRADE_UNDFINED = "ACQ.TRADE_NOT_EXIST";
+
     /**
      * 关闭微信订单
      *
@@ -128,7 +130,11 @@ public class PayService {
             if (alipayResponse.isSuccess()) {
                 logger.info("关闭成功");
             } else {
-                logger.error("关闭失败：{}", alipayResponse.getBody());
+                if (TRADE_UNDFINED.equals(alipayResponse.getSubCode())) {
+                    logger.info("订单 {} 未创建，无需关闭", orderId);
+                } else {
+                    logger.error("关闭失败：{}", alipayResponse.getBody());
+                }
             }
             logger.info("{}", alipayResponse);
         } catch (Exception e) {
