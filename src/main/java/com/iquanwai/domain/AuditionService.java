@@ -121,7 +121,6 @@ public class AuditionService {
         Profile profile = customerService.getProfile(profileId);
 
         Coupon coupon = new Coupon();
-        coupon.setOpenId(profile.getOpenid());
         coupon.setProfileId(profileId);
         coupon.setAmount(100);
         coupon.setUsed(0);
@@ -155,7 +154,6 @@ public class AuditionService {
         Profile profile = customerService.getProfile(profileId);
 
         Coupon coupon = new Coupon();
-        coupon.setOpenId(profile.getOpenid());
         coupon.setProfileId(profileId);
         coupon.setAmount(200);
         coupon.setUsed(0);
@@ -189,7 +187,6 @@ public class AuditionService {
         Profile profile = customerService.getProfile(profileId);
 
         Coupon coupon = new Coupon();
-        coupon.setOpenId(profile.getOpenid());
         coupon.setProfileId(profileId);
         coupon.setAmount(200);
         coupon.setUsed(0);

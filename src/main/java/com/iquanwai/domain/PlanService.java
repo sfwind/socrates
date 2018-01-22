@@ -3,7 +3,10 @@ package com.iquanwai.domain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.dao.*;
-import com.iquanwai.domain.po.*;
+import com.iquanwai.domain.po.ImprovementPlan;
+import com.iquanwai.domain.po.Problem;
+import com.iquanwai.domain.po.RiseMember;
+import com.iquanwai.domain.po.RiseUserLogin;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +31,6 @@ public class PlanService {
     private ProblemDao problemDao;
     @Autowired
     private RiseUserLoginDao riseUserLoginDao;
-    @Autowired
-    private CustomerService customerService;
     @Autowired
     private RedisUtil redisUtil;
 
@@ -123,24 +124,6 @@ public class PlanService {
         return improvementPlanList;
     }
 
-    public List<ImprovementPlan> getLearningPlan(Integer problemId) {
-        List<ImprovementPlan> improvementPlans = Lists.newArrayList();
-        List<String> openids = Lists.newArrayList();
-        improvementPlanDao.loadByProblemId(problemId).forEach(improvementPlan -> {
-            Integer profileId = improvementPlan.getProfileId();
-            Profile profile = customerService.getProfile(profileId);
-            //过滤没报名的用户
-            if (profile != null && (profile.getRiseMember() != 0)) {
-                //用户去重
-                if (!openids.contains(profile.getOpenid())) {
-                    improvementPlans.add(improvementPlan);
-                    openids.add(profile.getOpenid());
-                }
-            }
-        });
-
-        return improvementPlans;
-    }
 
     public List<ImprovementPlan> loadRunningUnlogin() {
         String todayDateString = DateUtils.parseDateToString(new Date());

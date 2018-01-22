@@ -23,7 +23,7 @@ public class RiseUserLandingDao extends DBUtil {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "select * from RiseUserLanding where Openid = ?";
         try{
-            ResultSetHandler<RiseUserLanding> handler = new BeanHandler<RiseUserLanding>(RiseUserLanding.class);
+            ResultSetHandler<RiseUserLanding> handler = new BeanHandler<>(RiseUserLanding.class);
             return runner.query(sql, handler, openid);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);

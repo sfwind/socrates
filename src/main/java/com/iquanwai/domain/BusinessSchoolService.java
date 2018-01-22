@@ -110,7 +110,6 @@ public class BusinessSchoolService {
                     if (application.getCoupon() != null && application.getCoupon() > 0) {
                         Coupon couponBean = new Coupon();
                         couponBean.setAmount(application.getCoupon().intValue());
-                        couponBean.setOpenId(application.getOpenid());
                         couponBean.setProfileId(profileId);
                         couponBean.setUsed(Coupon.UNUSED);
                         couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
@@ -133,7 +132,6 @@ public class BusinessSchoolService {
                                 // 添加优惠券
                                 Coupon couponBean = new Coupon();
                                 couponBean.setAmount(order.getPrice().intValue());
-                                couponBean.setOpenId(application.getOpenid());
                                 couponBean.setProfileId(profileId);
                                 couponBean.setUsed(Coupon.UNUSED);
                                 couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
@@ -204,13 +202,13 @@ public class BusinessSchoolService {
             logger.info("{}已经报名商学院", profileId);
             return;
         }
-        templateMessage.setTouser(application.getOpenid());
+        Profile profile = profileDao.load(Profile.class, profileId);
+        templateMessage.setTouser(profile.getOpenid());
         data.put(checkKey, new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime())));
         logger.info("发送模版消息id ：{}", templateMessage.getTemplate_id());
         // 录取通知强制发送
         templateMessageService.sendMessage(templateMessage, false);
         // 有优惠券短信内容
-        Profile profile = profileDao.load(Profile.class, profileId);
         SMSDto smsDto = new SMSDto();
         if (profile != null && profile.getMobileNo() != null) {
             smsDto.setProfileId(profileId);

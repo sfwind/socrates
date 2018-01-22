@@ -12,7 +12,7 @@ import java.util.Date;
 public class RiseUserLogin {
     private Integer id;
     private String openid;
-    private Date LoginDate;
+    private Date loginDate;
     private Integer diffDay;
     private Date addTime;
     private Date updateTime;
