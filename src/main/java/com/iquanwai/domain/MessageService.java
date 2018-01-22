@@ -55,7 +55,7 @@ public class MessageService {
         List<VoteMessage<HomeworkVote>> voteMessageList = Lists.newArrayList();
 
         //自己给自己点赞不提醒
-        homeworkVotes.stream().filter(h1 -> !h1.getVoteOpenId().equals(h1.getVotedOpenid()))
+        homeworkVotes.stream().filter(h1 -> !h1.getVotedProfileId().equals(h1.getVoteProfileId()))
                 .filter(h1 -> NOTICE_TYPE.contains(h1.getType()))
                 .forEach(homeworkVote -> {
                     VoteMessage<HomeworkVote> voteMessage = new VoteMessage<>(homeworkVote.getReferencedId(),
@@ -99,12 +99,6 @@ public class MessageService {
                 }
                 url = "/rise/static/practice/application?id=" + applicationSubmit.getApplicationId()
                         + "&planId=" + applicationSubmit.getPlanId() + "&submitId=" + applicationSubmit.getId();
-            } else if (voteMessage.getType() == 3) {
-                SubjectArticle subjectArticle = submitDao.load(SubjectArticle.class, homeworkVote.getReferencedId());
-                if (subjectArticle == null) {
-                    return;
-                }
-                url = "/rise/static/message/subject/reply?submitId=" + subjectArticle.getId();
             }
             sendMessage(message, toUser, SYSTEM_MESSAGE, url);
         });

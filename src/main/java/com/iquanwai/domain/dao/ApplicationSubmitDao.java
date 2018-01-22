@@ -19,22 +19,6 @@ import java.util.List;
 public class ApplicationSubmitDao extends PracticeDBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public int insert(ApplicationSubmit applicationSubmit) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "insert into ApplicationSubmit(Openid, ProfileId, ApplicationId, PlanId, ProblemId) " +
-                "values(?,?,?,?,?)";
-        try {
-            Long insertRs = runner.insert(sql, new ScalarHandler<>(),
-                    applicationSubmit.getOpenid(), applicationSubmit.getProfileId(),
-                    applicationSubmit.getApplicationId(),
-                    applicationSubmit.getPlanId(), applicationSubmit.getProblemId());
-            return insertRs.intValue();
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return -1;
-    }
-
     /**
      * 查询用户提交记录
      * @param applicationId 应用练习id

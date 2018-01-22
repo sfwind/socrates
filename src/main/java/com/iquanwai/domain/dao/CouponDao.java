@@ -22,13 +22,11 @@ public class CouponDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public int insert(Coupon coupon) {
-        coupon.setUsed(0);
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO Coupon (OpenId, ProfileId, Amount, Used, ExpiredDate, Category, Description) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Coupon (ProfileId, Amount, Used, ExpiredDate, Category, Description) " +
+                "VALUES (?, ?, 0, ?, ?, ?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
-                    coupon.getOpenId(),
                     coupon.getProfileId(),
                     coupon.getAmount(),
                     coupon.getUsed(),

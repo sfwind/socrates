@@ -4,14 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.dao.*;
-import com.iquanwai.domain.message.SMSDto;
-import com.iquanwai.domain.message.ShortMessageService;
-import com.iquanwai.domain.message.TemplateMessage;
-import com.iquanwai.domain.message.TemplateMessageService;
-import com.iquanwai.domain.po.Coupon;
-import com.iquanwai.domain.po.Profile;
-import com.iquanwai.domain.po.RiseMember;
-import com.iquanwai.domain.po.RiseUserLanding;
 import com.iquanwai.domain.message.*;
 import com.iquanwai.domain.po.Coupon;
 import com.iquanwai.domain.po.Profile;
@@ -49,8 +41,6 @@ public class CustomerService {
     @Autowired
     private RiseUserLoginDao riseUserLoginDao;
     @Autowired
-    private BusinessSchoolApplicationDao businessSchoolApplicationDao;
-    @Autowired
     private CouponDao couponDao;
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
@@ -76,8 +66,7 @@ public class CustomerService {
     private static final String RISE_APPLY_COUPON_CATEGORY = "ELITE_RISE_MEMBER";
     private static final String RISE_APPLY_COUPON_DESCRIPTION = "商学院奖学金";
 
-
-    String LIST_BLACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/getblacklist?access_token={access_token}";
+    private String LIST_BLACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/getblacklist?access_token={access_token}";
     private final int WX_BLACKLIST_DEFAULT_PAGE_SIZE = 10000;
 
     @PostConstruct
@@ -91,18 +80,15 @@ public class CustomerService {
         riseMembers.stream().filter(riseMember -> !riseMember.getExpireDate().after(new Date()))
                 .forEach(riseMember -> {
                     try {
-                        logger.info("user:{} expired ad {}", riseMember.getOpenId(),
+                        logger.info("user:{} expired ad {}", riseMember.getProfileId(),
                                 DateUtils.parseDateTimeToString(riseMember.getExpireDate()));
-                        //训练营用户的用户profile表保留risemember=3
-                        if (riseMember.getMemberTypeId() != MEMBER_TYPE_CAMP) {
-                            profileDao.riseMemberExpired(riseMember.getProfileId());
-                        }
 
                         riseMemberDao.riseMemberExpired(riseMember);
                         //发送用户信息修改消息
-                        userLoadRabbitMQPublisher.publish(riseMember.getOpenId());
+                        Profile profile = profileDao.load(Profile.class, riseMember.getProfileId());
+                        userLoadRabbitMQPublisher.publish(profile.getOpenid());
                     } catch (Exception e) {
-                        logger.error("expired: {} error", riseMember.getOpenId());
+                        logger.error("expired: {} error", riseMember.getProfileId());
                     }
                 });
     }
