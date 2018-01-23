@@ -47,28 +47,4 @@ public class RiseUserLoginDao extends DBUtil {
         }
         return Lists.newArrayList();
     }
-
-    public boolean update(Integer profileId, int id) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update RiseUserLogin set ProfileId=? where id=?";
-        long result = 0;
-        try {
-            result = runner.update(sql, profileId, id);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return result > 0;
-    }
-
-    public List<RiseUserLogin> selectAll() {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from RiseUserLogin where ProfileId is null limit 50000";
-        try {
-            ResultSetHandler<List<RiseUserLogin>> handler = new BeanListHandler<>(RiseUserLogin.class);
-            return runner.query(sql, handler);
-        } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return Lists.newArrayList();
-    }
 }

@@ -99,6 +99,11 @@ public class CustomerService {
         Date thatDay = DateUtils.beforeDays(new Date(), days);
         openIds.forEach(openId -> {
             Profile profile = getProfile(openId);
+            if(profile == null){
+                logger.error("用户不存在", openId);
+                return;
+            }
+
             Integer profileId = profile.getId();
             RiseUserLanding riseUserLanding = riseUserLandingDao.loadByProfileId(profileId);
             Date landingDate = null;
