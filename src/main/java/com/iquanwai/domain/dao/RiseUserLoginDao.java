@@ -21,13 +21,13 @@ import java.util.List;
 public class RiseUserLoginDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public boolean insert(String openId, Date loginDate, Integer diffDay) {
+    public boolean insert(Integer profileId, Date loginDate, Integer diffDay) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "INSERT INTO RiseUserLogin(Openid, LoginDate, DiffDay) VALUES (?, ?, ?) ";
+        String sql = "INSERT INTO RiseUserLogin(ProfileId, LoginDate, DiffDay) VALUES (?, ?, ?) ";
         long insert = 0;
         try {
             ScalarHandler<Long> handler = new ScalarHandler<Long>();
-            insert = runner.insert(sql, handler, openId, loginDate, diffDay);
+            insert = runner.insert(sql, handler, profileId, loginDate, diffDay);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -37,8 +37,8 @@ public class RiseUserLoginDao extends DBUtil {
     // 获取超过 x 天未登录的学员
     public List<RiseUserLogin> loadUnLoginUser(String previousLoginDate) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select Openid, max(LoginDate) as LoginDate " +
-                "from RiseUserLogin GROUP BY Openid having max(LoginDate) < ?";
+        String sql = "select ProfileId, max(LoginDate) as LoginDate " +
+                "from RiseUserLogin GROUP BY ProfileId having max(LoginDate) < ?";
         ResultSetHandler<List<RiseUserLogin>> h = new BeanListHandler<>(RiseUserLogin.class);
         try {
             return runner.query(sql, h, previousLoginDate);
@@ -48,4 +48,28 @@ public class RiseUserLoginDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    public boolean update(Integer profileId, int id) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update RiseUserLogin set ProfileId=? where id=?";
+        long result = 0;
+        try {
+            ScalarHandler<Long> handler = new ScalarHandler<Long>();
+            result = runner.update(sql, handler, profileId, id);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return result > 0;
+    }
+
+    public List<RiseUserLogin> selectAll() {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from RiseUserLogin where ProfileId is null limit 10000";
+        try {
+            ResultSetHandler<List<RiseUserLogin>> handler = new BeanListHandler<>(RiseUserLogin.class);
+            return runner.query(sql, handler);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
 }

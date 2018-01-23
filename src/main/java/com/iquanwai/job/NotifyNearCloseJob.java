@@ -1,11 +1,13 @@
 package com.iquanwai.job;
 
 import com.google.common.collect.Maps;
+import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.PlanService;
 import com.iquanwai.domain.message.TemplateMessage;
 import com.iquanwai.domain.message.TemplateMessageService;
 import com.iquanwai.domain.po.ImprovementPlan;
 import com.iquanwai.domain.po.Problem;
+import com.iquanwai.domain.po.Profile;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.slf4j.Logger;
@@ -26,6 +28,8 @@ public class NotifyNearCloseJob {
     @Autowired
     private PlanService planService;
     @Autowired
+    private CustomerService customerService;
+    @Autowired
     private TemplateMessageService templateMessageService;
 
     private static final String INDEX_URL = "/rise/static/learn";
@@ -42,7 +46,8 @@ public class NotifyNearCloseJob {
         List<ImprovementPlan> underClosedPlans = planService.loadUnderClosePlan();
         underClosedPlans.stream().forEach(improvementPlan -> {
             TemplateMessage templateMessage = new TemplateMessage();
-            templateMessage.setTouser(improvementPlan.getOpenid());
+            Profile profile = customerService.getProfile(improvementPlan.getProfileId());
+            templateMessage.setTouser(profile.getOpenid());
             templateMessage.setTemplate_id(ConfigUtils.getUnderCloseMsg());
             templateMessage.setUrl(ConfigUtils.getAppDomain() + INDEX_URL);
 

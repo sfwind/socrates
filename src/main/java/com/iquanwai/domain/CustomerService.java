@@ -98,11 +98,13 @@ public class CustomerService {
                 filter(Objects::nonNull).collect(Collectors.toList());
         Date thatDay = DateUtils.beforeDays(new Date(), days);
         openIds.forEach(openId -> {
-            RiseUserLanding riseUserLanding = riseUserLandingDao.loadByOpenId(openId);
+            Profile profile = getProfile(openId);
+            Integer profileId = profile.getId();
+            RiseUserLanding riseUserLanding = riseUserLandingDao.loadByProfileId(profileId);
             Date landingDate = null;
             if (riseUserLanding == null) {
                 landingDate = DateUtils.beforeDays(new Date(), days);
-                boolean insert = riseUserLandingDao.insert(openId, landingDate);
+                boolean insert = riseUserLandingDao.insert(profileId, landingDate);
                 if (!insert) {
                     logger.error("插入用户:{} 注册表失败! 日期:{}", openId, landingDate);
                 }
@@ -111,7 +113,7 @@ public class CustomerService {
             }
 
             Integer diffDay = DateUtils.interval(thatDay, landingDate);
-            boolean insert = riseUserLoginDao.insert(openId, thatDay, diffDay);
+            boolean insert = riseUserLoginDao.insert(profileId, thatDay, diffDay);
             if (!insert) {
                 logger.error("插入用户:{} 登录表失败! 日期:{}", openId, thatDay);
             }

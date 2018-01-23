@@ -49,15 +49,15 @@ public class NotifyInactiveUserJob {
             if(improvementPlan.getStartDate().after(new Date())){
                 return;
             }
+            Profile profile = customerService.getProfile(improvementPlan.getProfileId());
             try{
-                Profile profile = customerService.getProfile(improvementPlan.getProfileId());
                 if(profile.getLearningNotify()){
                     // 打开了每日提醒，不用发送三日未登录
                     logger.info("用户:{} 打开了每日提醒，不需要发送三日未登录", improvementPlan.getProfileId());
                     return;
                 }
                 TemplateMessage templateMessage = new TemplateMessage();
-                templateMessage.setTouser(improvementPlan.getOpenid());
+                templateMessage.setTouser(profile.getOpenid());
                 templateMessage.setTemplate_id(ConfigUtils.getLearningNotifyMsg());
 
                 Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
@@ -72,7 +72,7 @@ public class NotifyInactiveUserJob {
 
                 templateMessageService.sendMessage(templateMessage);
             } catch (Exception e){
-                logger.error("发送"+improvementPlan.getOpenid()+"失败", e);
+                logger.error("发送"+ profile.getOpenid()+"失败", e);
             }
         });
     }

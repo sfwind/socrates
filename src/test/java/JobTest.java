@@ -58,20 +58,6 @@ public class JobTest extends TestBase {
         businessSchoolService.sendRiseMemberApplyMessageByDealTime(oneDay, 0);
     }
 
-    @Test
-    public void logDaoTest() {
-//        List<String> strings = operationLogDao.loadThatDayLoginUser(2);
-//
-//        strings.forEach(System.out::println);
-        RiseUserLanding login = riseUserLandingDao.loadByOpenId("o5h6ywl3-k7FGio94tHPHlw7Eusc");
-        Date landingDate = login.getLandingDate();
-        System.out.println(DateUtils.parseDateToString(landingDate));
-        Date thatDate = DateUtils.beforeDays(new Date(), 2);
-        System.out.println(DateUtils.parseDateToString(thatDate));
-        Integer diff = DateUtils.interval(thatDate, landingDate);
-        System.out.println(diff);
-    }
-
 //    @Test
 //    public void searchTest(){
 //        businessSchoolService.searchApplications(DateUtils.parseStringToDate("2017-09-22"));

@@ -10,8 +10,8 @@ import java.util.Date;
  */
 @Data
 public class RiseUserLanding {
-    private Integer id;
-    private String openid;
+    private int id;
+    private Integer profileId;
     private Date landingDate;
     private Date addTime;
     private Date updateTime;
