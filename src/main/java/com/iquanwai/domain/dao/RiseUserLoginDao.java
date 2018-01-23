@@ -62,7 +62,7 @@ public class RiseUserLoginDao extends DBUtil {
 
     public List<RiseUserLogin> selectAll() {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from RiseUserLogin where ProfileId is null limit 10000";
+        String sql = "select * from RiseUserLogin where ProfileId is null limit 50000";
         try {
             ResultSetHandler<List<RiseUserLogin>> handler = new BeanListHandler<>(RiseUserLogin.class);
             return runner.query(sql, handler);
