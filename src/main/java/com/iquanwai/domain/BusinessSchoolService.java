@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 @Service
 public class BusinessSchoolService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    public static String PAY_URL = "https://www.iquanwai.com/pay/apply";
-    public static String PAY_CAMP_URL = "https://www.iquanwai.com/pay/camp";
+    public final static String PAY_URL = "https://www.iquanwai.com/pay/apply";
+    public final static String PAY_CAMP_URL = "https://www.iquanwai.com/pay/camp";
 
     @Autowired
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
