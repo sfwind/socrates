@@ -86,7 +86,7 @@ public class CustomerService {
                         riseMemberDao.riseMemberExpired(riseMember);
                         //发送用户信息修改消息
                         Profile profile = profileDao.load(Profile.class, riseMember.getProfileId());
-                        userLoadRabbitMQPublisher.publish(profile.getOpenid());
+                        userLoadRabbitMQPublisher.publish(profile.getUnionId());
                     } catch (Exception e) {
                         logger.error("expired: {} error", riseMember.getProfileId());
                     }
