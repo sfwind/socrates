@@ -11,7 +11,7 @@ import java.util.Date;
 @Data
 public class RiseUserLogin {
     private Integer id;
-    private String openid;
+    private Integer profileId;
     private Date loginDate;
     private Integer diffDay;
     private Date addTime;

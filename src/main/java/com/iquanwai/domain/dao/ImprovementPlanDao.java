@@ -53,26 +53,13 @@ public class ImprovementPlanDao extends PracticeDBUtil {
         }
     }
 
-    public ImprovementPlan loadLatestProblemByOpenId(String openId) {
+    public ImprovementPlan loadLatestProblem(Integer profileId) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from ImprovementPlan where Openid = ? and Del=0 ORDER BY Id DESC";
+        String sql = "select * from ImprovementPlan where ProfileId = ? and Del=0 ORDER BY Id DESC";
         ResultSetHandler<ImprovementPlan> h = new BeanHandler<>(ImprovementPlan.class);
         try {
-            ImprovementPlan improvementPlan = runner.query(sql, h, openId);
+            ImprovementPlan improvementPlan = runner.query(sql, h, profileId);
             return improvementPlan;
-        } catch (Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
-    public List<ImprovementPlan> loadByProblemId(Integer problemId) {
-        QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select * from ImprovementPlan where ProblemId = ? and Del = 0";
-        ResultSetHandler<List<ImprovementPlan>> h = new BeanListHandler<>(ImprovementPlan.class);
-        try {
-            List<ImprovementPlan> improvementPlans = runner.query(sql, h, problemId);
-            return improvementPlans;
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }

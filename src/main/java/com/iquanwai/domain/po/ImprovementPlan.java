@@ -10,7 +10,6 @@ import java.util.Date;
 @Data
 public class ImprovementPlan {
     private int id;
-    private String openid; //openid
     private Integer problemId; //问题id
     private Date startDate; //开始日期
     private Date endDate; //结束日期(当日开始复习)

@@ -6,6 +6,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -75,5 +76,30 @@ public class QuanwaiOrderDao extends DBUtil {
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+    }
+
+    public boolean update(Integer profileId, int id) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update QuanwaiOrder set ProfileId=? where id=?";
+        long result = 0;
+        try{
+            ScalarHandler<Long> handler = new ScalarHandler<Long>();
+            result = runner.update(sql, handler, profileId, id);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return result > 0;
+    }
+
+    public List<QuanwaiOrder> selectAll() {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "select * from QuanwaiOrder where ProfileId is null limit 10000";
+        try{
+            ResultSetHandler<List<QuanwaiOrder>> handler = new BeanListHandler<>(QuanwaiOrder.class);
+            return runner.query(sql, handler);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
     }
 }

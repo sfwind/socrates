@@ -94,7 +94,7 @@ public class PlanService {
     }
 
     /**
-     * 获取已经三天内没有登陆过 RISE 且中间没有提醒过的用户的 OpenId 和最后一次学习的 Problem 名称
+     * 获取已经三天内没有登陆过 RISE 且中间没有提醒过的用户的 profileId 和最后一次学习的 Problem 名称
      */
     public List<ImprovementPlan> loadPreviouslyLogin() {
         List<ImprovementPlan> improvementPlanList = Lists.newArrayList();
@@ -104,19 +104,19 @@ public class PlanService {
         Map<Integer, String> problemMap = Maps.newHashMap();
         problemList.forEach(problem -> problemMap.put(problem.getId(), problem.getProblem()));
 
-        // 获取三天前学员 OpenId 和最近一次的 LoginDate
+        // 获取三天前学员 profileId 和最近一次的 LoginDate
         String previousLoginDate = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), NOLOGIN_DAYS));
         List<RiseUserLogin> riseUserLoginList = riseUserLoginDao.loadUnLoginUser(previousLoginDate);
 
         List<RiseMember> riseMemberList = riseMemberDao.validRiseMember();
-        List<String> riseMemberOpenids = riseMemberList.stream().map(RiseMember::getOpenId).collect(Collectors.toList());
+        List<Integer> riseMemberProfileIds = riseMemberList.stream().map(RiseMember::getProfileId).collect(Collectors.toList());
 
         //只提醒会员用户
         if (riseUserLoginList != null) {
             improvementPlanList = riseUserLoginList.stream().filter(riseUserLogin ->
-                    riseMemberOpenids.contains(riseUserLogin.getOpenid()))
+                    riseMemberProfileIds.contains(riseUserLogin.getProfileId()))
                     .map(riseUserLogin -> {
-                        ImprovementPlan improvementPlan = improvementPlanDao.loadLatestProblemByOpenId(riseUserLogin.getOpenid());
+                        ImprovementPlan improvementPlan = improvementPlanDao.loadLatestProblem(riseUserLogin.getProfileId());
                         improvementPlan.setProblemName(problemMap.get(improvementPlan.getProblemId()));
                         return improvementPlan;
                     }).collect(Collectors.toList());
