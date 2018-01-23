@@ -56,7 +56,7 @@ public class CustomerService {
 
     private static final String LOGIN_USER_RELOAD = "login_user_reload";
 
-    //训练营用户
+    //专项课用户
     private static final int MEMBER_TYPE_CAMP = 5;
     private static final String RISE_PAY_URL = "/pay/rise";
 
