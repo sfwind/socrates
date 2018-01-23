@@ -27,7 +27,7 @@ public class JobTest extends TestBase {
     @Autowired
     private CustomerService customerService;
     @Autowired
-    private RiseUserLandingDao riseUserLandingDao;
+    private RefreshProfileIdJob refreshProfileIdJob;
     @Autowired
     private ClosePlanJob closePlanJob;
     @Autowired
@@ -44,7 +44,7 @@ public class JobTest extends TestBase {
 
     @Test
     public void riseJobTest() {
-        riseUserJob.work();
+        refreshProfileIdJob.work();
     }
 
     @Test

@@ -83,8 +83,7 @@ public class QuanwaiOrderDao extends DBUtil {
         String sql = "Update QuanwaiOrder set ProfileId=? where id=?";
         long result = 0;
         try{
-            ScalarHandler<Long> handler = new ScalarHandler<Long>();
-            result = runner.update(sql, handler, profileId, id);
+            result = runner.update(sql, profileId, id);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

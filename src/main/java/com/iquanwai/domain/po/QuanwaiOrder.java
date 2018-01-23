@@ -11,6 +11,7 @@ import java.util.Date;
 public class QuanwaiOrder {
     private int id;
     private String orderId; //订单id
+    private String openid;
     private Integer profileId; //用户id
     private Double price;   //实际金额 总金额-折扣金额
     private Double discount; //折扣金额

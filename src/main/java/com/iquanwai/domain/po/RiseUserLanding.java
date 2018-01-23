@@ -12,6 +12,7 @@ import java.util.Date;
 public class RiseUserLanding {
     private int id;
     private Integer profileId;
+    private String openid;
     private Date landingDate;
     private Date addTime;
     private Date updateTime;
