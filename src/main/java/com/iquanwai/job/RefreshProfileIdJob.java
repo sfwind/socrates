@@ -34,6 +34,7 @@ public class RefreshProfileIdJob {
 
     @Scheduled(cron="0 0/15 * * * ?")
     public void work(){
+        logger.info("刷新profileid任务开始");
         List<RiseUserLanding> riseUserLandingList = riseUserLandingDao.selectAll();
         riseUserLandingList.forEach(riseUserLanding -> {
             try{
@@ -66,5 +67,6 @@ public class RefreshProfileIdJob {
             }
 
         });
+        logger.info("刷新profileid任务结束");
     }
 }
