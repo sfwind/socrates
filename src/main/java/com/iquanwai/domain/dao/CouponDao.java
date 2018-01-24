@@ -24,7 +24,7 @@ public class CouponDao extends DBUtil {
     public int insert(Coupon coupon) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO Coupon (ProfileId, Amount, Used, ExpiredDate, Category, Description) " +
-                "VALUES (?, ?, 0, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?)";
         try {
             Long result = runner.insert(sql, new ScalarHandler<>(),
                     coupon.getProfileId(),
