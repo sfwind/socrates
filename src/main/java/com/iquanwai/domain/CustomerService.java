@@ -56,18 +56,12 @@ public class CustomerService {
 
     private static final String LOGIN_USER_RELOAD = "login_user_reload";
 
-    //训练营用户
-    private static final int MEMBER_TYPE_CAMP = 5;
     private static final String RISE_PAY_URL = "/pay/rise";
 
     private static final String PERSON_ACCOUNT_PAGE = "/rise/static/customer/account"; // 个人账户页面
 
-    // 会员购买申请 发放优惠券的 Category 和 Description
-    private static final String RISE_APPLY_COUPON_CATEGORY = "ELITE_RISE_MEMBER";
-    private static final String RISE_APPLY_COUPON_DESCRIPTION = "商学院奖学金";
-
-    private String LIST_BLACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/getblacklist?access_token={access_token}";
-    private final int WX_BLACKLIST_DEFAULT_PAGE_SIZE = 10000;
+    private final static String LIST_BLACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/getblacklist?access_token={access_token}";
+    private final static int WX_BLACKLIST_DEFAULT_PAGE_SIZE = 10000;
 
     @PostConstruct
     public void init() {
