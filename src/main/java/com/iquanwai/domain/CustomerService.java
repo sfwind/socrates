@@ -287,6 +287,17 @@ public class CustomerService {
 
     }
 
+    /**
+     * 更新过期日期
+     * @param profileIds
+     * @param delay
+     * @param category （day,month,year）
+     */
+    public void updateExpiredDate(List<Integer> profileIds,Integer delay,String category){
+        riseMemberDao.updateExpiredDate(profileIds,delay,category);
+    }
+
+
     private Integer getRiseMember(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         if (riseMember == null) {

@@ -98,4 +98,25 @@ public class RiseMemberDao extends DBUtil {
         return Lists.newArrayList();
     }
 
+    /**
+     *更新过期日期
+     * @param profileIds
+     * @param delay
+     * @param category :顺延类型（day,month,year）
+     * @return
+     */
+    public void updateExpiredDate(List<Integer> profileIds,Integer delay,String category){
+        if(CollectionUtils.isEmpty(profileIds)){
+            return;
+        }
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update RiseMember set ExpireDate = DATE_ADD(ExpireDate,INTERVAL "+delay+" "+ category+") WHERE ProfileId in (" + produceQuestionMark(profileIds.size()) + ") AND Expired = 0 AND Del = 0";
+        try {
+            runner.update(sql,profileIds.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+    }
+
+
 }
