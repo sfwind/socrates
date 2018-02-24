@@ -1,7 +1,7 @@
 package com.iquanwai.job.asst;
 
+import com.iquanwai.domain.AsstService;
 import com.iquanwai.domain.CustomerService;
-import com.iquanwai.domain.dao.UserRoleDao;
 import com.iquanwai.domain.po.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class AsstJob {
 
     @Autowired
-    private UserRoleDao userRoleDao;
+    private AsstService asstService;
     @Autowired
     private CustomerService customerService;
 
@@ -32,7 +32,7 @@ public class AsstJob {
      * 顺延助教过期时间
      */
     private void delayExpiredDate(){
-        List<UserRole> userRoles = userRoleDao.loadValidAssists();
+        List<UserRole> userRoles = asstService.getValidAssists();
 
         List<Integer> profileIds = userRoles.stream().map(UserRole::getProfileId).collect(Collectors.toList());
         //顺延1个月
