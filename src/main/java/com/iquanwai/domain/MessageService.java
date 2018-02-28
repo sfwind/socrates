@@ -31,7 +31,7 @@ public class MessageService {
     @Autowired
     private NotifyMessageDao notifyMessageDao;
 
-    private List<Integer> NOTICE_TYPE = Lists.newArrayList(1, 2, 3);
+    private final static List<Integer> NOTICE_TYPE = Lists.newArrayList(1, 2, 3);
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
