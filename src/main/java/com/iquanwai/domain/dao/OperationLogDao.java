@@ -43,14 +43,12 @@ public class OperationLogDao extends DBUtil {
         return 0;
     }
 
-    public List<String> loadThatDayLoginUser(Integer days){
+    public List<Integer> loadThatDayLoginUser(Integer days){
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "select DISTINCT Openid from OperatingLog where OperateDate = DATE_SUB(CURDATE(),INTERVAL ? DAY) " +
-                "                and Openid is not null " +
-                "                and Module = '打点'";
+        String sql = "select DISTINCT ProfileId from ActionLog where DATE(AddTime) = DATE_SUB(CURDATE(),INTERVAL ? DAY) ";
 
         try{
-            ResultSetHandler<List<String>> handler = new ColumnListHandler<>();
+            ResultSetHandler<List<Integer>> handler = new ColumnListHandler<>();
             return runner.query(sql, handler, days);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
