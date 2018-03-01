@@ -36,8 +36,6 @@ public class CustomerService {
     @Autowired
     private RiseMemberDao riseMemberDao;
     @Autowired
-    private OperationLogDao operationLogDao;
-    @Autowired
     private RiseUserLandingDao riseUserLandingDao;
     @Autowired
     private RiseUserLoginDao riseUserLoginDao;
@@ -51,6 +49,8 @@ public class CustomerService {
     private ShortMessageService shortMessageService;
     @Autowired
     private RestfulHelper restfulHelper;
+    @Autowired
+    private ActionLogDao actionLogDao;
 
 
     private RabbitMQPublisher userLoadRabbitMQPublisher;
@@ -89,7 +89,7 @@ public class CustomerService {
     }
 
     public void userLoginLog(Integer days) {
-        List<Integer> profileIds = operationLogDao.loadThatDayLoginUser(days).stream().
+        List<Integer> profileIds = actionLogDao.loadThatDayLoginUser(days).stream().
                 filter(Objects::nonNull).collect(Collectors.toList());
         Date thatDay = DateUtils.beforeDays(new Date(), days);
         profileIds.forEach(profileId -> {
