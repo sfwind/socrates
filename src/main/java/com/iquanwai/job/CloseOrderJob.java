@@ -1,6 +1,7 @@
 package com.iquanwai.job;
 
 import com.iquanwai.domain.PayService;
+import com.iquanwai.util.cat.CatInspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ public class CloseOrderJob {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Scheduled(cron="0 * * * * ?")
+    @CatInspect(name = "closeOrder")
     public void work(){
         logger.info("关闭订单任务开始");
         payService.closeOrder();

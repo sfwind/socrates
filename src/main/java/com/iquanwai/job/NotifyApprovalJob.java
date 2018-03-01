@@ -3,6 +3,7 @@ package com.iquanwai.job;
 import com.iquanwai.domain.MessageService;
 import com.iquanwai.domain.PracticeService;
 import com.iquanwai.domain.po.HomeworkVote;
+import com.iquanwai.util.cat.CatInspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ public class NotifyApprovalJob {
     private MessageService messageService;
 
     @Scheduled(cron = "0 0 0 * * ?")
+    @CatInspect(name = "notifyLikeMessage")
     public void work() {
         logger.info("点赞消息任务开始");
         //发送点赞数统计

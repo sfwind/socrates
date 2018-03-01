@@ -3,6 +3,7 @@ package com.iquanwai.job;
 import com.iquanwai.domain.PlanService;
 import com.iquanwai.domain.po.ImprovementPlan;
 import com.iquanwai.util.DateUtils;
+import com.iquanwai.util.cat.CatInspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ public class ClosePlanJob {
     private PlanService planService;
 
     @Scheduled(cron = "0 0 0 * * ?")
+    @CatInspect(name = "closePlan")
     public void work() {
         logger.info("关闭课程任务开始");
         closePlan();

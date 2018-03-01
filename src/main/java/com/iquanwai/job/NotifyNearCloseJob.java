@@ -10,6 +10,7 @@ import com.iquanwai.domain.po.Problem;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
+import com.iquanwai.util.cat.CatInspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ public class NotifyNearCloseJob {
     private static final String INDEX_URL = "/rise/static/learn";
 
     @Scheduled(cron = "0 25 21 * * ?")
+    @CatInspect(name = "notifyNearClosePlan")
     public void work() {
         logger.info("通知即将关闭课程任务开始");
         //发送点赞数统计

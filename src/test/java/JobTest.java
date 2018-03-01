@@ -18,8 +18,6 @@ public class JobTest extends TestBase {
     @Autowired
     private RiseUserJob riseUserJob;
     @Autowired
-    private NotifyForumJob forumNotifyJob;
-    @Autowired
     private CustomerService customerService;
     @Autowired
     private ClosePlanJob closePlanJob;
@@ -30,10 +28,6 @@ public class JobTest extends TestBase {
     @Autowired
     private NotifyBusinessApplicationExpireJob notifyRiseMemberApplyJob;
 
-    @Test
-    public void expiredTest() {
-        forumNotifyJob.work();
-    }
 
     @Test
     public void customerTest() {

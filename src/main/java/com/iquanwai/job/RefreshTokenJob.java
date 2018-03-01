@@ -1,6 +1,7 @@
 package com.iquanwai.job;
 
 import com.iquanwai.domain.accesstoken.AccessTokenService;
+import com.iquanwai.util.cat.CatInspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ public class RefreshTokenJob {
     private AccessTokenService accessTokenService;
 
     @Scheduled(cron="0 0 0/2 * * ?")
+    @CatInspect(name = "refreshAccessToken")
     public void work(){
         logger.info("刷新token任务开始");
         accessTokenService.refreshAccessToken(true);

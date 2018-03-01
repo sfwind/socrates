@@ -2,6 +2,7 @@ package com.iquanwai.job;
 
 import com.iquanwai.domain.CustomerService;
 import com.iquanwai.util.DateUtils;
+import com.iquanwai.util.cat.CatInspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ public class NotifyCouponExpireJob {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Scheduled(cron = "0 0 21 * * ?")
+    @CatInspect(name = "notifyCouponWillBeExpired")
     public void work() {
         logger.info("优惠券即将过期提醒任务开始");
         sendCouponExpireNotify();

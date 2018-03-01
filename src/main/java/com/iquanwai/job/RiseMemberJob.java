@@ -1,6 +1,7 @@
 package com.iquanwai.job;
 
 import com.iquanwai.domain.CustomerService;
+import com.iquanwai.util.cat.CatInspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ public class RiseMemberJob {
     private CustomerService customerService;
 
     @Scheduled(cron = "0 0 0 * * ?")
+    @CatInspect(name = "checkMemberExpired")
     public void work() {
         logger.info("会员过期任务开始");
         customerService.checkMemberExpired();
