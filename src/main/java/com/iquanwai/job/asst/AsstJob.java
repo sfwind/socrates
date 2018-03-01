@@ -3,6 +3,7 @@ package com.iquanwai.job.asst;
 import com.iquanwai.domain.AsstService;
 import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.po.UserRole;
+import com.iquanwai.util.cat.CatInspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ public class AsstJob {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Scheduled(cron="0 0 1 * * ?")
+    @CatInspect(name = "asstJob")
     public void work(){
         logger.info("顺延助教一个月过期时间开始");
         delayExpiredDate();
