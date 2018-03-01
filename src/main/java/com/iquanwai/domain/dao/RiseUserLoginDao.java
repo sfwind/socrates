@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.iquanwai.domain.po.RiseUserLogin;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
@@ -32,6 +33,17 @@ public class RiseUserLoginDao extends DBUtil {
             logger.error(e.getLocalizedMessage(), e);
         }
         return insert > 0;
+    }
+
+    public RiseUserLogin loadCertainLogin(Integer profileId,Date loginDate) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseUserLogin WHERE ProfileId = ? and LoginDate = ?";
+        try {
+            return runner.query(sql, new BeanHandler<RiseUserLogin>(RiseUserLogin.class), profileId, loginDate);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 
     // 获取超过 x 天未登录的学员
