@@ -9,6 +9,7 @@ import com.iquanwai.domain.po.Coupon;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.domain.po.RiseMember;
 import com.iquanwai.domain.po.RiseUserLanding;
+import com.iquanwai.domain.po.RiseUserLogin;
 import com.iquanwai.mq.RabbitMQFactory;
 import com.iquanwai.mq.RabbitMQPublisher;
 import com.iquanwai.util.ConfigUtils;
@@ -35,8 +36,6 @@ public class CustomerService {
     @Autowired
     private RiseMemberDao riseMemberDao;
     @Autowired
-    private OperationLogDao operationLogDao;
-    @Autowired
     private RiseUserLandingDao riseUserLandingDao;
     @Autowired
     private RiseUserLoginDao riseUserLoginDao;
@@ -50,6 +49,8 @@ public class CustomerService {
     private ShortMessageService shortMessageService;
     @Autowired
     private RestfulHelper restfulHelper;
+    @Autowired
+    private ActionLogDao actionLogDao;
 
 
     private RabbitMQPublisher userLoadRabbitMQPublisher;
@@ -88,24 +89,27 @@ public class CustomerService {
     }
 
     public void userLoginLog(Integer days) {
-        List<String> openIds = operationLogDao.loadThatDayLoginUser(days).stream().
+        List<Integer> profileIds = actionLogDao.loadThatDayLoginUser(days).stream().
                 filter(Objects::nonNull).collect(Collectors.toList());
         Date thatDay = DateUtils.beforeDays(new Date(), days);
-        openIds.forEach(openId -> {
-            Profile profile = getProfile(openId);
-            if(profile == null){
-                logger.error("用户不存在", openId);
+        profileIds.forEach(profileId -> {
+//            Profile profile = getProfile(profileId);
+//            if(profile == null){
+//                logger.error("用户不存在", profileId);
+//                return;
+//            }
+
+            RiseUserLogin login = riseUserLoginDao.loadCertainLogin(profileId, thatDay);
+            if (login != null) {
                 return;
             }
-
-            Integer profileId = profile.getId();
             RiseUserLanding riseUserLanding = riseUserLandingDao.loadByProfileId(profileId);
             Date landingDate = null;
             if (riseUserLanding == null) {
                 landingDate = DateUtils.beforeDays(new Date(), days);
                 boolean insert = riseUserLandingDao.insert(profileId, landingDate);
                 if (!insert) {
-                    logger.error("插入用户:{} 注册表失败! 日期:{}", openId, landingDate);
+                    logger.error("插入用户:{} 注册表失败! 日期:{}", profileId, landingDate);
                 }
             } else {
                 landingDate = riseUserLanding.getLandingDate();
@@ -114,10 +118,9 @@ public class CustomerService {
             Integer diffDay = DateUtils.interval(thatDay, landingDate);
             boolean insert = riseUserLoginDao.insert(profileId, thatDay, diffDay);
             if (!insert) {
-                logger.error("插入用户:{} 登录表失败! 日期:{}", openId, thatDay);
+                logger.error("插入用户:{} 登录表失败! 日期:{}", profileId, thatDay);
             }
         });
-
     }
 
     /**

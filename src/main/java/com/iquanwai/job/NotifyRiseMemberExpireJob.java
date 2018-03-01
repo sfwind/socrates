@@ -3,6 +3,7 @@ package com.iquanwai.job;
 import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.po.RiseMember;
 import com.iquanwai.util.DateUtils;
+import com.iquanwai.util.cat.CatInspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ public class NotifyRiseMemberExpireJob {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Scheduled(cron = "0 20 21 * * ?")
+    @CatInspect(name = "notifyRiseMemberWillExpired")
     public void work() {
         logger.info("会员即将过期的模板消息提醒任务开始");
         riseMemberExpireCheck();
