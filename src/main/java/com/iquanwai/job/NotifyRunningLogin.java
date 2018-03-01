@@ -7,6 +7,7 @@ import com.iquanwai.domain.po.ImprovementPlan;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.Constants;
+import com.iquanwai.util.cat.CatInspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ public class NotifyRunningLogin {
     private CustomerMessageService customerMessageService;
 
     @Scheduled(cron = "0 30 21 ? * MON-FRI")
+    @CatInspect(name = "notifyRunningPlanNotLogin")
     public void notifyHasRunningPlansLogin() {
         logger.info("开始未登录提醒job");
         List<ImprovementPlan> runningUnlogin = planService.loadRunningUnlogin();

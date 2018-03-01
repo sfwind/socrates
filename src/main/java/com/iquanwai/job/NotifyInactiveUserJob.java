@@ -9,6 +9,7 @@ import com.iquanwai.domain.po.ImprovementPlan;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
+import com.iquanwai.util.cat.CatInspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ public class NotifyInactiveUserJob {
     private static final String INDEX_URL = "/rise/static/learn";
 
     @Scheduled(cron = "0 0 21 ? * THU")
+    @CatInspect(name = "notifyWhoNotLoginNearThreeDay")
     public void work() {
         logger.info("开始执行三天未登录信息通知任务");
         notifyInactiveUser();

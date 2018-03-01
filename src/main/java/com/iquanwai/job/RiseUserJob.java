@@ -1,6 +1,7 @@
 package com.iquanwai.job;
 
 import com.iquanwai.domain.CustomerService;
+import com.iquanwai.util.cat.CatInspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ public class RiseUserJob {
     private CustomerService customerService;
 
     @Scheduled(cron = "0 0 1 * * ?")
+    @CatInspect(name = "userLoginLog")
     public void work() {
         logger.info("记录用户昨日登录任务开始");
         customerService.userLoginLog();
