@@ -17,7 +17,7 @@ public class RiseUserJob {
     @Autowired
     private CustomerService customerService;
 
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 30 11 * * ?")
     public void work() {
         logger.info("记录用户昨日登录任务开始");
         customerService.userLoginLog();
