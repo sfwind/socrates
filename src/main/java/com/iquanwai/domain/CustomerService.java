@@ -127,11 +127,6 @@ public class CustomerService {
      * 记录昨天用户的情况
      */
     public void userLoginLog() {
-        this.userLoginLog(6);
-        this.userLoginLog(5);
-        this.userLoginLog(4);
-        this.userLoginLog(3);
-        this.userLoginLog(2);
         this.userLoginLog(1);
     }
 
