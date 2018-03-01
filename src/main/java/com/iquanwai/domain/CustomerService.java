@@ -93,11 +93,11 @@ public class CustomerService {
                 filter(Objects::nonNull).collect(Collectors.toList());
         Date thatDay = DateUtils.beforeDays(new Date(), days);
         profileIds.forEach(profileId -> {
-            Profile profile = getProfile(profileId);
-            if(profile == null){
-                logger.error("用户不存在", profileId);
-                return;
-            }
+//            Profile profile = getProfile(profileId);
+//            if(profile == null){
+//                logger.error("用户不存在", profileId);
+//                return;
+//            }
 
             RiseUserLogin login = riseUserLoginDao.loadCertainLogin(profileId, thatDay);
             if (login != null) {
