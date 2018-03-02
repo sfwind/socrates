@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+
 /**
  * Created by justin on 8/3/16.
  */
@@ -86,7 +88,6 @@ public class RestfulHelper {
         return "";
     }
 
-
     public String get(String requestUrl) {
         if (StringUtils.isNotEmpty(requestUrl)) {
             String accessToken = accessTokenService.getAccessToken();
@@ -124,22 +125,27 @@ public class RestfulHelper {
         return "";
     }
 
-    public String getPlain(String requestUrl) {
-        if (StringUtils.isNotEmpty(requestUrl)) {
-            Request request = new Request.Builder()
-                    .url(requestUrl)
-                    .build();
-
+    public String getPure(String requestUrl) {
+        if (!StringUtils.isEmpty(requestUrl)) {
+            Request request = new Request.Builder().url(requestUrl).build();
             try {
                 Response response = client.newCall(request).execute();
-                String body = response.body().string();
-
-                return body;
+                return response.body().string();
             } catch (Exception e) {
                 logger.error("execute " + requestUrl + " error", e);
             }
         }
-        return "";
+        return null;
+    }
+
+    public Response getResponse(String requestUrl) {
+        Request request = new Request.Builder().url(requestUrl).build();
+        try {
+            return client.newCall(request).execute();
+        } catch (IOException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
     }
 
 }

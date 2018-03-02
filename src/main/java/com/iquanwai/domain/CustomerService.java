@@ -29,7 +29,11 @@ import java.util.stream.Collectors;
  */
 @Service
 public class CustomerService {
-    private Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Autowired
+    private TemplateMessageService templateMessageService;
+    @Autowired
+    private ShortMessageService shortMessageService;
 
     @Autowired
     private ProfileDao profileDao;
@@ -42,25 +46,19 @@ public class CustomerService {
     @Autowired
     private CouponDao couponDao;
     @Autowired
-    private RabbitMQFactory rabbitMQFactory;
-    @Autowired
-    private TemplateMessageService templateMessageService;
-    @Autowired
-    private ShortMessageService shortMessageService;
-    @Autowired
-    private RestfulHelper restfulHelper;
-    @Autowired
     private ActionLogDao actionLogDao;
 
+    @Autowired
+    private RabbitMQFactory rabbitMQFactory;
+    @Autowired
+    private RestfulHelper restfulHelper;
 
+    private Logger logger = LoggerFactory.getLogger(getClass());
     private RabbitMQPublisher userLoadRabbitMQPublisher;
 
     private static final String LOGIN_USER_RELOAD = "login_user_reload";
-
     private static final String RISE_PAY_URL = "/pay/rise";
-
     private static final String PERSON_ACCOUNT_PAGE = "/rise/static/customer/account"; // 个人账户页面
-
     private final static String LIST_BLACKLIST_URL = "https://api.weixin.qq.com/cgi-bin/tags/members/getblacklist?access_token={access_token}";
     private final static int WX_BLACKLIST_DEFAULT_PAGE_SIZE = 10000;
 
@@ -144,39 +142,8 @@ public class CustomerService {
         return profile;
     }
 
-    public List<String> loadBlackListOpenIds() {
-        String url = LIST_BLACKLIST_URL;
-        int count = 0;
-        List<String> blackList = new ArrayList<>();
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("begin_openid", "");
-        String body = restfulHelper.post(url, jsonObject.toJSONString());
-        String data = JSON.parseObject(body).getString("data");
-        //获取data中的openidList
-        if (data != null) {
-            JSONObject dataJSON = JSON.parseObject(data);
-            String openidList = dataJSON.getString("openid");
-            blackList.addAll(Arrays.asList(openidList.substring(1, openidList.length() - 1).split(",")));
-            String nextOpenid = JSON.parseObject(body).getString("next_openid");
-
-            int total = Integer.valueOf(JSON.parseObject(body).getString("total"));
-            //取出所有的openid
-            while ((total - 1) / WX_BLACKLIST_DEFAULT_PAGE_SIZE > count) {
-                jsonObject = new JSONObject();
-                jsonObject.put("begin_openid", nextOpenid);
-                body = restfulHelper.post(url, jsonObject.toJSONString());
-                data = JSON.parseObject(body).getString("data");
-
-                dataJSON = JSON.parseObject(data);
-                openidList = dataJSON.getString("openid");
-                blackList.addAll(Arrays.asList(openidList.substring(1, openidList.length() - 1).split(",")));
-                nextOpenid = JSON.parseObject(body).getString("next_openid");
-
-                count++;
-            }
-        }
-        return blackList;
+    public void updateHeadImgUrl(int profileId, String headImgUrl) {
+        profileDao.updateHeadImgUrl(profileId, headImgUrl);
     }
 
     /**
@@ -292,14 +259,11 @@ public class CustomerService {
 
     /**
      * 更新过期日期
-     * @param profileIds
-     * @param delay
      * @param category （day,month,year）
      */
-    public void updateExpiredDate(List<Integer> profileIds,Integer delay,String category){
-        riseMemberDao.updateExpiredDate(profileIds,delay,category);
+    public void updateExpiredDate(List<Integer> profileIds, Integer delay, String category) {
+        riseMemberDao.updateExpiredDate(profileIds, delay, category);
     }
-
 
     private Integer getRiseMember(Integer profileId) {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
@@ -342,5 +306,40 @@ public class CustomerService {
                 break;
         }
         return memberTypeStr;
+    }
+
+    private List<String> loadBlackListOpenIds() {
+        String url = LIST_BLACKLIST_URL;
+        int count = 0;
+        List<String> blackList = new ArrayList<>();
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("begin_openid", "");
+        String body = restfulHelper.post(url, jsonObject.toJSONString());
+        String data = JSON.parseObject(body).getString("data");
+        //获取data中的openidList
+        if (data != null) {
+            JSONObject dataJSON = JSON.parseObject(data);
+            String openidList = dataJSON.getString("openid");
+            blackList.addAll(Arrays.asList(openidList.substring(1, openidList.length() - 1).split(",")));
+            String nextOpenid = JSON.parseObject(body).getString("next_openid");
+
+            int total = Integer.valueOf(JSON.parseObject(body).getString("total"));
+            //取出所有的openid
+            while ((total - 1) / WX_BLACKLIST_DEFAULT_PAGE_SIZE > count) {
+                jsonObject = new JSONObject();
+                jsonObject.put("begin_openid", nextOpenid);
+                body = restfulHelper.post(url, jsonObject.toJSONString());
+                data = JSON.parseObject(body).getString("data");
+
+                dataJSON = JSON.parseObject(data);
+                openidList = dataJSON.getString("openid");
+                blackList.addAll(Arrays.asList(openidList.substring(1, openidList.length() - 1).split(",")));
+                nextOpenid = JSON.parseObject(body).getString("next_openid");
+
+                count++;
+            }
+        }
+        return blackList;
     }
 }
