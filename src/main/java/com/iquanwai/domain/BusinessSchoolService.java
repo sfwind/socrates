@@ -50,7 +50,7 @@ public class BusinessSchoolService {
     // 会员购买申请 发放优惠券的 Category 和 Description
     private static final String RISE_APPLY_COUPON_CATEGORY = "ELITE_RISE_MEMBER";
     private static final String RISE_APPLY_COUPON_DESCRIPTION = "商学院奖学金";
-    private static final String APPLY_COUPON_DESCRIPTION = "商学院抵用券";
+    private static final String APPLY_COUPON_DESCRIPTION = "商学院申请费返还";
 
     public void noticeApplication(Date date) {
         List<BusinessSchoolApplication> applications = businessSchoolApplicationDao.loadCheckApplicationsForNotice(date);
@@ -136,7 +136,7 @@ public class BusinessSchoolService {
                                 couponBean.setUsed(Coupon.UNUSED);
                                 couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
                                 couponBean.setCategory(RISE_APPLY_COUPON_CATEGORY);
-                                couponBean.setDescription(RISE_APPLY_COUPON_DESCRIPTION);
+                                couponBean.setDescription(APPLY_COUPON_DESCRIPTION);
                                 couponDao.insert(couponBean);
                             }
                         }
