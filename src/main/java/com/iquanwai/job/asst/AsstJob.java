@@ -22,7 +22,7 @@ public class AsstJob {
     private CustomerService customerService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    @Scheduled(cron="0 0 1 * * ?")
+    @Scheduled(cron="0 0 0 1 * ?")
     @CatInspect(name = "asstJob")
     public void work(){
         logger.info("顺延助教一个月过期时间开始");
