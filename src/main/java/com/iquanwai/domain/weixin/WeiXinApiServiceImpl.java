@@ -68,6 +68,9 @@ public class WeiXinApiServiceImpl implements WeiXinApiService {
                 return null;
             }
             Map<String, Object> result = CommonUtils.jsonToMap(body);
+            if (result.get("errcode") != null || result.get("errmsg") != null) {
+                return null;
+            }
             String newOpenId = result.get("openid").toString();
             String nickName = result.get("nickname").toString();
             Integer sex = null;

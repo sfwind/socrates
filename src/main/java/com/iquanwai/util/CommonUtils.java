@@ -9,15 +9,14 @@ import com.iquanwai.domain.exception.WeixinException;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 /**
  * Created by justin on 16/8/7.
  */
 public class CommonUtils {
-    public static String placeholderReplace(String content, Map<String, String> replacer){
-        if(StringUtils.isNotEmpty(content) && replacer!=null) {
+    public static String placeholderReplace(String content, Map<String, String> replacer) {
+        if (StringUtils.isNotEmpty(content) && replacer != null) {
             for (Map.Entry<String, String> entry : replacer.entrySet()) {
                 content = StringUtils.replace(content, "{" + entry.getKey() + "}", entry.getValue());
             }
@@ -25,8 +24,8 @@ public class CommonUtils {
         return content;
     }
 
-    public static Map<String, Object> jsonToMap(String json){
-        if(StringUtils.isEmpty(json)){
+    public static Map<String, Object> jsonToMap(String json) {
+        if (StringUtils.isEmpty(json)) {
             return Maps.newHashMap();
         }
         Map<String, Object> gsonMap = new Gson().fromJson(json,
@@ -35,8 +34,8 @@ public class CommonUtils {
         return gsonMap;
     }
 
-    public static String mapToJson(Map<String, Object> map){
-        if(MapUtils.isEmpty(map)){
+    public static String mapToJson(Map<String, Object> map) {
+        if (MapUtils.isEmpty(map)) {
             return "";
         }
         String json = new Gson().toJson(map,
@@ -46,34 +45,34 @@ public class CommonUtils {
     }
 
     public static boolean isError(String json) throws WeixinException {
-        if(StringUtils.isEmpty(json)){
+        if (StringUtils.isEmpty(json)) {
             return false;
         }
         Map<String, Object> gsonMap = jsonToMap(json);
-        if(gsonMap.get("errcode")!=null && gsonMap.get("errmsg")!=null){
+        if (gsonMap.get("errcode") != null && gsonMap.get("errmsg") != null) {
             Integer errcode;
             try {
                 errcode = ((Double) gsonMap.get("errcode")).intValue();
-            }catch (Exception e){
+            } catch (Exception e) {
                 errcode = Integer.valueOf((String) gsonMap.get("errcode"));
             }
-            if(errcode.equals(ErrorConstants.ACCESS_TOKEN_EXPIRED)){
+            if (errcode.equals(ErrorConstants.ACCESS_TOKEN_EXPIRED)) {
                 throw new WeixinException(ErrorConstants.ACCESS_TOKEN_EXPIRED, "accessToken过期了");
             }
-            if(errcode.equals(ErrorConstants.ACCESS_TOKEN_INVALID)){
+            if (errcode.equals(ErrorConstants.ACCESS_TOKEN_INVALID)) {
                 throw new WeixinException(ErrorConstants.ACCESS_TOKEN_INVALID, "accessToken失效了");
             }
 
-            return errcode!=0;
+            return errcode != 0;
         }
         return false;
     }
 
-    public static String sign(final Map<String, String> params){
+    public static String sign(final Map<String, String> params) {
         List<String> list = new ArrayList(params.keySet());
         Collections.sort(list);
 
-        List<String> kvList = Lists.transform(list, input -> input+"="+params.get(input));
+        List<String> kvList = Lists.transform(list, input -> input + "=" + params.get(input));
 
         String digest = StringUtils.join(kvList.iterator(), "&")
                 .concat("&key=")
