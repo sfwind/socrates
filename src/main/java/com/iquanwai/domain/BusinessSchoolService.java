@@ -136,7 +136,7 @@ public class BusinessSchoolService {
                                 couponBean.setUsed(Coupon.UNUSED);
                                 couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
                                 couponBean.setCategory(RISE_APPLY_COUPON_CATEGORY);
-                                couponBean.setDescription(RISE_APPLY_COUPON_DESCRIPTION);
+                                couponBean.setDescription(APPLY_COUPON_DESCRIPTION);
                                 couponDao.insert(couponBean);
                             }
                         }
