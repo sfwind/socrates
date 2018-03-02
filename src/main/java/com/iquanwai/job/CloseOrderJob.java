@@ -17,9 +17,10 @@ public class CloseOrderJob {
     private PayService payService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    @Scheduled(cron="0 * * * * ?")
+
+    @Scheduled(cron = "0 * * * * ?")
     @CatInspect(name = "closeOrder")
-    public void work(){
+    public void work() {
         logger.info("关闭订单任务开始");
         payService.closeOrder();
         logger.info("关闭订单任务结束");
