@@ -61,6 +61,7 @@ public class HeadImgUrlCheckReceiver {
                         logger.info("更新用户 {} 头像成功", openId);
                     }
                 }
+                response.close();
             }
             Thread.sleep(TimeUnit.SECONDS.toMillis(2));
         } catch (Exception e) {
