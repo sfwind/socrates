@@ -20,8 +20,8 @@ public class CloseOrderJob {
     @Scheduled(cron="0 * * * * ?")
     @CatInspect(name = "closeOrder")
     public void work(){
-        logger.info("关闭订单任务开始");
+        // logger.info("关闭订单任务开始");
         payService.closeOrder();
-        logger.info("关闭订单任务结束");
+        // logger.info("关闭订单任务结束");
     }
 }
