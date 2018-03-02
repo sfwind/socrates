@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,9 +24,9 @@ public class ProfileDao extends DBUtil {
 
     public int updateHeadImgUrl(int id, String headImgUrl) {
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "UPDATE Profile SET HeadImgUrl = ? WHERE Id = ?";
+        String sql = "UPDATE Profile SET HeadImgUrl = ?, HeadImgUrlCheckTime = ? WHERE Id = ?";
         try {
-            return runner.update(sql, headImgUrl, id);
+            return runner.update(sql, headImgUrl, new Date(), id);
         } catch (SQLException e) {
             logger.error(e.getLocalizedMessage(), e);
         }

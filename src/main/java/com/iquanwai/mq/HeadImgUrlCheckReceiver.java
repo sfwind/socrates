@@ -38,6 +38,7 @@ public class HeadImgUrlCheckReceiver {
 
     @PostConstruct
     public void init() {
+        logger.info("headImgUrl receiver 开启");
         rabbitMQFactory.initReceiver(QUEUE, TOPIC, message -> {
             logger.info("receive message: {}", message);
             JSONObject json = JSON.parseObject(message.getMessage().toString());
