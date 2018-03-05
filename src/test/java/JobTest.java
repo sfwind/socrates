@@ -22,7 +22,7 @@ public class JobTest extends TestBase {
     @Autowired
     private ClosePlanJob closePlanJob;
     @Autowired
-    private NotifyRunningLogin notifyRunningLogin;
+    private NotifyRunningLoginJob notifyRunningLogin;
     @Autowired
     private BusinessSchoolService businessSchoolService;
     @Autowired

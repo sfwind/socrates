@@ -1,6 +1,5 @@
 package com.iquanwai.domain.message;
 
-import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.dao.AuditionClassMemberDao;
@@ -8,7 +7,6 @@ import com.iquanwai.domain.dao.CustomerMessageLogDao;
 import com.iquanwai.domain.po.AuditionClassMember;
 import com.iquanwai.domain.po.CustomerMessageLog;
 import com.iquanwai.domain.po.Profile;
-import com.iquanwai.util.CommonUtils;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by justin on 16/8/10.
@@ -57,17 +54,6 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
             body = restfulHelper.post(SEND_MESSAGE_URL, json);
         }
         return StringUtils.isNoneEmpty(body);
-    }
-
-    public String getTemplateId(String templateShortId) {
-        Map<String, String> map = Maps.newHashMap();
-        map.put("template_id_short", templateShortId);
-
-        String json = new Gson().toJson(map);
-        String body = restfulHelper.post(SEND_MESSAGE_URL, json);
-
-        Map<String, Object> response = CommonUtils.jsonToMap(body);
-        return (String) response.get("template_id");
     }
 
     /**
