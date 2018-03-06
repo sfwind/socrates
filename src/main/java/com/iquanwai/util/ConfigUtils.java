@@ -146,6 +146,8 @@ public class ConfigUtils {
         return getValue("account.change.message");
     }
 
+    public static String getInCompleteTask(){ return  getValue("incomplete.task.msg");}
+
     public static List<String> getDevelopOpenIds() {
         String openIdsStr = getValue("sms.alarm.openids");
         return Lists.newArrayList(openIdsStr.split(","));

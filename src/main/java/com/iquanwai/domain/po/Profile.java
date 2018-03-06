@@ -21,6 +21,8 @@ public class Profile {
     private String function; //职业
     private String workingLife; //工作年限
     private String realName; //真名
+    private String receiver;//收件人
+    private String address;
     private Integer point;
     private Integer isFull;
     private String riseId;

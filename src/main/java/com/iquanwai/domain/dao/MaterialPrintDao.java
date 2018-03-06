@@ -2,7 +2,6 @@ package com.iquanwai.domain.dao;
 
 import com.google.common.collect.Lists;
 import com.iquanwai.domain.po.MaterialPrint;
-import com.iquanwai.domain.po.RiseMember;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -53,4 +52,21 @@ public class MaterialPrintDao extends DBUtil{
             logger.error(e.getLocalizedMessage(),e);
         }
     }
+
+    /**
+     * 临时方案check 模板消息人员是否正确
+     * @param profileId
+     * @param checkBatch
+     */
+    public Integer  updatePrint(Integer profileId,String checkBatch){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "Update MaterialPrint set posted = 10 Where ProfileId = ? And CheckBatch = ? And DEL = 0 ";
+        try {
+            return runner.update(sql,profileId,checkBatch);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return -1;
+    }
+
 }
