@@ -118,5 +118,18 @@ public class RiseMemberDao extends DBUtil {
         }
     }
 
+    public List<RiseMember> loadValidElite(String startTime,String endTime){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseMember WHERE MemberTypeId = 3 AND  Expired = 0 AND VIP =0 AND AddTime>=? AND AddTime<=? AND DEL = 0 ";
+        ResultSetHandler<List<RiseMember>> h = new BeanListHandler<>(RiseMember.class);
+        try {
+            return runner.query(sql,h,startTime,endTime);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
+
+
 
 }
