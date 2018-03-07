@@ -38,15 +38,14 @@ public class GiftService {
     private String url = "https://www.iquanwai.com/rise/static/customer/profile?goRise=true";
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+
     /**
      * 生成寄送名单
      */
     public void generateList() {
         //商学院用户
-        String endTime = DateUtils.parseDateToString(new Date()) + " 00:00:00";
-        String startTime = DateUtils.parseDateToString(DateUtils.beforeDays(new Date(), 7)) + " 00:00:00";
-        System.out.println("startTime:" + startTime);
-        System.out.println("endTime:" + endTime);
+        String endTime = DateUtils.parseDateTimeToString(DateUtils.startOfDay(new Date()));
+        String startTime = DateUtils.parseDateTimeToString(DateUtils.startOfDay(DateUtils.beforeDays(new Date(),7)));
         //获得需要寄送礼包的人的名单
         List<RiseMember> riseMemberList = riseMemberDao.loadValidElite(startTime, endTime);
         List<MaterialPrint> sendList = Lists.newArrayList();
@@ -82,7 +81,6 @@ public class GiftService {
         List<Integer> profiles = sendList.stream().map(MaterialPrint::getProfileId).collect(Collectors.toList());
         //统计需要发送模板消息的人
         List<Profile> sendProfiles = countSendList(profiles);
-        System.out.println("sendList:"+sendProfiles.toString());
 
         //TODO:临时方案：修改Posted记录，手动check发送，未来发送模板消息
         sendProfiles.forEach(profile -> materialPrintDao.updatePrint(profile.getId(),DateUtils.parseDateToString(new Date())));
