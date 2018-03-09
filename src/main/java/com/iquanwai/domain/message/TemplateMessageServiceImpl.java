@@ -38,6 +38,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
 
     @Override
     public boolean sendMessage(TemplateMessage templateMessage, boolean validation) {
+        addHook(templateMessage);
         boolean sendTag = true;
         if (validation) {
             // 发送权限校验
@@ -145,6 +146,18 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     private boolean checkOtherAuthority(Integer profileId) {
         AuditionClassMember auditionClassMember = auditionClassMemberDao.loadByProfileId(profileId);
         return auditionClassMember != null;
+    }
+
+    private void addHook(TemplateMessage templateMessage) {
+        if (templateMessage.getUrl() != null) {
+            String url = templateMessage.getUrl();
+            if(url.contains("?")){
+                url = url + "&_tm=template_message";
+            }else{
+                url = url + "?_tm=template_message";
+            }
+            templateMessage.setUrl(url);
+        }
     }
 
 }
