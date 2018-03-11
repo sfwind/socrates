@@ -1,4 +1,4 @@
-package com.iquanwai.job;
+package com.iquanwai.job.notify;
 
 import com.iquanwai.domain.BusinessSchoolService;
 import com.iquanwai.util.DateUtils;

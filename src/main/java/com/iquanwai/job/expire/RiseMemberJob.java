@@ -1,4 +1,4 @@
-package com.iquanwai.job;
+package com.iquanwai.job.expire;
 
 import com.iquanwai.domain.CustomerService;
 import com.iquanwai.util.cat.CatInspect;

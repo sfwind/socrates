@@ -1,4 +1,4 @@
-package com.iquanwai.job;
+package com.iquanwai.job.expire;
 
 import com.iquanwai.domain.PlanService;
 import com.iquanwai.domain.po.ImprovementPlan;
