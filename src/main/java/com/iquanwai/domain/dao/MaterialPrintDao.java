@@ -31,7 +31,6 @@ public class MaterialPrintDao extends DBUtil{
     }
 
     public void batchInsertPrint(List<MaterialPrint> materialPrints){
-        System.out.println("print:"+materialPrints);
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "INSERT INTO MaterialPrint(ProfileId,Type,Posted,CheckBatch,SendBatch) Values(?,?,?,?,?)";
 
