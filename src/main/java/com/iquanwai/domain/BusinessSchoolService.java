@@ -164,12 +164,13 @@ public class BusinessSchoolService {
         templateMessage.setUrl(PAY_URL);
         templateMessage.setComment("商学院审核通过");
         data.put("keyword1", new TemplateMessage.Keyword("通过"));
-        data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
+        data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取通知24小时内有效，价值799的《战略管理》课程仍有少量免费内测名额，名校EMBA教授授课，现在入学即可联系班主任申领。请及时点击本通知书，办理入学。", "#f57f16"));
+//        data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
         // 同样的对象不需要定义两次
         coupons.forEach((amount, applicationGroup) -> {
             data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！" +
                     "\n\n根据你的申请，入学委员会决定发放给你" + amount.intValue()
-                    + "元奖学金，付款时自动抵扣学费。希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
+                    + "元奖学金，付款时自动抵扣学费。\n"));
             applicationGroup.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword2"));
         });
 
@@ -181,9 +182,11 @@ public class BusinessSchoolService {
         noCouponMsg.setComment("商学院审核通过,无优惠券");
         Map<String, TemplateMessage.Keyword> noCouponData = Maps.newHashMap();
         noCouponMsg.setData(noCouponData);
-        noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
+        noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！\n"));
+//        noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
         noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
-        noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
+        noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知24小时内有效，过期后需重新申请。价值799的《战略管理》课程仍有少量免费内测名额，名校EMBA教授授课，现在入学即可联系班主任申领。\n\n请及时点击本通知书，办理入学。", "#f57f16"));
+//        noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
         // 发送没有优惠券的
         if (noCouponGroup != null) {
             noCouponGroup.forEach(app -> this.sendMsg(noCouponMsg, noCouponData, app, "keyword2"));
@@ -210,7 +213,7 @@ public class BusinessSchoolService {
         templateMessageService.sendMessage(templateMessage, false);
         // 有优惠券短信内容
         SMSDto smsDto = new SMSDto();
-        if (profile != null && profile.getMobileNo() != null) {
+        if (profile.getMobileNo() != null) {
             smsDto.setProfileId(profileId);
             smsDto.setPhone(profile.getMobileNo());
             smsDto.setType(SMSDto.PROMOTION);
@@ -271,47 +274,50 @@ public class BusinessSchoolService {
         templateMessage.setData(data);
         templateMessage.setUrl(PAY_URL);
 
-        if (CollectionUtils.isNotEmpty(coupons)) {
-            Coupon coupon = coupons.get(0);
-            // 设置消息 message id
-            templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
-            String expiredHourStr = DateUtils.parseDateToString6(
-                    DateUtils.afterDays(businessSchoolApplication.getDealTime(), 1));
-            String expiredDateStr = DateUtils.parseDateToString(
-                    DateUtils.afterDays(businessSchoolApplication.getDealTime(), 1));
-            // 有优惠券模板消息内容
-            String first = "Hi " + profile.getNickname() + "，您的圈外商学院录取资格及奖学金即将到期，请尽快办理入学！\n";
-            data.put("first", new TemplateMessage.Keyword(first, "#000000"));
-
-            data.put("keyword1", new TemplateMessage.Keyword("今天" + expiredHourStr + "（" + expiredDateStr + "）到期", "#000000"));
-            data.put("keyword2", new TemplateMessage.Keyword("商学院入学奖学金", "#000000"));
-            data.put("keyword3", new TemplateMessage.Keyword(coupon.getAmount() + "元", "#000000"));
-            data.put("remark", new TemplateMessage.Keyword("\n点此卡片，立即办理入学", "#f57f16"));
-
-            // 有优惠券短信内容
-            SMSDto smsDto = new SMSDto();
-            if (profile.getMobileNo() != null) {
-                smsDto.setProfileId(profileId);
-                smsDto.setPhone(profile.getMobileNo());
-                smsDto.setType(SMSDto.PROMOTION);
-                String content = "Hi " + profile.getNickname() +
-                        "，你申请的商学院入学奖学金即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
-                smsDto.setContent(content);
-                shortMessageService.sendShortMessage(smsDto);
-            }
-
-        } else {
+//        if (CollectionUtils.isNotEmpty(coupons)) {
+//            Coupon coupon = coupons.get(0);
+//            // 设置消息 message id
+//            templateMessage.setTemplate_id(ConfigUtils.getAccountChangeMsg());
+//            String expiredHourStr = DateUtils.parseDateToString6(
+//                    DateUtils.afterDays(businessSchoolApplication.getDealTime(), 1));
+//            String expiredDateStr = DateUtils.parseDateToString(
+//                    DateUtils.afterDays(businessSchoolApplication.getDealTime(), 1));
+//            // 有优惠券模板消息内容
+//            String first = "Hi " + profile.getNickname() + "，您的圈外商学院录取资格及奖学金即将到期，请尽快办理入学！\n";
+//            data.put("first", new TemplateMessage.Keyword(first, "#000000"));
+//
+//            data.put("keyword1", new TemplateMessage.Keyword("今天" + expiredHourStr + "（" + expiredDateStr + "）到期", "#000000"));
+//            data.put("keyword2", new TemplateMessage.Keyword("商学院入学奖学金", "#000000"));
+//            data.put("keyword3", new TemplateMessage.Keyword(coupon.getAmount() + "元", "#000000"));
+//            data.put("remark", new TemplateMessage.Keyword("\n点此卡片，立即办理入学", "#f57f16"));
+//
+//            // 有优惠券短信内容
+//            SMSDto smsDto = new SMSDto();
+//            if (profile.getMobileNo() != null) {
+//                smsDto.setProfileId(profileId);
+//                smsDto.setPhone(profile.getMobileNo());
+//                smsDto.setType(SMSDto.PROMOTION);
+//                String content  = "Hi " + profile.getNickname() +
+//                        "，你已额外获得价值799的《战略管理》内测名额，名校EMBA教授授课，完成入学手续即可领取，学完永久回听。";
+////                String content = "Hi " + profile.getNickname() +
+////                        "，你申请的商学院入学奖学金即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
+//                smsDto.setContent(content);
+//                shortMessageService.sendShortMessage(smsDto);
+//            }
+//
+//        } else {
             String expiredDateStr = DateUtils.parseDateToString5(
                     DateUtils.afterDays(businessSchoolApplication.getDealTime(), 1));
             // 设置消息 message id
             templateMessage.setTemplate_id(ConfigUtils.getApplySuccessMsg());
             // 无优惠券模板消息内容
-            String first = "我们很荣幸地通知您被商学院录取，录取有效期24小时，请尽快办理入学，及时开始学习并结识优秀的校友吧！\n";
+//            String first = "我们很荣幸地通知您被商学院录取，录取有效期24小时，请尽快办理入学，及时开始学习并结识优秀的校友吧！\n";
+            String first = "我们很荣幸地通知您被商学院录取，录取有效期24小时。\n";
             data.put("first", new TemplateMessage.Keyword(first, "#000000"));
             data.put("keyword1", new TemplateMessage.Keyword("已录取", "#000000"));
             BusinessSchoolApplication application = businessSchoolApplicationDao.loadLastApproveApplication(profileId);
             data.put("keyword2", new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime()), "#000000"));
-            data.put("remark", new TemplateMessage.Keyword("过期时间 :  " + expiredDateStr + "\n\n点击卡片，立即办理入学", "#f57f16"));
+            data.put("remark", new TemplateMessage.Keyword("过期时间 :  " + expiredDateStr + "\n\n你已额外获得价值799的《战略管理》内测名额，名校EMBA教授授课，完成入学手续即可领取，学完永久回听。点击卡片，立即办理入学", "#f57f16"));
 
             // 有优惠券短信内容
             SMSDto smsDto = new SMSDto();
@@ -319,13 +325,15 @@ public class BusinessSchoolService {
                 smsDto.setProfileId(profileId);
                 smsDto.setPhone(profile.getMobileNo());
                 smsDto.setType(SMSDto.PROMOTION);
-                String content = "Hi " + profile.getNickname() +
-                        "，你申请的商学院入学资格即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
+                String content  = "Hi " + profile.getNickname() +
+                        "，你已额外获得价值799的《战略管理》内测名额，名校EMBA教授授课，完成入学手续即可领取，学完永久回听。";
+//                String content = "Hi " + profile.getNickname() +
+//                        "，你申请的商学院入学资格即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
                 smsDto.setContent(content);
                 shortMessageService.sendShortMessage(smsDto);
             }
 
-        }
+//        }
 
         templateMessageService.sendMessage(templateMessage);
     }
