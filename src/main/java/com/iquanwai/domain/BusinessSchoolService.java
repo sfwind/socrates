@@ -3,10 +3,7 @@ package com.iquanwai.domain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.dao.*;
-import com.iquanwai.domain.message.SMSDto;
-import com.iquanwai.domain.message.ShortMessageService;
-import com.iquanwai.domain.message.TemplateMessage;
-import com.iquanwai.domain.message.TemplateMessageService;
+import com.iquanwai.domain.message.*;
 import com.iquanwai.domain.po.*;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
@@ -46,6 +43,8 @@ public class BusinessSchoolService {
     private CouponDao couponDao;
     @Autowired
     private QuanwaiOrderDao quanwaiOrderDao;
+    @Autowired
+    private MessageService messageService;
 
     // 会员购买申请 发放优惠券的 Category 和 Description
     private static final String RISE_APPLY_COUPON_CATEGORY = "ELITE_RISE_MEMBER";
@@ -145,6 +144,10 @@ public class BusinessSchoolService {
 
                 //插入申请通过许可
                 customerStatusDao.insert(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
+                //发送录取通知信息
+                messageService.sendMessage("恭喜！我们很荣幸地通知你被【圈外商学院】录取！请及时点击本通知书，办理入学。",
+                        String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL);
+
             } catch (Exception e) {
                 logger.error("插入优惠券失败", e);
             }

@@ -35,7 +35,7 @@ public class MessageService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private static final String SYSTEM_MESSAGE = "AUTO";
+    public static final String SYSTEM_MESSAGE = "AUTO";
 
     public void sendMessage(String message, String toUser, String fromUser, String url) {
         NotifyMessage notifyMessage = new NotifyMessage();
