@@ -76,13 +76,14 @@ public class BusinessSchoolService {
         data.put("keyword1", new TemplateMessage.Keyword("【圈外商学院】"));
         data.put("keyword2", new TemplateMessage.Keyword("未通过"));
         data.put("remark", new TemplateMessage.Keyword(
-                "\n本期商学院的申请者都异常优秀，我们无法为每位申请者提供学习机会，但是很高兴你有一颗追求卓越的心！\n\n" +
-                        "扫描二维码，添加【圈外招生委员会】微信"));
+                "\n点击扫描二维码，添加【圈外招生委员会】微信，实时关注和咨询招生信息\n\n" +
+                        "即可获得：商学院课程知识礼包", "#f57f16"));
         // 同样的对象不需要定义两次
         data.put("first", new TemplateMessage.Keyword(
                 "我们认真评估了你的入学申请，认为你的需求和商学院核心能力项目暂时不匹配\n\n" +
-                        "建议关注后续的课程与体验活动\n\n" +
-                        "添加【圈外招生委员会】微信，可实时关注并咨询招生信息\n"));
+                        "本期商学院的申请者都异常优秀，我们无法为每位申请者提供学习机会，" +
+                        "但是很高兴你有一颗追求卓越的心！\n" +
+                        "\n欢迎继续关注后续的课程与体验活动\n"));
         applications.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword3"));
     }
 
