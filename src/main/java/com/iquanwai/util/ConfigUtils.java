@@ -73,10 +73,6 @@ public class ConfigUtils {
         return getValue("db.fragment.url");
     }
 
-    public static String getForumJdbcUrl() {
-        return getValue("db.forum.url");
-    }
-
     public static String getAppid() {
         return getValue("appid");
     }

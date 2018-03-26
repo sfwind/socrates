@@ -3,10 +3,7 @@ package com.iquanwai.domain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.dao.*;
-import com.iquanwai.domain.message.SMSDto;
-import com.iquanwai.domain.message.ShortMessageService;
-import com.iquanwai.domain.message.TemplateMessage;
-import com.iquanwai.domain.message.TemplateMessageService;
+import com.iquanwai.domain.message.*;
 import com.iquanwai.domain.po.*;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
@@ -27,8 +24,8 @@ import java.util.stream.Collectors;
 @Service
 public class BusinessSchoolService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    public final static String PAY_URL = "https://www.iquanwai.com/pay/apply";
-    public final static String PAY_CAMP_URL = "https://www.iquanwai.com/pay/camp";
+    public final static String PAY_URL = ConfigUtils.getAppDomain()+"/pay/apply";
+    public final static String PAY_CAMP_URL = ConfigUtils.getAppDomain()+"/pay/camp";
 
     @Autowired
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
@@ -46,6 +43,8 @@ public class BusinessSchoolService {
     private CouponDao couponDao;
     @Autowired
     private QuanwaiOrderDao quanwaiOrderDao;
+    @Autowired
+    private MessageService messageService;
 
     // 会员购买申请 发放优惠券的 Category 和 Description
     private static final String RISE_APPLY_COUPON_CATEGORY = "ELITE_RISE_MEMBER";
@@ -77,11 +76,13 @@ public class BusinessSchoolService {
         data.put("keyword1", new TemplateMessage.Keyword("【圈外商学院】"));
         data.put("keyword2", new TemplateMessage.Keyword("未通过"));
         data.put("remark", new TemplateMessage.Keyword(
-                "\n本期商学院的申请者都异常优秀，我们无法为每位申请者提供学习机会，但是很高兴你有一颗追求卓越的心！\n\n点击下方“详情”，了解商学院预科班--专项课。"));
+                "\n本期商学院的申请者都异常优秀，我们无法为每位申请者提供学习机会，但是很高兴你有一颗追求卓越的心！\n\n" +
+                        "扫描二维码，添加【圈外招生委员会】微信"));
         // 同样的对象不需要定义两次
         data.put("first", new TemplateMessage.Keyword(
-                "认真审核过你的入学申请后，我们很遗憾地通知，你本次未被商学院录取。\n\n" +
-                        "在此之前，我们推荐你进入【专项课】进行学习。专项课能够帮你快速提高专项能力，为你进入商学院做好准备。点击了解专项课。\n"));
+                "我们认真评估了你的入学申请，认为你的需求和商学院核心能力项目暂时不匹配\n\n" +
+                        "建议关注后续的课程与体验活动\n\n" +
+                        "添加【圈外招生委员会】微信，可实时关注并咨询招生信息\n"));
         applications.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword3"));
     }
 
@@ -145,6 +146,10 @@ public class BusinessSchoolService {
 
                 //插入申请通过许可
                 customerStatusDao.insert(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
+                //发送录取通知信息
+                messageService.sendMessage("恭喜！我们很荣幸地通知你被【圈外商学院】录取！请及时点击本通知书，办理入学。",
+                        String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL);
+
             } catch (Exception e) {
                 logger.error("插入优惠券失败", e);
             }
