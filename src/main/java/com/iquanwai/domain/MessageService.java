@@ -46,6 +46,7 @@ public class MessageService {
         notifyMessage.setOld(false);
         notifyMessage.setSendTime(DateUtils.parseDateTimeToString(new Date()));
         notifyMessage.setUrl(url);
+        addHook(notifyMessage);
 
         notifyMessageDao.insert(notifyMessage);
     }
@@ -209,5 +210,17 @@ public class MessageService {
                     + "&answerId=" + answerApproval.getAnswerId();
             sendMessage(message, toUser, SYSTEM_MESSAGE, url);
         });
+    }
+
+    private void addHook(NotifyMessage notifyMessage) {
+        if (notifyMessage.getUrl() != null) {
+            String url = notifyMessage.getUrl();
+            if (url.contains("?") && !url.contains("_tm")){
+                url = url + "&_tm=notify_message";
+            }else{
+                url = url + "?_tm=notify_message";
+            }
+            notifyMessage.setUrl(url);
+        }
     }
 }
