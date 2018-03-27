@@ -2,9 +2,12 @@ package com.iquanwai;
 
 import com.iquanwai.mq.RabbitMQConverter;
 import com.iquanwai.util.ConfigUtils;
+import com.sensorsdata.analytics.javasdk.SensorsAnalytics;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
@@ -20,10 +23,14 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.io.IOException;
+
 @SpringBootApplication
 @EnableScheduling
 @EnableRabbit
 public class Application {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Bean(name = "connectionFactory")
     public ConnectionFactory injectConnectionFactory() {
@@ -35,6 +42,16 @@ public class Application {
         return factory;
     }
 
+    @Bean(name = "sa")
+    public SensorsAnalytics getSa() {
+        try {
+            SensorsAnalytics sa = new SensorsAnalytics(new SensorsAnalytics.ConcurrentLoggingConsumer("/data/appdatas/sa/access.log"));
+            return sa;
+        } catch (IOException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return null;
+    }
 
     @Bean(name = "amqpTemplate")
     public AmqpTemplate injectRabbitTemplate() {
@@ -56,7 +73,7 @@ public class Application {
     }
 
     @Bean(name = "mqConverter")
-    public MessageConverter injectConverter(){
+    public MessageConverter injectConverter() {
         return new RabbitMQConverter();
     }
 
