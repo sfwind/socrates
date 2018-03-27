@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.dao.AuditionClassMemberDao;
 import com.iquanwai.domain.dao.CustomerMessageLogDao;
+import com.iquanwai.domain.log.OperationLogService;
 import com.iquanwai.domain.po.AuditionClassMember;
 import com.iquanwai.domain.po.CustomerMessageLog;
 import com.iquanwai.domain.po.Profile;
@@ -30,6 +31,8 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     private CustomerService customerService;
     @Autowired
     private AuditionClassMemberDao auditionClassMemberDao;
+    @Autowired
+    private OperationLogService operationLogService;
 
     @Override
     public boolean sendMessage(TemplateMessage templateMessage) {
@@ -54,7 +57,13 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
             String json = new Gson().toJson(templateMessage);
             body = restfulHelper.post(SEND_MESSAGE_URL, json);
         }
-        return StringUtils.isNoneEmpty(body);
+
+        boolean success = StringUtils.isNoneEmpty(body);
+        operationLogService.trace(() -> {
+            Profile profile = customerService.getProfile(templateMessage.getTouser());
+            return profile.getId();
+        }, "sendWechatMessage", () -> OperationLogService.props().add("success", success));
+        return success;
     }
 
     /**
@@ -66,6 +75,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
      * 5. 用户每天最多收到2条消息
      * 6. 用户三小时内最多收到1条消息
      * 7. 活动提醒通知，文字尽量简洁，不要用推销的口吻
+     *
      * @return 是否允许发送模板消息
      */
     private boolean checkTemplateMessageAuthority(TemplateMessage templateMessage, boolean forwardlyPush) {
@@ -151,9 +161,9 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     private void addHook(TemplateMessage templateMessage) {
         if (templateMessage.getUrl() != null) {
             String url = templateMessage.getUrl();
-            if (url.contains("?") && !url.contains("_tm")){
+            if (url.contains("?") && !url.contains("_tm")) {
                 url = url + "&_tm=template_message";
-            }else{
+            } else {
                 url = url + "?_tm=template_message";
             }
             templateMessage.setUrl(url);

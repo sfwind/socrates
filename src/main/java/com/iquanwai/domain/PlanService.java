@@ -2,7 +2,13 @@ package com.iquanwai.domain;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.iquanwai.domain.dao.*;
+import com.iquanwai.domain.dao.ImprovementPlanDao;
+import com.iquanwai.domain.dao.ProblemDao;
+import com.iquanwai.domain.dao.RedisUtil;
+import com.iquanwai.domain.dao.RiseMemberDao;
+import com.iquanwai.domain.dao.RiseUserLoginDao;
+import com.iquanwai.domain.dao.WarmupSubmitDao;
+import com.iquanwai.domain.log.OperationLogService;
 import com.iquanwai.domain.po.ImprovementPlan;
 import com.iquanwai.domain.po.Problem;
 import com.iquanwai.domain.po.RiseMember;
@@ -33,6 +39,10 @@ public class PlanService {
     private RiseUserLoginDao riseUserLoginDao;
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private OperationLogService operationLogService;
+    @Autowired
+    private WarmupSubmitDao warmupSubmitDao;
 
     private static final String LOGIN_REDIS_KEY = "login:";
 
@@ -64,6 +74,23 @@ public class PlanService {
         if (status == ImprovementPlan.CLOSE) {
             // 更新关闭时间
             improvementPlanDao.updateCloseTime(planId);
+            operationLogService.trace(() -> improvementPlanDao.load(ImprovementPlan.class, planId).getProfileId()
+                    , "closeCourse",
+                    () -> {
+                        ImprovementPlan plan = improvementPlanDao.load(ImprovementPlan.class, planId);
+                        Problem problem = problemDao.load(Problem.class, plan.getProblemId());
+                        int warmupSubmitCount = warmupSubmitDao.getPlanSubmitCount(plan.getId());
+                        int warmupRightCount = warmupSubmitDao.getPlanRightCount(plan.getId());
+                        return OperationLogService
+                                .props()
+                                .add("problemId", plan.getProblemId())
+                                .add("problem", problem.getAbbreviation())
+                                .add("totalWarmup", warmupSubmitCount)
+                                .add("rightWarmup", warmupRightCount)
+                                .add("useDays", DateUtils.interval(plan.getStartDate()))
+                                .add("manualClose", false);
+                    }
+            );
         }
     }
 

@@ -3,8 +3,18 @@ package com.iquanwai.domain;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
-import com.iquanwai.domain.dao.*;
-import com.iquanwai.domain.message.*;
+import com.iquanwai.domain.dao.ActionLogDao;
+import com.iquanwai.domain.dao.CouponDao;
+import com.iquanwai.domain.dao.ProfileDao;
+import com.iquanwai.domain.dao.RiseMemberDao;
+import com.iquanwai.domain.dao.RiseUserLandingDao;
+import com.iquanwai.domain.dao.RiseUserLoginDao;
+import com.iquanwai.domain.log.OperationLogService;
+import com.iquanwai.domain.message.RestfulHelper;
+import com.iquanwai.domain.message.SMSDto;
+import com.iquanwai.domain.message.ShortMessageService;
+import com.iquanwai.domain.message.TemplateMessage;
+import com.iquanwai.domain.message.TemplateMessageService;
 import com.iquanwai.domain.po.Coupon;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.domain.po.RiseMember;
@@ -14,6 +24,7 @@ import com.iquanwai.mq.RabbitMQFactory;
 import com.iquanwai.mq.RabbitMQPublisher;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
+import com.iquanwai.util.constants.Goods;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +32,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +68,8 @@ public class CustomerService {
     private RabbitMQFactory rabbitMQFactory;
     @Autowired
     private RestfulHelper restfulHelper;
+    @Autowired
+    private OperationLogService operationLogService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     private RabbitMQPublisher userLoadRabbitMQPublisher;
@@ -80,6 +98,16 @@ public class CustomerService {
                         //发送用户信息修改消息
                         Profile profile = profileDao.load(Profile.class, riseMember.getProfileId());
                         userLoadRabbitMQPublisher.publish(profile.getUnionId());
+
+                        operationLogService.trace(riseMember.getProfileId(), "memberExpired", () -> {
+                            OperationLogService.Prop prop = OperationLogService.props();
+                            Goods goods = Goods.find(riseMember.getMemberTypeId().toString());
+                            if (goods != null) {
+                                prop.add("goodsType", goods.getGoodsType());
+                                prop.add("goodsId", goods.getGoodsId());
+                            }
+                            return prop;
+                        });
                     } catch (Exception e) {
                         logger.error("expired: {} error", riseMember.getProfileId());
                     }
@@ -91,12 +119,6 @@ public class CustomerService {
                 filter(Objects::nonNull).collect(Collectors.toList());
         Date thatDay = DateUtils.beforeDays(new Date(), days);
         profileIds.forEach(profileId -> {
-//            Profile profile = getProfile(profileId);
-//            if(profile == null){
-//                logger.error("用户不存在", profileId);
-//                return;
-//            }
-
             RiseUserLogin login = riseUserLoginDao.loadCertainLogin(profileId, thatDay);
             if (login != null) {
                 return;
@@ -259,6 +281,7 @@ public class CustomerService {
 
     /**
      * 更新过期日期
+     *
      * @param category （day,month,year）
      */
     public void updateExpiredDate(List<Integer> profileIds, Integer delay, String category) {
