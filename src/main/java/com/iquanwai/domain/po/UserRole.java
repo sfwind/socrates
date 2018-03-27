@@ -7,5 +7,5 @@ public class UserRole {
     private Integer id;
     private Integer roleId;
     private Integer profileId;
-    private Integer del;
+    private Boolean del;
 }
