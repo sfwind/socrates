@@ -45,7 +45,7 @@ public class Application {
     @Bean(name = "sa")
     public SensorsAnalytics getSa() {
         try {
-            SensorsAnalytics sa = new SensorsAnalytics(new SensorsAnalytics.ConcurrentLoggingConsumer("/data/appdatas/sa/access.log"));
+            SensorsAnalytics sa = new SensorsAnalytics(new SensorsAnalytics.ConcurrentLoggingConsumer("/data/appdatas/jobsa/access.log"));
             return sa;
         } catch (IOException e) {
             logger.error(e.getLocalizedMessage(), e);
