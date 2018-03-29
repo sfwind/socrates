@@ -231,8 +231,7 @@ public class BusinessSchoolService {
             smsDto.setProfileId(profileId);
             smsDto.setPhone(profile.getMobileNo());
             smsDto.setType(SMSDto.PROMOTION);
-            String content = "Hi " + profile.getNickname() +
-                    "，感谢申请圈外商学院，您的申请结果已公布，现在就去「圈外同学」微信公众号查收吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
+            String content = "Hi，感谢申请圈外商学院，您的申请结果已公布，现在就去「圈外同学」微信公众号查收吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
             smsDto.setContent(content);
             shortMessageService.sendShortMessage(smsDto);
         }
@@ -311,8 +310,7 @@ public class BusinessSchoolService {
                 smsDto.setProfileId(profileId);
                 smsDto.setPhone(profile.getMobileNo());
                 smsDto.setType(SMSDto.PROMOTION);
-                String content = "Hi " + profile.getNickname() +
-                        "，你申请的商学院入学奖学金即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
+                String content = "Hi，你申请的商学院入学奖学金即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
                 smsDto.setContent(content);
                 shortMessageService.sendShortMessage(smsDto);
             }
@@ -336,8 +334,7 @@ public class BusinessSchoolService {
                 smsDto.setProfileId(profileId);
                 smsDto.setPhone(profile.getMobileNo());
                 smsDto.setType(SMSDto.PROMOTION);
-                String content = "Hi " + profile.getNickname() +
-                        "，你申请的商学院入学资格即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
+                String content = "Hi，你申请的商学院入学资格即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
                 smsDto.setContent(content);
                 shortMessageService.sendShortMessage(smsDto);
             }
