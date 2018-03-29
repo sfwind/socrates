@@ -162,8 +162,8 @@ public class CustomerService {
         List<Profile> profiles = profileDao.loadByProfileIds(profileIds);
         Map<Integer, Profile> profileMap = profiles.stream().collect(Collectors.toMap(Profile::getId, profile -> profile));
 
-        TemplateMessage templateMessage = new TemplateMessage();
         for (RiseMember riseMember : riseMembers) {
+            TemplateMessage templateMessage = new TemplateMessage();
             Profile profile = profileMap.get(riseMember.getProfileId());
             templateMessage.setTouser(profile.getOpenid());
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
