@@ -173,17 +173,17 @@ public class BusinessSchoolService {
         List<BusinessSchoolApplication> noCouponGroup = coupons.remove(0d);
         coupons.forEach((amount, group) -> logger.info("{}元优惠券:{}条", amount, group.size()));
         logger.info("无优惠券:{}条", noCouponGroup == null ? 0 : noCouponGroup.size());
-        // 发送有优惠券的
-        TemplateMessage templateMessage = new TemplateMessage();
-        templateMessage.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
-        Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-        templateMessage.setData(data);
-        templateMessage.setUrl(PAY_URL);
-        templateMessage.setComment("商学院审核通过");
-        data.put("keyword1", new TemplateMessage.Keyword("通过"));
-        data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
         // 同样的对象不需要定义两次
         coupons.forEach((amount, applicationGroup) -> {
+            // 发送有优惠券的
+            TemplateMessage templateMessage = new TemplateMessage();
+            templateMessage.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
+            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+            templateMessage.setData(data);
+            templateMessage.setUrl(PAY_URL);
+            templateMessage.setComment("商学院审核通过");
+            data.put("keyword1", new TemplateMessage.Keyword("通过"));
+            data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
             data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！" +
                     "\n\n根据你的申请，入学委员会决定发放给你" + amount.intValue()
                     + "元奖学金，付款时自动抵扣学费。希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
@@ -191,19 +191,21 @@ public class BusinessSchoolService {
         });
 
 
-        // 发送没有优惠券的模版
-        TemplateMessage noCouponMsg = new TemplateMessage();
-        noCouponMsg.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
-        noCouponMsg.setUrl(PAY_URL);
-        noCouponMsg.setComment("商学院审核通过,无优惠券");
-        Map<String, TemplateMessage.Keyword> noCouponData = Maps.newHashMap();
-        noCouponMsg.setData(noCouponData);
-        noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
-        noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
-        noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
         // 发送没有优惠券的
         if (noCouponGroup != null) {
-            noCouponGroup.forEach(app -> this.sendMsg(noCouponMsg, noCouponData, app, "keyword2"));
+            noCouponGroup.forEach(app -> {
+                // 发送没有优惠券的模版
+                TemplateMessage noCouponMsg = new TemplateMessage();
+                noCouponMsg.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
+                noCouponMsg.setUrl(PAY_URL);
+                noCouponMsg.setComment("商学院审核通过,无优惠券");
+                Map<String, TemplateMessage.Keyword> noCouponData = Maps.newHashMap();
+                noCouponMsg.setData(noCouponData);
+                noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
+                noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
+                noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
+                this.sendMsg(noCouponMsg, noCouponData, app, "keyword2");
+            });
         }
     }
 
