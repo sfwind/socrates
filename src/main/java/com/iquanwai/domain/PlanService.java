@@ -84,7 +84,6 @@ public class PlanService {
                         return OperationLogService
                                 .props()
                                 .add("problemId", plan.getProblemId())
-                                .add("problem", problem.getAbbreviation())
                                 .add("totalWarmup", warmupSubmitCount)
                                 .add("rightWarmup", warmupRightCount)
                                 .add("useDays", DateUtils.interval(plan.getStartDate()))
