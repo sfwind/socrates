@@ -65,7 +65,7 @@ public class OperationLogServiceImpl implements OperationLogService {
                 properties.put("isAsst", role != null);
                 properties.put("riseId", profile.getRiseId());
 
-                sa.track(profileId.toString(), true, eventName, properties);
+                sa.track(profile.getRiseId(), true, eventName, properties);
                 // TODO 上线前删掉
                 sa.flush();
             } catch (InvalidArgumentException e) {
