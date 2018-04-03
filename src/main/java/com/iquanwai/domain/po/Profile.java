@@ -29,6 +29,7 @@ public class Profile {
     private Boolean openRise;
     private Boolean learningNotify; // 是否开启学习提醒
     private Integer riseMember; // 0 - 非会员， 1 - 会员， 2 - 课程单买
+    private Integer role;
 
     //默认头像
     public static final String DEFAULT_AVATAR = "http://www.iquanwai.com/images/default_avatar.png";
