@@ -152,10 +152,11 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     private void addHook(TemplateMessage templateMessage) {
         if (templateMessage.getUrl() != null) {
             String url = templateMessage.getUrl();
+            if (url.contains("_tm")){
+                return;
+            }
             if (url.contains("?")) {
-                if (!url.contains("_tm")) {
-                    url = url + "&_tm=template_message";
-                }
+                url = url + "&_tm=template_message";
             } else {
                 url = url + "?_tm=template_message";
             }
