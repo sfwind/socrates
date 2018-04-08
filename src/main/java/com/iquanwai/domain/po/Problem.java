@@ -19,9 +19,12 @@ public class Problem {
     private String descPic; // 描述图片
     private String audio; //语音
     private Boolean del; //是否删除(0-否,1-是)
+    private String abbreviation; // 缩略名
+
 
     private Boolean done; // 非db字段 用户是否做过
     private Integer status; // 非db字段 用户选过课程（0-未选过,1-正在进行,2-已完成）
     private String activityUrl; //非db字段 吊打活动页面
     private String password; //非db字段 吊打密码
+
 }
