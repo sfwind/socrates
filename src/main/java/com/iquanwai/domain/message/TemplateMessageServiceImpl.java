@@ -4,10 +4,12 @@ import com.google.gson.Gson;
 import com.iquanwai.domain.CustomerService;
 import com.iquanwai.domain.dao.AuditionClassMemberDao;
 import com.iquanwai.domain.dao.CustomerMessageLogDao;
+import com.iquanwai.domain.dao.RiseMemberDao;
 import com.iquanwai.domain.log.OperationLogService;
 import com.iquanwai.domain.po.AuditionClassMember;
 import com.iquanwai.domain.po.CustomerMessageLog;
 import com.iquanwai.domain.po.Profile;
+import com.iquanwai.domain.po.RiseMember;
 import com.iquanwai.util.ConfigUtils;
 import com.iquanwai.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +35,8 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     private AuditionClassMemberDao auditionClassMemberDao;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private RiseMemberDao riseMemberDao;
 
     @Override
     public boolean sendMessage(TemplateMessage templateMessage) {
@@ -83,6 +87,8 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         String openId = templateMessage.getTouser();
         Profile profile = customerService.getProfile(openId);
 
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profile.getId());
+
         // 如果不是主动推送或者发送对象是开发人员，不进行任何限制
         List<String> devOpenIds = ConfigUtils.getDevelopOpenIds();
         if (!forwardlyPush || devOpenIds.contains(profile.getOpenid())) {
@@ -93,7 +99,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
 
         boolean authority;
         // 1. 会员用户每周最多收到 7 条消息
-        if (profile.getRiseMember() == 1 || checkOtherAuthority(profile.getId())) {
+        if (riseMember != null || checkOtherAuthority(profile.getId())) {
             Date distanceDate = DateUtils.beforeDays(new Date(), 7);
             Long result = customerMessageLogs.stream().filter(messageLog -> messageLog.getPublishTime().compareTo(distanceDate) > 0).count();
             authority = result.intValue() < 7;
@@ -103,7 +109,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         }
 
         // 2. 非会员用户每周最多收到 2 条消息
-        if (profile.getRiseMember() != 1) {
+        if (riseMember == null) {
             Date distanceDate = DateUtils.beforeDays(new Date(), 7);
             Long result = customerMessageLogs.stream().filter(messageLog -> messageLog.getPublishTime().compareTo(distanceDate) > 0).count();
             authority = result.intValue() < 2;
@@ -161,7 +167,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
     private void addHook(TemplateMessage templateMessage) {
         if (templateMessage.getUrl() != null) {
             String url = templateMessage.getUrl();
-            if (url.contains("_tm")){
+            if (url.contains("_tm")) {
                 return;
             }
             if (url.contains("?")) {
