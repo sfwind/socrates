@@ -24,6 +24,10 @@ public class BusinessSchoolApplication {
     private Date submitTime;
     private Date dealTime;
     private String orderId;
+    /**
+     * 项目类型
+     */
+    private Integer project;
 
     private String originMemberTypeName;
 

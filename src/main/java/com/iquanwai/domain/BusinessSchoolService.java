@@ -3,9 +3,11 @@ package com.iquanwai.domain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.dao.*;
+import com.iquanwai.domain.dao.member.MemberTypeDao;
 import com.iquanwai.domain.message.*;
 import com.iquanwai.domain.po.*;
 import com.iquanwai.util.ConfigUtils;
+import com.iquanwai.util.Constants;
 import com.iquanwai.util.DateUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -27,14 +29,15 @@ public class BusinessSchoolService {
     public final static String PAY_URL = ConfigUtils.getAppDomain() + "/pay/apply";
     public final static String PAY_CAMP_URL = ConfigUtils.getAppDomain() + "/pay/camp";
 
+    public final static String ELITE = "商学院";
+    public final static String MBA = "商业进阶课程";
+
     @Autowired
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
     @Autowired
     private ProfileDao profileDao;
     @Autowired
     private RiseMemberDao riseMemberDao;
-    @Autowired
-    private CustomerStatusDao customerStatusDao;
     @Autowired
     private TemplateMessageService templateMessageService;
     @Autowired
@@ -45,6 +48,8 @@ public class BusinessSchoolService {
     private QuanwaiOrderDao quanwaiOrderDao;
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private MemberTypeDao memberTypeDao;
 
     // 会员购买申请 发放优惠券的 Category 和 Description
     private static final String RISE_APPLY_COUPON_CATEGORY = "ELITE_RISE_MEMBER";
@@ -57,15 +62,18 @@ public class BusinessSchoolService {
      * @param date 当天以及当天之前
      */
     public void noticeApplication(Date date) {
+        List<MemberType> memberTypes = memberTypeDao.loadAll(MemberType.class).stream().filter(memberType -> memberType.getDel() == 0).collect(Collectors.toList());
+
         List<BusinessSchoolApplication> applications = businessSchoolApplicationDao.loadCheckApplicationsForNotice(date);
         logger.info("待发送通知:{} 条", applications.size());
         Map<Integer, List<BusinessSchoolApplication>> waitNoticeMap = applications.stream()
                 .collect(Collectors.groupingBy(BusinessSchoolApplication::getStatus));
         // 通知 通过的
         List<BusinessSchoolApplication> approveGroup = waitNoticeMap.getOrDefault(BusinessSchoolApplication.APPROVE, Lists.newArrayList());
-        this.noticeApplicationForApprove(approveGroup);
+        this.noticeApplicationForApprove(approveGroup, memberTypes);
         // 通知 拒信
         List<BusinessSchoolApplication> rejectGroup = waitNoticeMap.getOrDefault(BusinessSchoolApplication.REJECT, Lists.newArrayList());
+
         this.noticeApplicationForReject(rejectGroup);
     }
 
@@ -76,20 +84,38 @@ public class BusinessSchoolService {
         templateMessage.setTemplate_id(ConfigUtils.getRejectApplyMsgId());
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
+        data.put("keyword2", new TemplateMessage.Keyword("未通过"));
         templateMessage.setUrl(PAY_CAMP_URL);
         templateMessage.setComment("发送拒信");
-        data.put("keyword1", new TemplateMessage.Keyword("【圈外商学院】"));
-        data.put("keyword2", new TemplateMessage.Keyword("未通过"));
-        data.put("remark", new TemplateMessage.Keyword(
-                "\n点击扫描二维码，添加【圈外招生委员会】微信，实时关注和咨询招生信息\n\n" +
-                        "即可获得：商学院课程知识礼包", "#f57f16"));
-        // 同样的对象不需要定义两次
-        data.put("first", new TemplateMessage.Keyword(
-                "我们认真评估了你的入学申请，认为你的需求和商学院核心能力项目暂时不匹配\n\n" +
-                        "本期商学院的申请者都异常优秀，我们无法为每位申请者提供学习机会，" +
-                        "但是很高兴你有一颗追求卓越的心！\n" +
-                        "\n欢迎继续关注后续的课程与体验活动\n"));
-        applications.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword3"));
+        applications.forEach(app -> {
+
+                    String remark = "\n点击扫描二维码，添加【圈外招生委员会】微信，实时关注和咨询招生信息\n\n" +
+                            "即可获得：{}课程知识礼包";
+                    String first = null;
+
+                    if(Constants.Project.CORE_PROJECT==app.getProject()){
+                        remark = remark.replace("{}",ELITE);
+                        first = "我们认真评估了你的入学申请，认为你的需求和商学院核心能力项目暂时不匹配\n\n" +
+                                "本期商学院的申请者都异常优秀，我们无法为每位申请者提供学习机会，" +
+                                "但是很高兴你有一颗追求卓越的心！\n" +
+                                "\n欢迎继续关注后续的课程与体验活动\n";
+                    }else if(Constants.Project.BUSINESS_THOUGHT_PROJECT==app.getProject()){
+                        remark = remark.replace("{}",MBA);
+                        first = "我们认真评估了你的入学申请，认为你的需求和"+MBA+"暂时不匹配\n\n" +
+                                "本期"+MBA+"的申请者都异常优秀，我们无法为每位申请者提供学习机会，" +
+                                "但是很高兴你有一颗追求卓越的心！\n" +
+                                "\n欢迎继续关注后续的课程与体验活动\n";
+                    }
+
+            data.put("remark", new TemplateMessage.Keyword(
+                    remark, "#f57f16"));
+            // 同样的对象不需要定义两次
+            data.put("first", new TemplateMessage.Keyword(
+                    first));
+                    this.sendMsg(templateMessage, data, app, "keyword3");
+                }
+
+        );
     }
 
 
@@ -98,23 +124,24 @@ public class BusinessSchoolService {
      *
      * @param applications 申请记录
      */
-    public void noticeApplicationForApprove(List<BusinessSchoolApplication> applications) {
+    public void noticeApplicationForApprove(List<BusinessSchoolApplication> applications, List<MemberType> memberTypes) {
         Integer count = applications != null ? applications.size() : 0;
         logger.info("审核通过:{} 条", count);
         if (count == 0) {
             return;
         }
 
+        MemberType eliteMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.ELITE).findAny().orElse(null);
+        MemberType mbaMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.BUSINESS_THOUGHT).findAny().orElse(null);
+
+
         applications.forEach(application -> {
             // 发放优惠券，开白名单
             try {
                 int profileId = application.getProfileId();
-                // TODO: REMOVE hardcode
-                RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-                // 已购买商学院的用户不再发通知
-                if (riseMember != null && (riseMember.getMemberTypeId() == RiseMember.ELITE ||
-                        riseMember.getMemberTypeId() == RiseMember.BUSINESS_THOUGHT)) {
-                    logger.info("{}已经报名商学院", profileId);
+                //2   8
+                int project = application.getProject();
+                if (checkIsBuy(profileId, project)) {
                     return;
                 }
 
@@ -157,12 +184,19 @@ public class BusinessSchoolService {
                         }
                     }
                 }
-
-                //插入申请通过许可
-                customerStatusDao.insert(profileId, CustomerStatus.APPLY_BUSINESS_SCHOOL_SUCCESS);
-                //发送录取通知信息
-                messageService.sendMessage("恭喜！我们很荣幸地通知你被【圈外商学院】录取！请及时点击本通知书，办理入学。",
-                        String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL);
+                if (project == Constants.Project.CORE_PROJECT) {
+                    if (eliteMemberType != null) {
+                        //发送核心项目录取通知信息
+                        messageService.sendMessage("恭喜！我们很荣幸地通知你被【" + eliteMemberType.getDescription() + "】录取！请及时点击本通知书，办理入学。",
+                                String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL);
+                    }
+                } else if (project == Constants.Project.BUSINESS_THOUGHT_PROJECT) {
+                    //发送商业进阶课程录取通知信息
+                    if (mbaMemberType != null) {
+                        messageService.sendMessage("恭喜！我们很荣幸地通知你被【" + mbaMemberType.getDescription() + "】录取！请及时点击本通知书，办理入学。",
+                                String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL);
+                    }
+                }
 
             } catch (Exception e) {
                 logger.error("插入优惠券失败", e);
@@ -170,45 +204,19 @@ public class BusinessSchoolService {
         });
 
 
-        Map<Double, List<BusinessSchoolApplication>> coupons = applications.stream().collect(Collectors.groupingBy(BusinessSchoolApplication::getCoupon));
+        Map<Double, List<BusinessSchoolApplication>> coupons = applications.stream().filter(businessSchoolApplication -> businessSchoolApplication.getProject().equals(Constants.Project.CORE_PROJECT)).collect(Collectors.groupingBy(BusinessSchoolApplication::getCoupon));
+        Map<Double, List<BusinessSchoolApplication>> mbaCoupons = applications.stream().filter(businessSchoolApplication -> businessSchoolApplication.getProject().equals(Constants.Project.BUSINESS_THOUGHT_PROJECT)).collect(Collectors.groupingBy(BusinessSchoolApplication::getCoupon));
         // 没有优惠券
         List<BusinessSchoolApplication> noCouponGroup = coupons.remove(0d);
+        List<BusinessSchoolApplication> mbaNoCouponGroup = mbaCoupons.remove(0d);
         coupons.forEach((amount, group) -> logger.info("{}元优惠券:{}条", amount, group.size()));
         logger.info("无优惠券:{}条", noCouponGroup == null ? 0 : noCouponGroup.size());
-        // 同样的对象不需要定义两次
-        coupons.forEach((amount, applicationGroup) -> {
-            // 发送有优惠券的
-            TemplateMessage templateMessage = new TemplateMessage();
-            templateMessage.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
-            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
-            templateMessage.setData(data);
-            templateMessage.setUrl(PAY_URL);
-            templateMessage.setComment("商学院审核通过");
-            data.put("keyword1", new TemplateMessage.Keyword("通过"));
-            data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
-            data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！" +
-                    "\n\n根据你的申请，入学委员会决定发放给你" + amount.intValue()
-                    + "元奖学金，付款时自动抵扣学费。希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
-            applicationGroup.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword2"));
-        });
 
+        mbaCoupons.forEach((amount, group) -> logger.info("{}元优惠券:{}条", amount, group.size()));
+        logger.info("无优惠券:{}条", mbaNoCouponGroup == null ? 0 : mbaNoCouponGroup.size());
 
-        // 发送没有优惠券的
-        if (noCouponGroup != null) {
-            noCouponGroup.forEach(app -> {
-                // 发送没有优惠券的模版
-                TemplateMessage noCouponMsg = new TemplateMessage();
-                noCouponMsg.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
-                noCouponMsg.setUrl(PAY_URL);
-                noCouponMsg.setComment("商学院审核通过,无优惠券");
-                Map<String, TemplateMessage.Keyword> noCouponData = Maps.newHashMap();
-                noCouponMsg.setData(noCouponData);
-                noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
-                noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
-                noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
-                this.sendMsg(noCouponMsg, noCouponData, app, "keyword2");
-            });
-        }
+        //发送奖学金消息
+        sendCouponMsgs(coupons, noCouponGroup, mbaCoupons, mbaNoCouponGroup);
     }
 
 
@@ -216,14 +224,11 @@ public class BusinessSchoolService {
                          BusinessSchoolApplication application, String checkKey) {
 
         int profileId = application.getProfileId();
-        // TODO: REMOVE hardcode
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        // 已购买商学院的用户不再发通知
-        if (riseMember != null && (riseMember.getMemberTypeId() == RiseMember.ELITE ||
-                riseMember.getMemberTypeId() == RiseMember.BUSINESS_THOUGHT)) {
-            logger.info("{}已经报名商学院", profileId);
+        Integer project = application.getProject();
+        if (checkIsBuy(profileId, project)) {
             return;
         }
+
         Profile profile = profileDao.load(Profile.class, profileId);
         templateMessage.setTouser(profile.getOpenid());
         data.put(checkKey, new TemplateMessage.Keyword(DateUtils.parseDateToString(application.getCheckTime())));
@@ -236,7 +241,12 @@ public class BusinessSchoolService {
             smsDto.setProfileId(profileId);
             smsDto.setPhone(profile.getMobileNo());
             smsDto.setType(SMSDto.PROMOTION);
-            String content = "Hi，感谢申请圈外商学院，您的申请结果已公布，现在就去「圈外同学」微信公众号查收吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
+            String content = "Hi，感谢申请圈外{}，您的申请结果已公布，现在就去「圈外同学」微信公众号查收吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
+            if (project.equals(Constants.Project.CORE_PROJECT)) {
+                content = content.replace("{}", ELITE);
+            } else if (project.equals(Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
+                content = content.replace("{}", MBA);
+            }
             smsDto.setContent(content);
             shortMessageService.sendShortMessage(smsDto);
         }
@@ -267,7 +277,6 @@ public class BusinessSchoolService {
             try {
                 Integer profileId = businessSchoolApplication.getProfileId();
                 RiseMember riseMember = existRiseMemberMap.get(profileId);
-                // TODO: 需要传入project参数
                 if (riseMember == null ||
                         (!riseMember.getMemberTypeId().equals(RiseMember.ELITE) &&
                                 !riseMember.getMemberTypeId().equals(RiseMember.BUSINESS_THOUGHT))) {
@@ -348,5 +357,106 @@ public class BusinessSchoolService {
         }
 
         templateMessageService.sendMessage(templateMessage);
+    }
+
+    /**
+     * 发送奖学金消息
+     *
+     * @param coupons
+     * @param noCouponGroup
+     * @param mbaCoupons
+     * @param mbaNoCouponGroup
+     */
+    private void sendCouponMsgs(Map<Double, List<BusinessSchoolApplication>> coupons, List<BusinessSchoolApplication> noCouponGroup, Map<Double, List<BusinessSchoolApplication>> mbaCoupons, List<BusinessSchoolApplication> mbaNoCouponGroup) {
+        // 同样的对象不需要定义两次
+        //发送商学院奖学金消息
+        coupons.forEach((amount, applicationGroup) -> {
+            // 发送有优惠券的
+            TemplateMessage templateMessage = new TemplateMessage();
+            templateMessage.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
+            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+            templateMessage.setData(data);
+            templateMessage.setUrl(PAY_URL);
+            templateMessage.setComment("商学院审核通过");
+            data.put("keyword1", new TemplateMessage.Keyword("通过"));
+            data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
+            data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！" +
+                    "\n\n根据你的申请，入学委员会决定发放给你" + amount.intValue()
+                    + "元奖学金，付款时自动抵扣学费。希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
+            applicationGroup.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword2"));
+        });
+
+        // 发送没有优惠券的
+        if (noCouponGroup != null) {
+            noCouponGroup.forEach(app -> {
+                // 发送没有优惠券的模版
+                TemplateMessage noCouponMsg = new TemplateMessage();
+                noCouponMsg.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
+                noCouponMsg.setUrl(PAY_URL);
+                noCouponMsg.setComment("商学院审核通过,无优惠券");
+                Map<String, TemplateMessage.Keyword> noCouponData = Maps.newHashMap();
+                noCouponMsg.setData(noCouponData);
+                noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院】录取！希望你在商学院内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
+                noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
+                noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
+                this.sendMsg(noCouponMsg, noCouponData, app, "keyword2");
+            });
+        }
+
+        //发送商业进阶项目优惠券消息
+        mbaCoupons.forEach((amount, applicationGroup) -> {
+            // 发送有优惠券的
+            TemplateMessage templateMessage = new TemplateMessage();
+            templateMessage.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
+            Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
+            templateMessage.setData(data);
+            templateMessage.setUrl(PAY_URL);
+            templateMessage.setComment(MBA + "审核通过");
+            data.put("keyword1", new TemplateMessage.Keyword("通过"));
+            data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
+            data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商业进阶课程】录取！" +
+                    "\n\n根据你的申请，入学委员会决定发放给你" + amount.intValue()
+                    + "元奖学金，付款时自动抵扣学费。希望你在" + MBA + "内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
+            applicationGroup.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword2"));
+        });
+
+        // 发送没有优惠券的
+        if (mbaNoCouponGroup != null) {
+            mbaNoCouponGroup.forEach(app -> {
+                // 发送没有优惠券的模版
+                TemplateMessage noCouponMsg = new TemplateMessage();
+                noCouponMsg.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
+                noCouponMsg.setUrl(PAY_URL);
+                noCouponMsg.setComment(MBA + "审核通过,无优惠券");
+                Map<String, TemplateMessage.Keyword> noCouponData = Maps.newHashMap();
+                noCouponMsg.setData(noCouponData);
+                noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外" + MBA + "】录取！希望你在" + MBA + "内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
+                noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
+                noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
+                this.sendMsg(noCouponMsg, noCouponData, app, "keyword2");
+            });
+        }
+
+    }
+
+    /**
+     * 判断是否已经购买
+     *
+     * @param profileId
+     * @param project
+     * @return
+     */
+    private boolean checkIsBuy(Integer profileId, Integer project) {
+        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
+
+        if (riseMember != null && project == Constants.Project.CORE_PROJECT && riseMember.getMemberTypeId() == RiseMember.ELITE) {
+            logger.info("{}已经报名" + ELITE, profileId);
+            return true;
+        }
+        if (riseMember != null && project == Constants.Project.BUSINESS_THOUGHT_PROJECT && riseMember.getMemberTypeId() == RiseMember.BUSINESS_THOUGHT) {
+            logger.info("{}已经报名" + MBA, profileId);
+            return true;
+        }
+        return false;
     }
 }
