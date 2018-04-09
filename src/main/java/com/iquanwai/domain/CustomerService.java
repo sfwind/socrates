@@ -152,14 +152,12 @@ public class CustomerService {
 
     public Profile getProfile(Integer profileId) {
         Profile profile = profileDao.load(Profile.class, profileId);
-        profile.setRiseMember(getRiseMember(profileId));
         return profile;
     }
 
     public Profile getProfile(String openId) {
         Profile profile = profileDao.loadByOpenId(openId);
         if (profile != null) {
-            profile.setRiseMember(getRiseMember(profile.getId()));
         }
         return profile;
     }
@@ -288,28 +286,6 @@ public class CustomerService {
         riseMemberDao.updateExpiredDate(profileIds, delay, category);
     }
 
-    private Integer getRiseMember(Integer profileId) {
-        RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
-        if (riseMember == null) {
-            return 0;
-        }
-        Integer memberTypeId = riseMember.getMemberTypeId();
-        if (memberTypeId == null) {
-            return 0;
-        }
-        // 精英或者专业版用户
-        if (memberTypeId == RiseMember.HALF || memberTypeId == RiseMember.ANNUAL
-                || memberTypeId == RiseMember.ELITE || memberTypeId == RiseMember.HALF_ELITE) {
-            return 1;
-        } else if (memberTypeId == RiseMember.CAMP) {
-            return 3;
-        } else if (memberTypeId == RiseMember.COURSE) {
-            return 2;
-        } else {
-            return 0;
-        }
-    }
-
     private String convertMemberTypeStr(Integer memberTypeId) {
         String memberTypeStr = "";
         switch (memberTypeId) {
@@ -320,10 +296,13 @@ public class CustomerService {
                 memberTypeStr = "一年版会员";
                 break;
             case RiseMember.ELITE:
-                memberTypeStr = "商学院会员";
+                memberTypeStr = "核心能力项目";
                 break;
             case RiseMember.HALF_ELITE:
-                memberTypeStr = "商学院会员";
+                memberTypeStr = "核心能力项目";
+                break;
+            case RiseMember.BUSINESS_THOUGHT:
+                memberTypeStr = "商业思维项目";
                 break;
             default:
                 break;

@@ -111,7 +111,8 @@ public class BusinessSchoolService {
                 int profileId = application.getProfileId();
                 RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
                 // 已购买商学院的用户不再发通知
-                if (riseMember != null && riseMember.getMemberTypeId() == RiseMember.ELITE) {
+                if (riseMember != null && (riseMember.getMemberTypeId() == RiseMember.ELITE ||
+                        riseMember.getMemberTypeId() == RiseMember.BUSINESS_THOUGHT)) {
                     logger.info("{}已经报名商学院", profileId);
                     return;
                 }
@@ -217,7 +218,7 @@ public class BusinessSchoolService {
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         // 已购买商学院的用户不再发通知
         if (riseMember != null && (riseMember.getMemberTypeId() == RiseMember.ELITE ||
-                riseMember.getMemberTypeId() == RiseMember.HALF_ELITE)) {
+                riseMember.getMemberTypeId() == RiseMember.BUSINESS_THOUGHT)) {
             logger.info("{}已经报名商学院", profileId);
             return;
         }
@@ -264,9 +265,10 @@ public class BusinessSchoolService {
             try {
                 Integer profileId = businessSchoolApplication.getProfileId();
                 RiseMember riseMember = existRiseMemberMap.get(profileId);
+                // TODO: 需要传入project参数
                 if (riseMember == null ||
                         (!riseMember.getMemberTypeId().equals(RiseMember.ELITE) &&
-                                !riseMember.getMemberTypeId().equals(RiseMember.HALF_ELITE))) {
+                                !riseMember.getMemberTypeId().equals(RiseMember.BUSINESS_THOUGHT))) {
                     sendExpiredMessage(distanceDay, businessSchoolApplication, profileId);
                 }
             } catch (Exception e) {

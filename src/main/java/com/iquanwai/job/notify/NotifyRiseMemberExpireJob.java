@@ -42,7 +42,8 @@ public class NotifyRiseMemberExpireJob {
                 .filter(item -> item.getMemberTypeId().equals(RiseMember.HALF) ||
                         item.getMemberTypeId().equals(RiseMember.ANNUAL) ||
                         item.getMemberTypeId().equals(RiseMember.ELITE) ||
-                        item.getMemberTypeId().equals(RiseMember.HALF_ELITE))
+                        item.getMemberTypeId().equals(RiseMember.HALF_ELITE) ||
+                        item.getMemberTypeId().equals(RiseMember.BUSINESS_THOUGHT))
                 .collect(Collectors.toList());
         logger.info("7天人数：{}", sevenRiseMembers.size());
         customerService.sendWillExpireMessage(sevenRiseMembers, 7);
@@ -53,7 +54,8 @@ public class NotifyRiseMemberExpireJob {
                 .filter(item -> item.getMemberTypeId().equals(RiseMember.HALF) ||
                         item.getMemberTypeId().equals(RiseMember.ANNUAL) ||
                         item.getMemberTypeId().equals(RiseMember.ELITE) ||
-                        item.getMemberTypeId().equals(RiseMember.HALF_ELITE))
+                        item.getMemberTypeId().equals(RiseMember.HALF_ELITE) ||
+                        item.getMemberTypeId().equals(RiseMember.BUSINESS_THOUGHT))
                 .collect(Collectors.toList());
         logger.info("1天人数：{}", oneRiseMembers.size());
         customerService.sendWillExpireMessage(oneRiseMembers, 1);
