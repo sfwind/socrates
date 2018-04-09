@@ -109,6 +109,7 @@ public class BusinessSchoolService {
             // 发放优惠券，开白名单
             try {
                 int profileId = application.getProfileId();
+                // TODO: REMOVE hardcode
                 RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
                 // 已购买商学院的用户不再发通知
                 if (riseMember != null && (riseMember.getMemberTypeId() == RiseMember.ELITE ||
@@ -215,6 +216,7 @@ public class BusinessSchoolService {
                          BusinessSchoolApplication application, String checkKey) {
 
         int profileId = application.getProfileId();
+        // TODO: REMOVE hardcode
         RiseMember riseMember = riseMemberDao.loadValidRiseMember(profileId);
         // 已购买商学院的用户不再发通知
         if (riseMember != null && (riseMember.getMemberTypeId() == RiseMember.ELITE ||
