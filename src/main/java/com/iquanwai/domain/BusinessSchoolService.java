@@ -389,7 +389,6 @@ public class BusinessSchoolService {
                 shortMessageService.sendShortMessage(smsDto);
             }
         }
-        logger.info("开始发送");
         templateMessageService.sendMessage(templateMessage);
     }
 
