@@ -26,8 +26,10 @@ import java.util.stream.Collectors;
 @Service
 public class BusinessSchoolService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    public final static String PAY_URL = ConfigUtils.getAppDomain() + "/pay/apply";
+    public final static String PAY_URL = ConfigUtils.getAppDomain() + "/pay/apply?goodsId=";
     public final static String PAY_CAMP_URL = ConfigUtils.getAppDomain() + "/pay/camp";
+    public final static Integer ELITE_GOODS = 3;
+    public final static Integer THOUGHT_GOODS = 8;
 
     @Autowired
     private BusinessSchoolApplicationDao businessSchoolApplicationDao;
@@ -198,13 +200,13 @@ public class BusinessSchoolService {
                     if (eliteMemberType != null) {
                         //发送核心项目录取通知信息
                         messageService.sendMessage("恭喜！我们很荣幸地通知你被【圈外商学院" + eliteMemberType.getDescription() + "】录取！请及时点击本通知书，办理入学。",
-                                String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL);
+                                String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL+ELITE_GOODS);
                     }
                 } else if (project == Constants.Project.BUSINESS_THOUGHT_PROJECT) {
                     //发送商业进阶课程录取通知信息
                     if (mbaMemberType != null) {
                         messageService.sendMessage("恭喜！我们很荣幸地通知你被【圈外商学院" + mbaMemberType.getDescription() + "】录取！请及时点击本通知书，办理入学。",
-                                String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL);
+                                String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL+THOUGHT_GOODS);
                     }
                 }
 
@@ -335,7 +337,7 @@ public class BusinessSchoolService {
         templateMessage.setTouser(profile.getOpenid());
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
-        templateMessage.setUrl(PAY_URL);
+        templateMessage.setUrl(PAY_URL+memberType.getId());
 
         if (CollectionUtils.isNotEmpty(coupons)) {
             Coupon coupon = coupons.get(0);
@@ -412,7 +414,8 @@ public class BusinessSchoolService {
             templateMessage.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
             templateMessage.setData(data);
-            templateMessage.setUrl(PAY_URL);
+            templateMessage.setUrl(PAY_URL+ELITE_GOODS);
+
             if (eliteMemberType != null) {
                 templateMessage.setComment(eliteMemberType.getDescription() + "审核通过");
             }
@@ -432,7 +435,7 @@ public class BusinessSchoolService {
                 // 发送没有优惠券的模版
                 TemplateMessage noCouponMsg = new TemplateMessage();
                 noCouponMsg.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
-                noCouponMsg.setUrl(PAY_URL);
+                noCouponMsg.setUrl(PAY_URL+ELITE_GOODS);
                 if (eliteMemberType != null) {
                     noCouponMsg.setComment(eliteMemberType.getDescription() + "审核通过,无优惠券");
                 }
@@ -454,7 +457,7 @@ public class BusinessSchoolService {
             templateMessage.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
             templateMessage.setData(data);
-            templateMessage.setUrl(PAY_URL);
+            templateMessage.setUrl(PAY_URL+THOUGHT_GOODS);
             if (mbaMemberType != null) {
                 templateMessage.setComment(mbaMemberType.getDescription() + "审核通过");
             }
@@ -472,7 +475,7 @@ public class BusinessSchoolService {
                 // 发送没有优惠券的模版
                 TemplateMessage noCouponMsg = new TemplateMessage();
                 noCouponMsg.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
-                noCouponMsg.setUrl(PAY_URL);
+                noCouponMsg.setUrl(PAY_URL+THOUGHT_GOODS);
                 if (mbaMemberType != null) {
                     noCouponMsg.setComment(mbaMemberType.getDescription() + "审核通过,无优惠券");
                 }
