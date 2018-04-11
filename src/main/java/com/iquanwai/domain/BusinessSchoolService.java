@@ -100,16 +100,16 @@ public class BusinessSchoolService {
                             remark = remark.replace("{}", eliteMemberType.getDescription());
                             data.put("keyword1", new TemplateMessage.Keyword("【" + eliteMemberType.getDescription() + "】"));
                         }
-                        first = "我们认真评估了你的入学申请，认为你的需求和" + eliteMemberType.getDescription() + "核心能力项目暂时不匹配\n\n" +
-                                "本期" + eliteMemberType.getDescription() + "的申请者都异常优秀，我们无法为每位申请者提供学习机会，" +
+                        first = "我们认真评估了你的入学申请，认为你的需求和圈外商学院" + eliteMemberType.getDescription() + "暂时不匹配\n\n" +
+                                "本期圈外商学院" + eliteMemberType.getDescription() + "的申请者都异常优秀，我们无法为每位申请者提供学习机会，" +
                                 "但是很高兴你有一颗追求卓越的心！\n" +
                                 "\n欢迎继续关注后续的课程与体验活动\n";
                     } else if (Constants.Project.BUSINESS_THOUGHT_PROJECT == app.getProject()) {
                         if (mbaMemberType != null) {
                             remark = remark.replace("{}", mbaMemberType.getDescription());
-                            data.put("keyword1", new TemplateMessage.Keyword("【圈外" + mbaMemberType.getDescription() + "】"));
-                            first = "我们认真评估了你的入学申请，认为你的需求和" + mbaMemberType.getDescription() + "暂时不匹配\n\n" +
-                                    "本期" + mbaMemberType.getDescription() + "的申请者都异常优秀，我们无法为每位申请者提供学习机会，" +
+                            data.put("keyword1", new TemplateMessage.Keyword("【圈外商学院" + mbaMemberType.getDescription() + "】"));
+                            first = "我们认真评估了你的入学申请，认为你的需求和圈外商学院" + mbaMemberType.getDescription() + "暂时不匹配\n\n" +
+                                    "本期圈外商学院" + mbaMemberType.getDescription() + "的申请者都异常优秀，我们无法为每位申请者提供学习机会，" +
                                     "但是很高兴你有一颗追求卓越的心！\n" +
                                     "\n欢迎继续关注后续的课程与体验活动\n";
                         }
@@ -197,13 +197,13 @@ public class BusinessSchoolService {
                 if (project == Constants.Project.CORE_PROJECT) {
                     if (eliteMemberType != null) {
                         //发送核心项目录取通知信息
-                        messageService.sendMessage("恭喜！我们很荣幸地通知你被【" + eliteMemberType.getDescription() + "】录取！请及时点击本通知书，办理入学。",
+                        messageService.sendMessage("恭喜！我们很荣幸地通知你被【圈外商学院" + eliteMemberType.getDescription() + "】录取！请及时点击本通知书，办理入学。",
                                 String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL);
                     }
                 } else if (project == Constants.Project.BUSINESS_THOUGHT_PROJECT) {
                     //发送商业进阶课程录取通知信息
                     if (mbaMemberType != null) {
-                        messageService.sendMessage("恭喜！我们很荣幸地通知你被【圈外" + mbaMemberType.getDescription() + "】录取！请及时点击本通知书，办理入学。",
+                        messageService.sendMessage("恭喜！我们很荣幸地通知你被【圈外商学院" + mbaMemberType.getDescription() + "】录取！请及时点击本通知书，办理入学。",
                                 String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL);
                     }
                 }
@@ -255,7 +255,7 @@ public class BusinessSchoolService {
             smsDto.setProfileId(profileId);
             smsDto.setPhone(profile.getMobileNo());
             smsDto.setType(SMSDto.PROMOTION);
-            String content = "Hi，感谢申请{}，您的申请结果已公布，现在就去「圈外同学」微信公众号查收吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
+            String content = "Hi，感谢申请圈外商学院{}，您的申请结果已公布，现在就去「圈外同学」微信公众号查收吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
             //添加项目类型判断（2018-04-10）
             if (project.equals(Constants.Project.CORE_PROJECT)) {
                 if (eliteMemberType != null) {
@@ -263,7 +263,7 @@ public class BusinessSchoolService {
                 }
             } else if (project.equals(Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
                 if (mbaMemberType != null) {
-                    content = content.replace("{}", "圈外" + mbaMemberType.getDescription());
+                    content = content.replace("{}", mbaMemberType.getDescription());
                 }
             }
             smsDto.setContent(content);
@@ -346,7 +346,7 @@ public class BusinessSchoolService {
             String expiredDateStr = DateUtils.parseDateToString(
                     DateUtils.afterDays(businessSchoolApplication.getDealTime(), 1));
             // 有优惠券模板消息内容
-            String first = "Hi " + profile.getNickname() + "，您的" + memberType.getDescription() + "录取资格及奖学金即将到期，请尽快办理入学！\n";
+            String first = "Hi " + profile.getNickname() + "，您的圈外商学院" + memberType.getDescription() + "录取资格及奖学金即将到期，请尽快办理入学！\n";
             data.put("first", new TemplateMessage.Keyword(first, "#000000"));
 
             data.put("keyword1", new TemplateMessage.Keyword("今天" + expiredHourStr + "（" + expiredDateStr + "）到期", "#000000"));
@@ -360,7 +360,7 @@ public class BusinessSchoolService {
                 smsDto.setProfileId(profileId);
                 smsDto.setPhone(profile.getMobileNo());
                 smsDto.setType(SMSDto.PROMOTION);
-                String content = "Hi，你申请的" + memberType.getDescription() + "入学奖学金即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
+                String content = "Hi，你申请的圈外商学院" + memberType.getDescription() + "入学奖学金即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
                 smsDto.setContent(content);
                 shortMessageService.sendShortMessage(smsDto);
             }
@@ -371,7 +371,7 @@ public class BusinessSchoolService {
             // 设置消息 message id
             templateMessage.setTemplate_id(ConfigUtils.getApplySuccessMsg());
             // 无优惠券模板消息内容
-            String first = "我们很荣幸地通知您被" + memberType.getDescription() + "录取，录取有效期24小时，请尽快办理入学，及时开始学习并结识优秀的校友吧！\n";
+            String first = "我们很荣幸地通知您被圈外商学院" + memberType.getDescription() + "录取，录取有效期24小时，请尽快办理入学，及时开始学习并结识优秀的校友吧！\n";
             data.put("first", new TemplateMessage.Keyword(first, "#000000"));
             data.put("keyword1", new TemplateMessage.Keyword("已录取", "#000000"));
             BusinessSchoolApplication application = businessSchoolApplicationDao.loadLastApproveApplication(profileId);
@@ -384,7 +384,7 @@ public class BusinessSchoolService {
                 smsDto.setProfileId(profileId);
                 smsDto.setPhone(profile.getMobileNo());
                 smsDto.setType(SMSDto.PROMOTION);
-                String content = "Hi，你申请的" + memberType.getDescription() + "入学资格即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
+                String content = "Hi，你申请的圈外商学院" + memberType.getDescription() + "入学资格即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
                 smsDto.setContent(content);
                 shortMessageService.sendShortMessage(smsDto);
             }
@@ -419,9 +419,9 @@ public class BusinessSchoolService {
             data.put("keyword1", new TemplateMessage.Keyword("通过"));
             data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
             if (eliteMemberType != null) {
-                data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【" + eliteMemberType.getDescription() + "】录取！" +
+                data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院" + eliteMemberType.getDescription() + "】录取！" +
                         "\n\n根据你的申请，入学委员会决定发放给你" + amount.intValue()
-                        + "元奖学金，付款时自动抵扣学费。希望你在" + eliteMemberType.getDescription() + "内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
+                        + "元奖学金，付款时自动抵扣学费。希望你在圈外商学院" + eliteMemberType.getDescription() + "内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
             }
             applicationGroup.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword2", memberTypes));
         });
@@ -439,7 +439,7 @@ public class BusinessSchoolService {
                 Map<String, TemplateMessage.Keyword> noCouponData = Maps.newHashMap();
                 noCouponMsg.setData(noCouponData);
                 if (eliteMemberType != null) {
-                    noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【   " + eliteMemberType.getDescription() + "】录取！希望你在" + eliteMemberType.getDescription() + "内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
+                    noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院" + eliteMemberType.getDescription() + "】录取！希望你在圈外商学院" + eliteMemberType.getDescription() + "内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
                 }
                 noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
                 noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
@@ -460,9 +460,9 @@ public class BusinessSchoolService {
             }
             data.put("keyword1", new TemplateMessage.Keyword("通过"));
             data.put("remark", new TemplateMessage.Keyword("\n奖学金和录取通知24小时内有效，请及时点击本通知书，办理入学。", "#f57f16"));
-            data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外" + mbaMemberType.getDescription() + "】录取！" +
+            data.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院" + mbaMemberType.getDescription() + "】录取！" +
                     "\n\n根据你的申请，入学委员会决定发放给你" + amount.intValue()
-                    + "元奖学金，付款时自动抵扣学费。希望你在" + mbaMemberType.getDescription() + "内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
+                    + "元奖学金，付款时自动抵扣学费。希望你在圈外商学院" + mbaMemberType.getDescription() + "内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
             applicationGroup.forEach(app -> this.sendMsg(templateMessage, data, app, "keyword2", memberTypes));
         });
 
@@ -479,7 +479,7 @@ public class BusinessSchoolService {
                 Map<String, TemplateMessage.Keyword> noCouponData = Maps.newHashMap();
                 noCouponMsg.setData(noCouponData);
                 if (mbaMemberType != null) {
-                    noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外" + mbaMemberType.getDescription() + "】录取！希望你在" + mbaMemberType.getDescription() + "内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
+                    noCouponData.put("first", new TemplateMessage.Keyword("恭喜！我们很荣幸地通知你被【圈外商学院" + mbaMemberType.getDescription() + "】录取！希望你在圈外商学院" + mbaMemberType.getDescription() + "内取得傲人的成绩，和顶尖的校友们一同前进！\n"));
                 }
                 noCouponData.put("keyword1", new TemplateMessage.Keyword("通过"));
                 noCouponData.put("remark", new TemplateMessage.Keyword("\n本录取通知24小时内有效，过期后需重新申请。请及时点击本通知书，办理入学。", "#f57f16"));
