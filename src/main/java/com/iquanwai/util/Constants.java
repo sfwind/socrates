@@ -115,6 +115,11 @@ public interface Constants {
         int BUSINESS_THOUGHT_PROJECT = 2;
     }
 
+    interface MemberType{
+        int ELITE = 3;
+        int THOUGHT = 8;
+    }
+
 
 
 }

@@ -25,9 +25,9 @@ public class BusinessSchoolApplication {
     private Date dealTime;
     private String orderId;
     /**
-     * 项目类型
+     * 项目类型编号
      */
-    private Integer project;
+    private Integer memberTypeId;
 
     private String originMemberTypeName;
 

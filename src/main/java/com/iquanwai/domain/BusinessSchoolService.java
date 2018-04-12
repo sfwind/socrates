@@ -79,9 +79,6 @@ public class BusinessSchoolService {
 
     public void noticeApplicationForReject(List<BusinessSchoolApplication> applications, List<MemberType> memberTypes) {
 
-        MemberType eliteMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.ELITE).findAny().orElse(null);
-        MemberType mbaMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.BUSINESS_THOUGHT).findAny().orElse(null);
-
         logger.info("审核拒绝:{}条", applications.size());
         // 发送有优惠券的
         TemplateMessage templateMessage = new TemplateMessage();
@@ -97,24 +94,15 @@ public class BusinessSchoolService {
                             "即可获得：{}课程知识礼包";
                     String first = null;
                     //添加项目判断（2018-04-10）
-                    if (Constants.Project.CORE_PROJECT == app.getProject()) {
-                        if (eliteMemberType != null) {
-                            remark = remark.replace("{}", eliteMemberType.getDescription());
-                            data.put("keyword1", new TemplateMessage.Keyword("【" + eliteMemberType.getDescription() + "】"));
-                        }
-                        first = "我们认真评估了你的入学申请，认为你的需求和圈外商学院" + eliteMemberType.getDescription() + "暂时不匹配\n\n" +
-                                "本期圈外商学院" + eliteMemberType.getDescription() + "的申请者都异常优秀，我们无法为每位申请者提供学习机会，" +
+                    int memberTypeId = app.getMemberTypeId();
+                    MemberType existMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == memberTypeId).findAny().orElse(null);
+                    if(existMemberType!=null){
+                        remark = remark.replace("{}", existMemberType.getDescription());
+                        data.put("keyword1", new TemplateMessage.Keyword("【" + existMemberType.getDescription() + "】"));
+                        first = "我们认真评估了你的入学申请，认为你的需求和圈外商学院" + existMemberType.getDescription() + "暂时不匹配\n\n" +
+                                "本期圈外商学院" + existMemberType.getDescription() + "的申请者都异常优秀，我们无法为每位申请者提供学习机会，" +
                                 "但是很高兴你有一颗追求卓越的心！\n" +
                                 "\n欢迎继续关注后续的课程与体验活动\n";
-                    } else if (Constants.Project.BUSINESS_THOUGHT_PROJECT == app.getProject()) {
-                        if (mbaMemberType != null) {
-                            remark = remark.replace("{}", mbaMemberType.getDescription());
-                            data.put("keyword1", new TemplateMessage.Keyword("【圈外商学院" + mbaMemberType.getDescription() + "】"));
-                            first = "我们认真评估了你的入学申请，认为你的需求和圈外商学院" + mbaMemberType.getDescription() + "暂时不匹配\n\n" +
-                                    "本期圈外商学院" + mbaMemberType.getDescription() + "的申请者都异常优秀，我们无法为每位申请者提供学习机会，" +
-                                    "但是很高兴你有一颗追求卓越的心！\n" +
-                                    "\n欢迎继续关注后续的课程与体验活动\n";
-                        }
                     }
 
                     data.put("remark", new TemplateMessage.Keyword(
@@ -141,18 +129,15 @@ public class BusinessSchoolService {
             return;
         }
 
-        MemberType eliteMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.ELITE).findAny().orElse(null);
-        MemberType mbaMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.BUSINESS_THOUGHT).findAny().orElse(null);
-
 
         applications.forEach(application -> {
             // 发放优惠券，开白名单
             try {
                 int profileId = application.getProfileId();
                 //2   8
-                int project = application.getProject();
+                int memberTypeId = application.getMemberTypeId();
                 //判断是否已经买过对应的课程（2018-04-10）
-                if (checkIsBuy(profileId, project)) {
+                if (checkIsBuy(profileId, memberTypeId)) {
                     return;
                 }
 
@@ -196,28 +181,18 @@ public class BusinessSchoolService {
                     }
                 }
                 //判断项目类型（2018-04-10）
-                if (project == Constants.Project.CORE_PROJECT) {
-                    if (eliteMemberType != null) {
-                        //发送核心项目录取通知信息
-                        messageService.sendMessage("恭喜！我们很荣幸地通知你被【圈外商学院" + eliteMemberType.getDescription() + "】录取！请及时点击本通知书，办理入学。",
-                                String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL+ELITE_GOODS);
-                    }
-                } else if (project == Constants.Project.BUSINESS_THOUGHT_PROJECT) {
-                    //发送商业进阶课程录取通知信息
-                    if (mbaMemberType != null) {
-                        messageService.sendMessage("恭喜！我们很荣幸地通知你被【圈外商学院" + mbaMemberType.getDescription() + "】录取！请及时点击本通知书，办理入学。",
-                                String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL+THOUGHT_GOODS);
-                    }
+                MemberType existMember = memberTypes.stream().filter(memberType -> memberType.getId() == memberTypeId).findAny().orElse(null);
+                if (existMember != null) {
+                    messageService.sendMessage("恭喜！我们很荣幸地通知你被【圈外商学院" + existMember.getDescription() + "】录取！请及时点击本通知书，办理入学。",
+                            String.valueOf(profileId), MessageService.SYSTEM_MESSAGE, PAY_URL + existMember.getId());
                 }
-
             } catch (Exception e) {
                 logger.error("插入优惠券失败", e);
             }
         });
 
-
-        Map<Double, List<BusinessSchoolApplication>> coupons = applications.stream().filter(businessSchoolApplication -> businessSchoolApplication.getProject().equals(Constants.Project.CORE_PROJECT)).collect(Collectors.groupingBy(BusinessSchoolApplication::getCoupon));
-        Map<Double, List<BusinessSchoolApplication>> mbaCoupons = applications.stream().filter(businessSchoolApplication -> businessSchoolApplication.getProject().equals(Constants.Project.BUSINESS_THOUGHT_PROJECT)).collect(Collectors.groupingBy(BusinessSchoolApplication::getCoupon));
+        Map<Double, List<BusinessSchoolApplication>> coupons = applications.stream().filter(businessSchoolApplication -> businessSchoolApplication.getMemberTypeId().equals(Constants.MemberType.ELITE)).collect(Collectors.groupingBy(BusinessSchoolApplication::getCoupon));
+        Map<Double, List<BusinessSchoolApplication>> mbaCoupons = applications.stream().filter(businessSchoolApplication -> businessSchoolApplication.getMemberTypeId().equals(Constants.MemberType.THOUGHT)).collect(Collectors.groupingBy(BusinessSchoolApplication::getCoupon));
         // 没有优惠券
         List<BusinessSchoolApplication> noCouponGroup = coupons.remove(0d);
         List<BusinessSchoolApplication> mbaNoCouponGroup = mbaCoupons.remove(0d);
@@ -235,13 +210,10 @@ public class BusinessSchoolService {
     private void sendMsg(TemplateMessage templateMessage, Map<String, TemplateMessage.Keyword> data,
                          BusinessSchoolApplication application, String checkKey, List<MemberType> memberTypes) {
 
-        MemberType eliteMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.ELITE).findAny().orElse(null);
-        MemberType mbaMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.BUSINESS_THOUGHT).findAny().orElse(null);
-
         int profileId = application.getProfileId();
-        Integer project = application.getProject();
+        int memberTypeId = application.getMemberTypeId();
         //判断是否已经购买过
-        if (checkIsBuy(profileId, project)) {
+        if (checkIsBuy(profileId, memberTypeId)) {
             return;
         }
 
@@ -259,14 +231,9 @@ public class BusinessSchoolService {
             smsDto.setType(SMSDto.PROMOTION);
             String content = "Hi，感谢申请圈外商学院{}，您的申请结果已公布，现在就去「圈外同学」微信公众号查收吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
             //添加项目类型判断（2018-04-10）
-            if (project.equals(Constants.Project.CORE_PROJECT)) {
-                if (eliteMemberType != null) {
-                    content = content.replace("{}", eliteMemberType.getDescription());
-                }
-            } else if (project.equals(Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
-                if (mbaMemberType != null) {
-                    content = content.replace("{}", mbaMemberType.getDescription());
-                }
+            MemberType existMember = memberTypes.stream().filter(memberType -> memberType.getId() == memberTypeId).findAny().orElse(null);
+            if(existMember!=null){
+                content = content.replace("{}", existMember.getDescription());
             }
             smsDto.setContent(content);
             shortMessageService.sendShortMessage(smsDto);
@@ -281,8 +248,8 @@ public class BusinessSchoolService {
      */
     public void sendRiseMemberApplyMessageByDealTime(Date dealTime, Integer distanceDay) {
         List<MemberType> memberTypes = memberTypeDao.loadAll(MemberType.class).stream().filter(memberType -> memberType.getDel() == 0).collect(Collectors.toList());
-        MemberType eliteMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.ELITE).findAny().orElse(null);
-        MemberType mbaMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.BUSINESS_THOUGHT).findAny().orElse(null);
+        //MemberType eliteMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.ELITE).findAny().orElse(null);
+      //  MemberType mbaMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.BUSINESS_THOUGHT).findAny().orElse(null);
 
         List<BusinessSchoolApplication> applications = businessSchoolApplicationDao.loadDealApplicationsForNotice(dealTime);
         // 过滤已经过期的申请,dealtime+24小时内不过期
@@ -308,16 +275,10 @@ public class BusinessSchoolService {
                     riseMemberIds = riseMembers.stream().map(RiseMember::getMemberTypeId).collect(Collectors.toList());
                 }
                 //排除已经付费的用户
-                Integer project = businessSchoolApplication.getProject();
-                if (project.equals(Constants.Project.CORE_PROJECT)) {
-                    if (CollectionUtils.isEmpty(riseMembers) || !riseMemberIds.contains(RiseMember.ELITE)) {
-                        sendExpiredMessage(distanceDay, businessSchoolApplication, profileId, eliteMemberType);
-                    }
-
-                } else if (project.equals(Constants.Project.BUSINESS_THOUGHT_PROJECT)) {
-                    if (CollectionUtils.isEmpty(riseMembers) || !riseMemberIds.contains(RiseMember.BUSINESS_THOUGHT)) {
-                        sendExpiredMessage(distanceDay, businessSchoolApplication, profileId, mbaMemberType);
-                    }
+                int memberTypeId = businessSchoolApplication.getMemberTypeId();
+                MemberType existMemberType =memberTypes.stream().filter(memberType -> memberType.getId() == memberTypeId).findAny().orElse(null);
+                if(CollectionUtils.isEmpty(riseMembers)||!riseMemberIds.contains(memberTypeId)){
+                    sendExpiredMessage(distanceDay,businessSchoolApplication,profileId,existMemberType);
                 }
             } catch (Exception e) {
                 logger.error("发送过期通知失败", e);
@@ -337,7 +298,7 @@ public class BusinessSchoolService {
         templateMessage.setTouser(profile.getOpenid());
         Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
         templateMessage.setData(data);
-        templateMessage.setUrl(PAY_URL+memberType.getId());
+        templateMessage.setUrl(PAY_URL + memberType.getId());
 
         if (CollectionUtils.isNotEmpty(coupons)) {
             Coupon coupon = coupons.get(0);
@@ -414,7 +375,7 @@ public class BusinessSchoolService {
             templateMessage.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
             templateMessage.setData(data);
-            templateMessage.setUrl(PAY_URL+ELITE_GOODS);
+            templateMessage.setUrl(PAY_URL + ELITE_GOODS);
 
             if (eliteMemberType != null) {
                 templateMessage.setComment(eliteMemberType.getDescription() + "审核通过");
@@ -435,7 +396,7 @@ public class BusinessSchoolService {
                 // 发送没有优惠券的模版
                 TemplateMessage noCouponMsg = new TemplateMessage();
                 noCouponMsg.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
-                noCouponMsg.setUrl(PAY_URL+ELITE_GOODS);
+                noCouponMsg.setUrl(PAY_URL + ELITE_GOODS);
                 if (eliteMemberType != null) {
                     noCouponMsg.setComment(eliteMemberType.getDescription() + "审核通过,无优惠券");
                 }
@@ -457,7 +418,7 @@ public class BusinessSchoolService {
             templateMessage.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
             Map<String, TemplateMessage.Keyword> data = Maps.newHashMap();
             templateMessage.setData(data);
-            templateMessage.setUrl(PAY_URL+THOUGHT_GOODS);
+            templateMessage.setUrl(PAY_URL + THOUGHT_GOODS);
             if (mbaMemberType != null) {
                 templateMessage.setComment(mbaMemberType.getDescription() + "审核通过");
             }
@@ -475,7 +436,7 @@ public class BusinessSchoolService {
                 // 发送没有优惠券的模版
                 TemplateMessage noCouponMsg = new TemplateMessage();
                 noCouponMsg.setTemplate_id(ConfigUtils.getApproveApplyMsgId());
-                noCouponMsg.setUrl(PAY_URL+THOUGHT_GOODS);
+                noCouponMsg.setUrl(PAY_URL + THOUGHT_GOODS);
                 if (mbaMemberType != null) {
                     noCouponMsg.setComment(mbaMemberType.getDescription() + "审核通过,无优惠券");
                 }
@@ -496,18 +457,13 @@ public class BusinessSchoolService {
      * 判断是否已经购买
      *
      * @param profileId
-     * @param project
      * @return
      */
-    private boolean checkIsBuy(Integer profileId, Integer project) {
+    private boolean checkIsBuy(Integer profileId, Integer memberTypeId) {
         List<RiseMember> riseMembers = riseMemberDao.loadAllValidRiseMembers(profileId);
         List<Integer> riseMemberIds = riseMembers.stream().map(RiseMember::getMemberTypeId).collect(Collectors.toList());
-        //是否已经购买核心能力项目
-        if (project == Constants.Project.CORE_PROJECT && riseMemberIds.contains(RiseMember.ELITE)) {
-            return true;
-        }
-        //是否购买商业思维项目
-        if (project == Constants.Project.BUSINESS_THOUGHT_PROJECT && riseMemberIds.contains(RiseMember.BUSINESS_THOUGHT)) {
+
+        if (riseMemberIds.contains(memberTypeId)) {
             return true;
         }
         return false;
