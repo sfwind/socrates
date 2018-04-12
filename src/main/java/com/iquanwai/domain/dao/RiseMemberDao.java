@@ -21,6 +21,19 @@ import java.util.List;
 public class RiseMemberDao extends DBUtil {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    public List<RiseMember> loadAllValidRiseMembers(Integer profileId){
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<RiseMember>> h  = new BeanListHandler<>(RiseMember.class);
+        String sql = "SELECT * FROM RiseMember WHERE ProfileId = ? AND Expired = 0 AND Del = 0";
+
+        try {
+           return runner.query(sql,h,profileId);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(),e);
+        }
+        return Lists.newArrayList();
+    }
+
     public boolean riseMemberExpired(RiseMember riseMember) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "Update RiseMember set Expired = 1 where Id = ? AND Del = 0";
