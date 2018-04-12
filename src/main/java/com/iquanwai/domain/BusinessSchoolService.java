@@ -349,4 +349,12 @@ public class BusinessSchoolService {
 
         templateMessageService.sendMessage(templateMessage);
     }
+
+    public void expiredApply() {
+        businessSchoolApplicationDao.loadNoExpiredDealApplication()
+                .stream()
+                .filter(item -> item.getDealTime() != null)
+                .filter(item -> DateUtils.intervalMinute(DateUtils.afterHours(item.getDealTime(), 24)) <= 0)
+                .forEach(item -> businessSchoolApplicationDao.expiredApply(item.getId()));
+    }
 }
