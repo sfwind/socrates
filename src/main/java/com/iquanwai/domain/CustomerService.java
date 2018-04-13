@@ -3,23 +3,14 @@ package com.iquanwai.domain;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
-import com.iquanwai.domain.dao.ActionLogDao;
-import com.iquanwai.domain.dao.CouponDao;
-import com.iquanwai.domain.dao.ProfileDao;
-import com.iquanwai.domain.dao.RiseMemberDao;
-import com.iquanwai.domain.dao.RiseUserLandingDao;
-import com.iquanwai.domain.dao.RiseUserLoginDao;
+import com.iquanwai.domain.dao.*;
 import com.iquanwai.domain.log.OperationLogService;
 import com.iquanwai.domain.message.RestfulHelper;
 import com.iquanwai.domain.message.SMSDto;
 import com.iquanwai.domain.message.ShortMessageService;
 import com.iquanwai.domain.message.TemplateMessage;
 import com.iquanwai.domain.message.TemplateMessageService;
-import com.iquanwai.domain.po.Coupon;
-import com.iquanwai.domain.po.Profile;
-import com.iquanwai.domain.po.RiseMember;
-import com.iquanwai.domain.po.RiseUserLanding;
-import com.iquanwai.domain.po.RiseUserLogin;
+import com.iquanwai.domain.po.*;
 import com.iquanwai.mq.RabbitMQFactory;
 import com.iquanwai.mq.RabbitMQPublisher;
 import com.iquanwai.util.ConfigUtils;
@@ -63,6 +54,8 @@ public class CustomerService {
     private CouponDao couponDao;
     @Autowired
     private ActionLogDao actionLogDao;
+    @Autowired
+    private ClassMemberDao classMemberDao;
 
     @Autowired
     private RabbitMQFactory rabbitMQFactory;
@@ -279,11 +272,38 @@ public class CustomerService {
 
     /**
      * 更新过期日期
-     *
      * @param category （day,month,year）
      */
     public void updateExpiredDate(List<Integer> profileIds, Integer delay, String category) {
         riseMemberDao.updateExpiredDate(profileIds, delay, category);
+    }
+
+    public void checkClassMemberExpire() {
+        List<ClassMember> classMembers = classMemberDao.loadAllWithoutDel(ClassMember.class);
+        List<Integer> profileIds = classMembers.stream().map(ClassMember::getProfileId).collect(Collectors.toList());
+        List<RiseMember> riseMembers = riseMemberDao.loadAllByProfileIds(profileIds);
+
+        classMembers.forEach(classMember -> {
+            Integer profileId = classMember.getProfileId();
+            Integer memberTypeId = classMember.getMemberTypeId();
+            RiseMember riseMember = riseMembers.stream()
+                    .filter(member -> profileId.equals(member.getProfileId()) && memberTypeId.equals(member.getMemberTypeId()))
+                    .findAny().orElse(null);
+
+            if (riseMember != null) {
+                if (classMember.getActive()) {
+                    // 现在正在生效中，如果对应会员已经过期了，才会转为失效
+                    if (new Date().compareTo(riseMember.getExpireDate()) >= 0) {
+                        classMemberDao.changeActiveStatus(classMember.getId(), false);
+                    }
+                } else {
+                    // 现在处于失效状态，进入学习状态，才会转为生效
+                    if (new Date().compareTo(riseMember.getOpenDate()) >= 0 && new Date().compareTo(riseMember.getExpireDate()) <= 0) {
+                        classMemberDao.changeActiveStatus(classMember.getId(), true);
+                    }
+                }
+            }
+        });
     }
 
     private String convertMemberTypeStr(Integer memberTypeId) {

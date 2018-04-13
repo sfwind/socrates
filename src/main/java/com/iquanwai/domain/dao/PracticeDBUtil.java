@@ -85,6 +85,18 @@ public class PracticeDBUtil {
         return Lists.newArrayList();
     }
 
+    public <T> List<T> loadAllWithoutDel(Class<T> type) {
+        QueryRunner runner = new QueryRunner(getDataSource());
+        ResultSetHandler<List<T>> h = new BeanListHandler<T>(type);
+
+        try {
+            return runner.query("SELECT * FROM " + type.getSimpleName() + " WHERE Del = 0", h);
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
+
     public long count(Class type) {
 
         QueryRunner run = new QueryRunner(getDataSource());

@@ -84,7 +84,7 @@ public class RiseMemberDao extends DBUtil {
     }
 
     public List<RiseMember> loadValidRiseMemberByProfileIds(List<Integer> profileIds) {
-        if(CollectionUtils.isEmpty(profileIds)){
+        if (CollectionUtils.isEmpty(profileIds)) {
             return Lists.newArrayList();
         }
         QueryRunner runner = new QueryRunner(getDataSource());
@@ -99,37 +99,48 @@ public class RiseMemberDao extends DBUtil {
     }
 
     /**
-     *更新过期日期
-     * @param profileIds
-     * @param delay
+     * 更新过期日期
      * @param category :顺延类型（day,month,year）
-     * @return
      */
-    public void updateExpiredDate(List<Integer> profileIds,Integer delay,String category){
-        if(CollectionUtils.isEmpty(profileIds)){
+    public void updateExpiredDate(List<Integer> profileIds, Integer delay, String category) {
+        if (CollectionUtils.isEmpty(profileIds)) {
             return;
         }
         QueryRunner runner = new QueryRunner(getDataSource());
-        String sql = "Update RiseMember set ExpireDate = DATE_ADD(ExpireDate,INTERVAL "+delay+" "+ category+") WHERE ProfileId in (" + produceQuestionMark(profileIds.size()) + ") AND Expired = 0 AND Del = 0";
+        String sql = "Update RiseMember set ExpireDate = DATE_ADD(ExpireDate,INTERVAL " + delay + " " + category + ") WHERE ProfileId in (" + produceQuestionMark(profileIds.size()) + ") AND Expired = 0 AND Del = 0";
         try {
-            runner.update(sql,profileIds.toArray());
+            runner.update(sql, profileIds.toArray());
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
     }
 
-    public List<RiseMember> loadValidElite(String startTime,String endTime){
+    public List<RiseMember> loadValidElite(String startTime, String endTime) {
         QueryRunner runner = new QueryRunner(getDataSource());
         String sql = "SELECT * FROM RiseMember WHERE MemberTypeId = 3 AND  Expired = 0 AND VIP =0 AND AddTime>=? AND AddTime<=? AND DEL = 0 ";
         ResultSetHandler<List<RiseMember>> h = new BeanListHandler<>(RiseMember.class);
         try {
-            return runner.query(sql,h,startTime,endTime);
+            return runner.query(sql, h, startTime, endTime);
         } catch (SQLException e) {
-            logger.error(e.getLocalizedMessage(),e);
+            logger.error(e.getLocalizedMessage(), e);
         }
         return Lists.newArrayList();
     }
 
+    public List<RiseMember> loadAllByProfileIds(List<Integer> profileIds) {
+        if (profileIds.size() == 0) {
+            return Lists.newArrayList();
+        }
 
+        QueryRunner runner = new QueryRunner(getDataSource());
+        String sql = "SELECT * FROM RiseMember WHERE ProfileId IN (" + produceQuestionMark(profileIds.size()) + ") AND Del = 0";
+        ResultSetHandler<List<RiseMember>> h = new BeanListHandler<RiseMember>(RiseMember.class);
 
+        try {
+            return runner.query(sql, h, profileIds.toArray());
+        } catch (SQLException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return Lists.newArrayList();
+    }
 }
