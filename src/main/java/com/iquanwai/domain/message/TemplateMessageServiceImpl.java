@@ -45,7 +45,7 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
 
     @Override
     public boolean sendMessage(TemplateMessage templateMessage, boolean validation) {
-        addHook(templateMessage);
+//        addHook(templateMessage);
         boolean sendTag = true;
         if (validation) {
             // 发送权限校验
