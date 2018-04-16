@@ -54,7 +54,6 @@ public class PracticeDBUtil {
         return ds;
     }
 
-
     public <T> T load(Class<T> type, int id) {
 
         QueryRunner run = new QueryRunner(getDataSource());
