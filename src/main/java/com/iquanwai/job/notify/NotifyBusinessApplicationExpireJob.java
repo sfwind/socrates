@@ -21,8 +21,9 @@ public class NotifyBusinessApplicationExpireJob {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Scheduled(cron = "0 0 13,20 * * ?")
-    @Scheduled(cron = "0 0 13,20 * * ?")
+    //@Scheduled(cron = "0 0 13,20 * * ?")
+    //todo:测试
+    @Scheduled(cron = "0 */1 * * * ?")
     @CatInspect(name = "notifyBusinessApplyPassedButNoPay")
     public void work() {
         logger.info("商学院申请未报名用户提醒任务开始");

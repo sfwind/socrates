@@ -26,9 +26,7 @@ public class NotifyRiseMemberExpireJob {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-   // @Scheduled(cron = "0 20 21 * * ?")
-    //TODO:测试
-    @Scheduled(cron = "0 */1 * * * ?")
+    @Scheduled(cron = "0 20 21 * * ?")
     @CatInspect(name = "notifyRiseMemberWillExpired")
     public void work() {
         logger.info("会员即将过期的模板消息提醒任务开始");
