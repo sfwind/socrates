@@ -359,7 +359,7 @@ public class BusinessSchoolService {
                 shortMessageService.sendShortMessage(smsDto);
             }
         }
-        templateMessageService.sendMessage(templateMessage);
+        templateMessageService.sendMessage(templateMessage,false);
     }
 
     /**
