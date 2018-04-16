@@ -26,7 +26,7 @@ public class NotifyRiseMemberExpireJob {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    //@Scheduled(cron = "0 20 21 * * ?")
+   // @Scheduled(cron = "0 20 21 * * ?")
     //TODO:测试
     @Scheduled(cron = "0 */1 * * * ?")
     @CatInspect(name = "notifyRiseMemberWillExpired")

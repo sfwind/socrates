@@ -248,8 +248,6 @@ public class BusinessSchoolService {
      */
     public void sendRiseMemberApplyMessageByDealTime(Date dealTime, Integer distanceDay) {
         List<MemberType> memberTypes = memberTypeDao.loadAll(MemberType.class).stream().filter(memberType -> memberType.getDel() == 0).collect(Collectors.toList());
-        //MemberType eliteMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.ELITE).findAny().orElse(null);
-      //  MemberType mbaMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.BUSINESS_THOUGHT).findAny().orElse(null);
 
         List<BusinessSchoolApplication> applications = businessSchoolApplicationDao.loadDealApplicationsForNotice(dealTime);
         // 过滤已经过期的申请,dealtime+24小时内不过期

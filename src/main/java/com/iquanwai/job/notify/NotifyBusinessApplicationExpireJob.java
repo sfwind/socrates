@@ -22,6 +22,7 @@ public class NotifyBusinessApplicationExpireJob {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Scheduled(cron = "0 0 13,20 * * ?")
+    @Scheduled(cron = "0 0 13,20 * * ?")
     @CatInspect(name = "notifyBusinessApplyPassedButNoPay")
     public void work() {
         logger.info("商学院申请未报名用户提醒任务开始");
@@ -31,7 +32,8 @@ public class NotifyBusinessApplicationExpireJob {
 
     private void sendBSApplicationExpireMessage() {
         // 优惠券的过期展示日期要比数据库中减少一天
-        Date oneDay = DateUtils.beforeDays(new Date(), 1);
+        //TODO:0修改为1
+        Date oneDay = DateUtils.beforeDays(new Date(), 0);
         businessSchoolService.sendRiseMemberApplyMessageByDealTime(oneDay, 0);
     }
 
