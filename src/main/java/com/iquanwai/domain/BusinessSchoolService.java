@@ -158,28 +158,28 @@ public class BusinessSchoolService {
                 }
 
                 // 如果收了申请费,则添加一张等价优惠券
-                String orderId = application.getOrderId();
-                if (orderId != null) {
-                    QuanwaiOrder order = quanwaiOrderDao.loadOrder(orderId);
-                    if (order != null) {
-                        // 是否有优惠券
-                        coupons = couponDao.loadCouponsByProfileId(profileId,
-                                RISE_APPLY_COUPON_CATEGORY, APPLY_COUPON_DESCRIPTION);
-                        if (CollectionUtils.isEmpty(coupons)) {
-                            if (order.getStatus().equals(QuanwaiOrder.PAID)) {
-                                // 添加优惠券
-                                Coupon couponBean = new Coupon();
-                                couponBean.setAmount(order.getPrice().intValue());
-                                couponBean.setProfileId(profileId);
-                                couponBean.setUsed(Coupon.UNUSED);
-                                couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
-                                couponBean.setCategory(RISE_APPLY_COUPON_CATEGORY);
-                                couponBean.setDescription(APPLY_COUPON_DESCRIPTION);
-                                couponDao.insert(couponBean);
-                            }
-                        }
-                    }
-                }
+//                String orderId = application.getOrderId();
+//                if (orderId != null) {
+//                    QuanwaiOrder order = quanwaiOrderDao.loadOrder(orderId);
+//                    if (order != null) {
+//                        // 是否有优惠券
+//                        coupons = couponDao.loadCouponsByProfileId(profileId,
+//                                RISE_APPLY_COUPON_CATEGORY, APPLY_COUPON_DESCRIPTION);
+//                        if (CollectionUtils.isEmpty(coupons)) {
+//                            if (order.getStatus().equals(QuanwaiOrder.PAID)) {
+//                                // 添加优惠券
+//                                Coupon couponBean = new Coupon();
+//                                couponBean.setAmount(order.getPrice().intValue());
+//                                couponBean.setProfileId(profileId);
+//                                couponBean.setUsed(Coupon.UNUSED);
+//                                couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
+//                                couponBean.setCategory(RISE_APPLY_COUPON_CATEGORY);
+//                                couponBean.setDescription(APPLY_COUPON_DESCRIPTION);
+//                                couponDao.insert(couponBean);
+//                            }
+//                        }
+//                    }
+//                }
                 //判断项目类型（2018-04-10）
                 MemberType existMember = memberTypes.stream().filter(memberType -> memberType.getId() == memberTypeId).findAny().orElse(null);
                 if (existMember != null) {
