@@ -63,6 +63,8 @@ public class CustomerService {
     private RestfulHelper restfulHelper;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private UserInfoDao userInfoDao;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     private RabbitMQPublisher userLoadRabbitMQPublisher;
@@ -212,9 +214,10 @@ public class CustomerService {
 
             SMSDto smsDto = new SMSDto();
             smsDto.setProfileId(profile.getId());
-            String mobileNo = profile.getMobileNo();
-            if (!StringUtils.isEmpty(mobileNo)) {
-                smsDto.setPhone(profile.getMobileNo());
+
+            UserInfo userInfo = userInfoDao.loadByProfileId(profile.getId());
+            if(userInfo!=null  && !StringUtils.isEmpty(userInfo.getMobile())){
+                smsDto.setPhone(userInfo.getMobile());
             }
             String content;
             if (distanceDay != 0) {

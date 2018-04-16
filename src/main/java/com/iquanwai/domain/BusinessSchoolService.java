@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.jws.soap.SOAPBinding;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,8 @@ public class BusinessSchoolService {
     private MessageService messageService;
     @Autowired
     private MemberTypeDao memberTypeDao;
+    @Autowired
+    private UserInfoDao userInfoDao;
 
     // 会员购买申请 发放优惠券的 Category 和 Description
     private static final String RISE_APPLY_COUPON_CATEGORY = "ELITE_RISE_MEMBER";
@@ -158,28 +161,28 @@ public class BusinessSchoolService {
                 }
 
                 // 如果收了申请费,则添加一张等价优惠券
-                String orderId = application.getOrderId();
-                if (orderId != null) {
-                    QuanwaiOrder order = quanwaiOrderDao.loadOrder(orderId);
-                    if (order != null) {
-                        // 是否有优惠券
-                        coupons = couponDao.loadCouponsByProfileId(profileId,
-                                RISE_APPLY_COUPON_CATEGORY, APPLY_COUPON_DESCRIPTION);
-                        if (CollectionUtils.isEmpty(coupons)) {
-                            if (order.getStatus().equals(QuanwaiOrder.PAID)) {
-                                // 添加优惠券
-                                Coupon couponBean = new Coupon();
-                                couponBean.setAmount(order.getPrice().intValue());
-                                couponBean.setProfileId(profileId);
-                                couponBean.setUsed(Coupon.UNUSED);
-                                couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
-                                couponBean.setCategory(RISE_APPLY_COUPON_CATEGORY);
-                                couponBean.setDescription(APPLY_COUPON_DESCRIPTION);
-                                couponDao.insert(couponBean);
-                            }
-                        }
-                    }
-                }
+//                String orderId = application.getOrderId();
+//                if (orderId != null) {
+//                    QuanwaiOrder order = quanwaiOrderDao.loadOrder(orderId);
+//                    if (order != null) {
+//                        // 是否有优惠券
+//                        coupons = couponDao.loadCouponsByProfileId(profileId,
+//                                RISE_APPLY_COUPON_CATEGORY, APPLY_COUPON_DESCRIPTION);
+//                        if (CollectionUtils.isEmpty(coupons)) {
+//                            if (order.getStatus().equals(QuanwaiOrder.PAID)) {
+//                                // 添加优惠券
+//                                Coupon couponBean = new Coupon();
+//                                couponBean.setAmount(order.getPrice().intValue());
+//                                couponBean.setProfileId(profileId);
+//                                couponBean.setUsed(Coupon.UNUSED);
+//                                couponBean.setExpiredDate(DateUtils.afterDays(new Date(), 2));
+//                                couponBean.setCategory(RISE_APPLY_COUPON_CATEGORY);
+//                                couponBean.setDescription(APPLY_COUPON_DESCRIPTION);
+//                                couponDao.insert(couponBean);
+//                            }
+//                        }
+//                    }
+//                }
                 //判断项目类型（2018-04-10）
                 MemberType existMember = memberTypes.stream().filter(memberType -> memberType.getId() == memberTypeId).findAny().orElse(null);
                 if (existMember != null) {
@@ -223,11 +226,15 @@ public class BusinessSchoolService {
         logger.info("发送模版消息id ：{}", templateMessage.getTemplate_id());
         // 录取通知强制发送
         templateMessageService.sendMessage(templateMessage, false);
+
+        UserInfo userInfo = userInfoDao.loadByProfileId(profileId);
+
+
         // 有优惠券短信内容
-        if (profile.getMobileNo() != null) {
+        if (userInfo!=null && userInfo.getMobile() != null) {
             SMSDto smsDto = new SMSDto();
             smsDto.setProfileId(profileId);
-            smsDto.setPhone(profile.getMobileNo());
+            smsDto.setPhone(userInfo.getMobile());
             smsDto.setType(SMSDto.PROMOTION);
             String content = "Hi，感谢申请圈外商学院{}，您的申请结果已公布，现在就去「圈外同学」微信公众号查收吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
             //添加项目类型判断（2018-04-10）
@@ -248,8 +255,6 @@ public class BusinessSchoolService {
      */
     public void sendRiseMemberApplyMessageByDealTime(Date dealTime, Integer distanceDay) {
         List<MemberType> memberTypes = memberTypeDao.loadAll(MemberType.class).stream().filter(memberType -> memberType.getDel() == 0).collect(Collectors.toList());
-        //MemberType eliteMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.ELITE).findAny().orElse(null);
-      //  MemberType mbaMemberType = memberTypes.stream().filter(memberType -> memberType.getId() == RiseMember.BUSINESS_THOUGHT).findAny().orElse(null);
 
         List<BusinessSchoolApplication> applications = businessSchoolApplicationDao.loadDealApplicationsForNotice(dealTime);
         // 过滤已经过期的申请,dealtime+24小时内不过期
@@ -317,11 +322,12 @@ public class BusinessSchoolService {
             data.put("keyword3", new TemplateMessage.Keyword(coupon.getAmount() + "元", "#000000"));
             data.put("remark", new TemplateMessage.Keyword("\n点此卡片，立即办理入学", "#f57f16"));
 
+            UserInfo userInfo = userInfoDao.loadByProfileId(profileId);
             // 有优惠券短信内容
             SMSDto smsDto = new SMSDto();
-            if (profile.getMobileNo() != null) {
+            if (userInfo!=null && userInfo.getMobile() != null) {
                 smsDto.setProfileId(profileId);
-                smsDto.setPhone(profile.getMobileNo());
+                smsDto.setPhone(userInfo.getMobile());
                 smsDto.setType(SMSDto.PROMOTION);
                 String content = "Hi，你申请的圈外商学院" + memberType.getDescription() + "入学奖学金即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
                 smsDto.setContent(content);
@@ -343,16 +349,17 @@ public class BusinessSchoolService {
 
             // 有优惠券短信内容
             SMSDto smsDto = new SMSDto();
-            if (profile.getMobileNo() != null) {
+            UserInfo userInfo = userInfoDao.loadByProfileId(profileId);
+            if (userInfo!=null && userInfo.getMobile() != null) {
                 smsDto.setProfileId(profileId);
-                smsDto.setPhone(profile.getMobileNo());
+                smsDto.setPhone(userInfo.getMobile());
                 smsDto.setType(SMSDto.PROMOTION);
                 String content = "Hi，你申请的圈外商学院" + memberType.getDescription() + "入学资格即将到期，请至「圈外同学」公众号，办理入学并使用吧！如有疑问请联系圈外小Y(微信号：quanwai666) 回复TD退订";
                 smsDto.setContent(content);
                 shortMessageService.sendShortMessage(smsDto);
             }
         }
-        templateMessageService.sendMessage(templateMessage);
+        templateMessageService.sendMessage(templateMessage,false);
     }
 
     /**

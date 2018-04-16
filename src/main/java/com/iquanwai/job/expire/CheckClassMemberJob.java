@@ -18,7 +18,8 @@ public class CheckClassMemberJob {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Scheduled(cron = "0 0 1 * * ?")
+    // @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 * * * * ?")
     public void work() {
         logger.info("开始校验学员身份数据");
         customerService.checkClassMemberExpire();
