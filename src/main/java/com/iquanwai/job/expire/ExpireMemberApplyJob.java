@@ -17,7 +17,7 @@ public class ExpireMemberApplyJob {
     @Autowired
     private BusinessSchoolService businessSchoolService;
 
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     @CatInspect(name = "closePlan")
     public void work() {
         logger.info("过期会员申请任务开始");
