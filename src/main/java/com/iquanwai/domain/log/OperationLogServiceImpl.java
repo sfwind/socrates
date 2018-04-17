@@ -56,8 +56,8 @@ public class OperationLogServiceImpl implements OperationLogService {
     @PostConstruct
     public void init() {
         memberTypeDao.loadAll(MemberType.class).forEach(item -> {
-            classNameMap.put(item.getId(), item.getId() + "className");
-            groupIdMap.put(item.getId(), item.getId() + "groupId");
+            classNameMap.put(item.getId(), "className:" + item.getId());
+            groupIdMap.put(item.getId(), "groupId:" + item.getId());
         });
     }
 
