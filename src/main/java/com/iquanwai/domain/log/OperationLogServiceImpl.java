@@ -1,9 +1,15 @@
 package com.iquanwai.domain.log;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.iquanwai.domain.dao.ClassMemberDao;
 import com.iquanwai.domain.dao.ProfileDao;
 import com.iquanwai.domain.dao.RiseClassMemberDao;
 import com.iquanwai.domain.dao.RiseMemberDao;
 import com.iquanwai.domain.dao.UserRoleDao;
+import com.iquanwai.domain.dao.member.MemberTypeDao;
+import com.iquanwai.domain.po.ClassMember;
+import com.iquanwai.domain.po.MemberType;
 import com.iquanwai.domain.po.Profile;
 import com.iquanwai.domain.po.RiseClassMember;
 import com.iquanwai.domain.po.RiseMember;
@@ -17,8 +23,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.support.Assert;
 
+import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Service
 public class OperationLogServiceImpl implements OperationLogService {
@@ -34,6 +43,23 @@ public class OperationLogServiceImpl implements OperationLogService {
     private RiseMemberDao riseMemberDao;
     @Autowired
     private ProfileDao profileDao;
+    @Autowired
+    private MemberTypeDao memberTypeDao;
+    @Autowired
+    private ClassMemberDao classMemberDao;
+
+
+    private Map<Integer, String> classNameMap = Maps.newHashMap();
+    private Map<Integer, String> groupIdMap = Maps.newHashMap();
+
+
+    @PostConstruct
+    public void init() {
+        memberTypeDao.loadAll(MemberType.class).forEach(item -> {
+            classNameMap.put(item.getId(), item.getId() + "className");
+            groupIdMap.put(item.getId(), item.getId() + "groupId");
+        });
+    }
 
     @Override
     public void trace(Supplier<Integer> profileIdSupplier, String eventName, Supplier<Prop> supplier) {
@@ -46,9 +72,17 @@ public class OperationLogServiceImpl implements OperationLogService {
                 Profile profile = profileDao.load(Profile.class, profileId);
                 UserRole role = userRoleDao.getAssist(profileId);
 
-                Integer roleName = 0;
-                // TODO: 子康
-                RiseMember validRiseMember = riseMemberDao.loadValidRiseMember(profileId);
+                List<RiseMember> riseMemberList = riseMemberDao.loadAllValidRiseMembers(profileId).stream().filter(item -> item.getMemberTypeId() != RiseMember.COURSE).collect(Collectors.toList());
+                if (!riseMemberList.isEmpty()) {
+                    properties.put("roleNames", riseMemberList
+                            .stream()
+                            .map(RiseMember::getMemberTypeId)
+                            .map(Object::toString)
+                            .distinct()
+                            .collect(Collectors.toList()));
+                } else {
+                    properties.put("roleNames", Lists.newArrayList("0"));
+                }
 
                 RiseClassMember riseClassMember = riseClassMemberDao.loadActiveRiseClassMember(profileId);
                 if (riseClassMember == null) {
@@ -63,10 +97,22 @@ public class OperationLogServiceImpl implements OperationLogService {
                         properties.put("groupId", riseClassMember.getGroupId());
                     }
                 }
-                if (validRiseMember != null) {
-                    roleName = validRiseMember.getMemberTypeId();
+
+                List<ClassMember> classMembers = classMemberDao.loadActiveByProfileId(profileId);
+                if (classMembers == null) {
+                    classMembers = Lists.newArrayList(classMemberDao.loadLatestByProfileId(profileId));
                 }
-                properties.put("roleName", roleName);
+                if (!classMembers.isEmpty()) {
+                    classMembers.forEach(item -> {
+                        if (item.getClassName() != null) {
+                            properties.put(classNameMap.get(item.getMemberTypeId()), item.getClassName());
+                        }
+                        if (item.getGroupId() != null) {
+                            properties.put(groupIdMap.get(item.getMemberTypeId()), item.getGroupId());
+                        }
+                    });
+                }
+
                 properties.put("isAsst", role != null);
                 properties.put("riseId", profile.getRiseId());
 
