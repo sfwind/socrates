@@ -99,8 +99,11 @@ public class OperationLogServiceImpl implements OperationLogService {
                 }
 
                 List<ClassMember> classMembers = classMemberDao.loadActiveByProfileId(profileId);
-                if (classMembers == null) {
-                    classMembers = Lists.newArrayList(classMemberDao.loadLatestByProfileId(profileId));
+                if (classMembers.isEmpty()) {
+                    ClassMember exist = classMemberDao.loadLatestByProfileId(profileId);
+                    if (exist != null) {
+                        classMembers = Lists.newArrayList(exist);
+                    }
                 }
                 if (!classMembers.isEmpty()) {
                     classMembers.forEach(item -> {
