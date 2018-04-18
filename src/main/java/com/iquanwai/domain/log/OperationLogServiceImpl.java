@@ -11,7 +11,6 @@ import com.iquanwai.domain.dao.member.MemberTypeDao;
 import com.iquanwai.domain.po.ClassMember;
 import com.iquanwai.domain.po.MemberType;
 import com.iquanwai.domain.po.Profile;
-import com.iquanwai.domain.po.RiseClassMember;
 import com.iquanwai.domain.po.RiseMember;
 import com.iquanwai.domain.po.UserRole;
 import com.iquanwai.util.ThreadPool;
@@ -82,20 +81,6 @@ public class OperationLogServiceImpl implements OperationLogService {
                             .collect(Collectors.toList()));
                 } else {
                     properties.put("roleNames", Lists.newArrayList("0"));
-                }
-
-                RiseClassMember riseClassMember = riseClassMemberDao.loadActiveRiseClassMember(profileId);
-                if (riseClassMember == null) {
-                    riseClassMember = riseClassMemberDao.loadLatestRiseClassMember(profileId);
-                }
-
-                if (riseClassMember != null) {
-                    if (riseClassMember.getClassName() != null) {
-                        properties.put("className", riseClassMember.getClassName());
-                    }
-                    if (riseClassMember.getGroupId() != null) {
-                        properties.put("groupId", riseClassMember.getGroupId());
-                    }
                 }
 
                 List<ClassMember> classMembers = classMemberDao.loadActiveByProfileId(profileId);
