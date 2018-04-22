@@ -4,15 +4,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.dao.ClassMemberDao;
 import com.iquanwai.domain.dao.ProfileDao;
-import com.iquanwai.domain.dao.RiseClassMemberDao;
 import com.iquanwai.domain.dao.RiseMemberDao;
 import com.iquanwai.domain.dao.UserRoleDao;
 import com.iquanwai.domain.dao.member.MemberTypeDao;
-import com.iquanwai.domain.po.ClassMember;
-import com.iquanwai.domain.po.MemberType;
-import com.iquanwai.domain.po.Profile;
-import com.iquanwai.domain.po.RiseMember;
-import com.iquanwai.domain.po.UserRole;
+import com.iquanwai.domain.po.*;
 import com.iquanwai.util.ThreadPool;
 import com.sensorsdata.analytics.javasdk.SensorsAnalytics;
 import com.sensorsdata.analytics.javasdk.exceptions.InvalidArgumentException;
@@ -36,8 +31,6 @@ public class OperationLogServiceImpl implements OperationLogService {
     private SensorsAnalytics sa;
     @Autowired
     private UserRoleDao userRoleDao;
-    @Autowired
-    private RiseClassMemberDao riseClassMemberDao;
     @Autowired
     private RiseMemberDao riseMemberDao;
     @Autowired
