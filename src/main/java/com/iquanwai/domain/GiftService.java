@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +32,8 @@ public class GiftService {
     private MaterialPrintDao materialPrintDao;
     @Autowired
     private ProfileDao profileDao;
+    @Autowired
+    private UserInfoDao userInfoDao;
     @Autowired
     private TemplateMessageService templateMessageService;
 
@@ -89,11 +92,16 @@ public class GiftService {
     private List<Profile> countSendList(List<Integer> profiles) {
         List<Profile> profileList = profileDao.loadByProfileIds(profiles);
 
-        return profileList.stream().filter(profile -> (profile.getRealName() == null
-                || profile.getReceiver() == null
-                || profile.getMobileNo() == null
-                || profile.getAddress() == null
-        )).collect(Collectors.toList());
+        List<UserInfo> userInfos = userInfoDao.loadByProfileIds(profiles);
+
+       return profileList.stream().map(profile -> {
+            UserInfo existUserInfo = userInfos.stream().filter(userInfo -> userInfo.getProfileId().equals(profile.getId())).findAny().orElse(null);
+            if(existUserInfo ==null || existUserInfo.getReceiverMobile()==null || existUserInfo.getReceiver()==null|| existUserInfo.getAddress()==null ||existUserInfo.getRealName()==null){
+                return profile;
+            }else{
+                return null;
+            }
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private void sendNotify(List<Profile> sendList){
