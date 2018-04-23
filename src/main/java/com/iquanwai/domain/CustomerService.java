@@ -2,6 +2,7 @@ package com.iquanwai.domain;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.iquanwai.domain.dao.*;
 import com.iquanwai.domain.log.OperationLogService;
@@ -94,6 +95,19 @@ public class CustomerService {
                         Profile profile = profileDao.load(Profile.class, riseMember.getProfileId());
                         userLoadRabbitMQPublisher.publish(profile.getUnionId());
 
+                        // 重新设置roleNames
+                        operationLogService.profileSet(riseMember::getProfileId, () -> {
+                            OperationLogService.Prop props = OperationLogService.props();
+                            List<RiseMember> allMembers = riseMemberDao.loadAllValidRiseMembers(riseMember.getProfileId());
+                            if (allMembers.isEmpty()) {
+                                props.add("roleNames", Lists.newArrayList("0"));
+                            } else {
+                                props.add("roleNames", allMembers.stream().map(RiseMember::getMemberTypeId).map(String::valueOf).distinct().collect(Collectors.toList()));
+                            }
+                            return props;
+                        });
+
+                        // 记录会员过期事件
                         operationLogService.trace(riseMember.getProfileId(), "memberExpired", () -> {
                             OperationLogService.Prop prop = OperationLogService.props();
                             Goods goods = Goods.find(riseMember.getMemberTypeId().toString());
@@ -216,7 +230,7 @@ public class CustomerService {
             smsDto.setProfileId(profile.getId());
 
             UserInfo userInfo = userInfoDao.loadByProfileId(profile.getId());
-            if(userInfo!=null  && !StringUtils.isEmpty(userInfo.getMobile())){
+            if (userInfo != null && !StringUtils.isEmpty(userInfo.getMobile())) {
                 smsDto.setPhone(userInfo.getMobile());
             }
             String content;
@@ -275,6 +289,7 @@ public class CustomerService {
 
     /**
      * 更新过期日期
+     *
      * @param category （day,month,year）
      */
     public void updateExpiredDate(List<Integer> profileIds, Integer delay, String category) {

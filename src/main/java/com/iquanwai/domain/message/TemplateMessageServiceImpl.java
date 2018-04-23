@@ -63,10 +63,11 @@ public class TemplateMessageServiceImpl implements TemplateMessageService {
         }
 
         boolean success = StringUtils.isNoneEmpty(body);
-        operationLogService.trace(() -> {
-            Profile profile = customerService.getProfile(templateMessage.getTouser());
-            return profile.getId();
-        }, "sendWechatMessage", () -> OperationLogService.props().add("success", success));
+        // 不记录socrates模板消息发送
+//        operationLogService.trace(() -> {
+//            Profile profile = customerService.getProfile(templateMessage.getTouser());
+//            return profile.getId();
+//        }, "sendWechatMessage", () -> OperationLogService.props().add("success", success).add("server_project", "socrates"));
         return success;
     }
 
