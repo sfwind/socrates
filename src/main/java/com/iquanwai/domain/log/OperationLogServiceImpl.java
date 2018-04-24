@@ -7,7 +7,11 @@ import com.iquanwai.domain.dao.ProfileDao;
 import com.iquanwai.domain.dao.RiseMemberDao;
 import com.iquanwai.domain.dao.UserRoleDao;
 import com.iquanwai.domain.dao.member.MemberTypeDao;
-import com.iquanwai.domain.po.*;
+import com.iquanwai.domain.po.ClassMember;
+import com.iquanwai.domain.po.MemberType;
+import com.iquanwai.domain.po.Profile;
+import com.iquanwai.domain.po.RiseMember;
+import com.iquanwai.domain.po.UserRole;
 import com.iquanwai.util.ThreadPool;
 import com.sensorsdata.analytics.javasdk.SensorsAnalytics;
 import com.sensorsdata.analytics.javasdk.exceptions.InvalidArgumentException;
@@ -96,7 +100,7 @@ public class OperationLogServiceImpl implements OperationLogService {
 
                 properties.put("isAsst", role != null);
                 properties.put("riseId", profile.getRiseId());
-
+                logger.info("trace:\nprofielId:{}\neventName:{}\nprops:{}", profileId, eventName, properties);
                 sa.track(profile.getRiseId(), true, eventName, properties);
                 //  上线前删掉
 //                sa.flush();
@@ -114,5 +118,31 @@ public class OperationLogServiceImpl implements OperationLogService {
     @Override
     public void trace(Integer profileId, String eventName, Supplier<Prop> supplier) {
         this.trace(() -> profileId, eventName, supplier);
+    }
+
+    @Override
+    public void profileSet(Integer profileId, String key, Object value) {
+        profileSet(() -> profileId, () -> OperationLogService.props().add(key, value));
+    }
+
+    @Override
+    public void profileSet(Supplier<Integer> supplier, String key, Object value) {
+        this.profileSet(supplier, () -> OperationLogService.props().add(key, value));
+    }
+
+    @Override
+    public void profileSet(Supplier<Integer> supplier, Supplier<Prop> propSupplier) {
+        ThreadPool.execute(() -> {
+            Integer profileId = supplier.get();
+            Profile profile = profileDao.load(Profile.class, profileId);
+            try {
+                Map<String, Object> properties = propSupplier.get().build();
+                logger.info("trace:\nprofielId:{}\neventName:{}\nprops:{}", profileId, "profileSet", properties);
+                sa.profileSet(profile.getRiseId(), true, properties);
+//                sa.flush();
+            } catch (InvalidArgumentException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+        });
     }
 }

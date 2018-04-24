@@ -21,6 +21,12 @@ public interface OperationLogService {
         return new OperationLogServiceImpl.Prop();
     }
 
+    void profileSet(Integer profileId, String key, Object value);
+
+    void profileSet(Supplier<Integer> supplier, String key, Object value);
+
+    void profileSet(Supplier<Integer> supplier, Supplier<Prop> propSupplier);
+
     class Prop {
         private Map<String, Object> map = Maps.newHashMap();
 
