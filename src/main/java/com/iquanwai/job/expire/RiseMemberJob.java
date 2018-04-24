@@ -17,7 +17,8 @@ public class RiseMemberJob {
     @Autowired
     private CustomerService customerService;
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    //    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 * * * * ?")
     @CatInspect(name = "checkMemberExpired")
     public void work() {
         logger.info("会员过期任务开始");
