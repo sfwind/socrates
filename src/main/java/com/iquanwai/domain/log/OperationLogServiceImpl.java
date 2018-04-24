@@ -103,7 +103,7 @@ public class OperationLogServiceImpl implements OperationLogService {
                 logger.info("trace:\nprofielId:{}\neventName:{}\nprops:{}", profileId, eventName, properties);
                 sa.track(profile.getRiseId(), true, eventName, properties);
                 //  上线前删掉
-                sa.flush();
+//                sa.flush();
             } catch (InvalidArgumentException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
@@ -139,7 +139,7 @@ public class OperationLogServiceImpl implements OperationLogService {
                 Map<String, Object> properties = propSupplier.get().build();
                 logger.info("trace:\nprofielId:{}\neventName:{}\nprops:{}", profileId, "profileSet", properties);
                 sa.profileSet(profile.getRiseId(), true, properties);
-                sa.flush();
+//                sa.flush();
             } catch (InvalidArgumentException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
